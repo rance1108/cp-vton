@@ -31,44 +31,86 @@ class CPDataset(data.Dataset):
         
         # load data list
         im_names = []
-        c_names = []
+        # c_names = []
         with open(osp.join(opt.dataroot, opt.data_list), 'r') as f:
             for line in f.readlines():
-                im_name, c_name = line.strip().split()
-                im_names.append(im_name)
-                c_names.append(c_name)
+                im_names.append(line.strip())
+
+        # with open(osp.join(opt.dataroot, opt.data_list), 'r') as f:
+        #     for line in f.readlines():
+        #         im_name, c_name = line.strip().split()
+        #         im_names.append(im_name)
+        #         c_names.append(c_name)
 
         self.im_names = im_names
-        self.c_names = c_names
+        # self.c_names = c_names
 
     def name(self):
         return "CPDataset"
 
     def __getitem__(self, index):
-        c_name = self.c_names[index]
+        # c_name = self.c_names[index]
         im_name = self.im_names[index]
 
         # cloth image & cloth mask
         if self.stage == 'GMM':
-            c = Image.open(osp.join(self.data_path, 'cloth', c_name))
-            cm = Image.open(osp.join(self.data_path, 'cloth-mask', c_name))
+            c = []
+            cm = []
+            clothes = ["0.png", "1.png", "2.png", "4.png"]
+            masks = ["0_mask.png", "1_mask.png", "2_mask.png", "4_mask.png"]
+            for f_name, fm_name in zip(clothes, masks):
+                c_path = osp.join(self.data_path, im_name, f_name)
+                cm_path = osp.join(self.data_path, im_name, fm_name)
+                if os.path.isfile(c_path) and os.path.isfile(cm_path):
+                    c.append(Image.open(c_path))
+                    cm.append(Image.open(cm_path))
+                else:
+                    c.append(Image.new('RGB',(102,147)))
+                    c.append(Image.new('L',(102,147)))
+
+
+            # c = Image.open(osp.join(self.data_path, 'cloth', c_name))
+            # cm = Image.open(osp.join(self.data_path, 'cloth-mask', c_name))
         else:
             c = Image.open(osp.join(self.data_path, 'warp-cloth', c_name))
             cm = Image.open(osp.join(self.data_path, 'warp-mask', c_name))
-     
-        c = self.transform(c)  # [-1,1]
-        cm_array = np.array(cm)
-        cm_array = (cm_array >= 128).astype(np.float32)
-        cm = torch.from_numpy(cm_array) # [0,1]
-        cm.unsqueeze_(0)
+        
+        for i in range(len(c)):
+            c[i] = self.transform(c[i])  # [-1,1]
+        c = torch.cat(c,dim=0)
+
+        for i in range(len(cm)):
+            cm[i] = np.array(cm[i])
+            cm[i] = (cm[i] >= 128).astype(np.float32)
+            cm[i]= torch.from_numpy(cm[i]) # [0,1]
+            cm[i].unsqueeze_(0)
+        cm = torch.cat(cm,dim=0)
 
         # person image 
-        im = Image.open(osp.join(self.data_path, 'image', im_name))
+        im = Image.open(osp.join(self.data_path, im_name, "99.png"))
         im = self.transform(im) # [-1,1]
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         # load parsing image
-        parse_name = im_name.replace('.jpg', '.png')
-        im_parse = Image.open(osp.join(self.data_path, 'image-parse', parse_name))
+        im_parse = Image.open(osp.join(self.data_path, im_name, "12.png"))
         parse_array = np.array(im_parse)
         parse_shape = (parse_array > 0).astype(np.float32)
         parse_head = (parse_array == 1).astype(np.float32) + \
@@ -78,6 +120,19 @@ class CPDataset(data.Dataset):
         parse_cloth = (parse_array == 5).astype(np.float32) + \
                 (parse_array == 6).astype(np.float32) + \
                 (parse_array == 7).astype(np.float32)
+        
+        # # load parsing image
+        # parse_name = im_name.replace('.jpg', '.png')
+        # im_parse = Image.open(osp.join(self.data_path, 'image-parse', parse_name))
+        # parse_array = np.array(im_parse)
+        # parse_shape = (parse_array > 0).astype(np.float32)
+        # parse_head = (parse_array == 1).astype(np.float32) + \
+        #         (parse_array == 2).astype(np.float32) + \
+        #         (parse_array == 4).astype(np.float32) + \
+        #         (parse_array == 13).astype(np.float32)
+        # parse_cloth = (parse_array == 5).astype(np.float32) + \
+        #         (parse_array == 6).astype(np.float32) + \
+        #         (parse_array == 7).astype(np.float32)
        
         # shape downsample
         parse_shape = Image.fromarray((parse_shape*255).astype(np.uint8))
@@ -176,10 +231,10 @@ if __name__ == "__main__":
     
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataroot", default = "data")
+    parser.add_argument("--dataroot", default = "data/zalando")
     parser.add_argument("--datamode", default = "train")
     parser.add_argument("--stage", default = "GMM")
-    parser.add_argument("--data_list", default = "train_pairs.txt")
+    parser.add_argument("--data_list", default = "train_id.txt")
     parser.add_argument("--fine_width", type=int, default = 192)
     parser.add_argument("--fine_height", type=int, default = 256)
     parser.add_argument("--radius", type=int, default = 3)
