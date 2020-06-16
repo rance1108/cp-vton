@@ -78,7 +78,7 @@ class CPDataset(data.Dataset):
             cm[i] = (cm[i] >= 128).astype(np.float32)
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
-
+        print(cm,len(cm))
         cm = torch.cat(cm,dim=0)
 
         # person image 
