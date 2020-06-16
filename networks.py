@@ -413,11 +413,8 @@ class GMM(nn.Module):
         self.gridGen = TpsGridGen(opt.fine_height, opt.fine_width, use_cuda=True, grid_size=opt.grid_size)
         
     def forward(self, inputA, inputB):
-        print(inputA.shape,inputB.shape,"000")
         featureA = self.extractionA(inputA)
-        print(featureA.shape,"111")
         featureB = self.extractionB(inputB)
-        print(featureB.shape,"222")
         featureA = self.l2norm(featureA)
         featureB = self.l2norm(featureB)
         correlation = self.correlation(featureA, featureB)
