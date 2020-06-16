@@ -24,7 +24,7 @@ class CPDataset(data.Dataset):
         self.fine_height = opt.fine_height
         self.fine_width = opt.fine_width
         self.radius = opt.radius
-        self.data_path = osp.join(opt.dataroot, opt.datamode)
+        self.data_path = osp.join(opt.dataroot)
         self.transform = transforms.Compose([  \
                 transforms.Resize((256,192)),   \
                 transforms.ToTensor(),   \
