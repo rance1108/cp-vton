@@ -74,7 +74,7 @@ class CPDataset(data.Dataset):
             c[i] = self.transform(c[i])  # [-1,1]
         c = torch.stack(c,dim=0)
 
-        
+
         for i in range(len(cm)):
             cm[i] = np.array(cm[i])
             cm[i] = (cm[i] >= 128).astype(np.float32)
@@ -167,6 +167,7 @@ class CPDataset(data.Dataset):
         
         # cloth-agnostic representation
         agnostic = torch.cat([shape, im_h, pose_map], 0) 
+        print(agnostic.shape,shape.shape,im_h.shape,pose_map.shape,"LOLOLOL")
 
         if self.stage == 'GMM':
             im_g = Image.open('grid.png')
