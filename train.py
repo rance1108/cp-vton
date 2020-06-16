@@ -78,20 +78,18 @@ def train_gmm(opt, train_loader, model, board):
         warped_grid = []
         visuals = []
         loss = 0
-        print("here",agnostic.shape)
-        print("check",pcm.shape,pcm[0].shape,c.shape,c[0].shape)
-        for i in range(c.shape[0]):
-            input_agnostic = torch.cat((agnostic,pcm[i]))
-            grid, theta = model(input_agnostic, c[i])
-            warped_cloth.append(F.grid_sample(c[i], grid, padding_mode='border'))
-            warped_mask.append(F.grid_sample(cm[i], grid, padding_mode='zeros'))
+        for i in range(c.shape[1]):
+            input_agnostic = torch.cat((agnostic,pcm[:,i]),0)
+            grid, theta = model(input_agnostic[:,i], c[:i])
+            warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
+            warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
             warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
 
             visuals.append([ [im_h, shape, im_pose], 
-                       [c[i], warped_cloth, im_c[i]], 
+                       [c[:,i], warped_cloth, im_c[:,i]], 
                        [warped_grid, (warped_cloth+im)*0.5, im]])
 
-            loss += criterionL1(warped_cloth, im_c[i])    
+            loss += criterionL1(warped_cloth, im_c[:,i])    
         
         visuals.append([((((warped_cloth[0]+warped_cloth[1])*0.5 + warped_cloth[2])*0.5 + warped_cloth[3])*0.5 + im)*0.5, im])
 
