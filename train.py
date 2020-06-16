@@ -79,7 +79,7 @@ def train_gmm(opt, train_loader, model, board):
         visuals = []
         loss = 0
         print("here",agnostic.shape)
-        print("check",pcm.shape,pcm[i].shape)
+        print("check",pcm.shape,pcm[0].shape,c.shape,c[0].shape)
         for i in range(c.shape[0]):
             input_agnostic = torch.cat((agnostic,pcm[i]))
             grid, theta = model(input_agnostic, c[i])
