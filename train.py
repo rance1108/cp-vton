@@ -88,10 +88,11 @@ def train_gmm(opt, train_loader, model, board):
             visuals.append([ [im_h, shape, im_pose], 
                        [c[i], warped_cloth, im_c[i]], 
                        [warped_grid, (warped_cloth+im)*0.5, im]])
+            
+            loss += criterionL1(warped_cloth, im_c[i])    
         
         visuals.append([((((warped_cloth[0]+warped_cloth[1])*0.5 + warped_cloth[2])*0.5 + warped_cloth[3])*0.5 + im)*0.5, im])
 
-            loss += criterionL1(warped_cloth, im_c[i])    
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
