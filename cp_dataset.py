@@ -72,7 +72,7 @@ class CPDataset(data.Dataset):
 
         for i in range(len(c)):
             c[i] = self.transform(c[i])  # [-1,1]
-        c = torch.cat(c,dim=0)
+        c = torch.stack(c,dim=0)
         print(c.shape)
         for i in range(len(cm)):
             cm[i] = np.array(cm[i])
