@@ -79,7 +79,7 @@ class CPDataset(data.Dataset):
             cm[i] = (cm[i] >= 128).astype(np.float32)
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
-        cm = torch.cat(cm,dim=0)
+        cm = torch.stack(cm,dim=0)
 
         # person image 
         im = Image.open(osp.join(self.data_path, im_name, "99.png"))
@@ -121,8 +121,8 @@ class CPDataset(data.Dataset):
             # inner cloth
             im_cloth.append((im * i + (1 - i))) # [-1,1], fill 1 for other parts
 
-        pcm_cloth = torch.cat(pcm_cloth,dim=0)
-        im_cloth = torch.cat(im_cloth,dim=0)
+        pcm_cloth = torch.stack(pcm_cloth,dim=0)
+        im_cloth = torch.stack(im_cloth,dim=0)
 
 
         # pcm_i = torch.from_numpy(parse_inner) # [0,1]
@@ -180,8 +180,9 @@ class CPDataset(data.Dataset):
             'cloth_mask':     cm,   # for input
             'image':    im,         # for visualization
             'agnostic': agnostic,   # for input
-            'parse_cloth': im_cloth,    # for ground truth
-            # 'parse_cloth': im_c,    # for ground truth
+            'parse_cloth': im_cloth,# for ground truth  
+            'parse_cloth_mask': pcm_cloth,# for ground truth  
+            # 'parse_cloth': im_c,  # for ground truth
             'shape': shape,         # for visualization
             'head': im_h,           # for visualization
             'pose_image': im_pose,  # for visualization

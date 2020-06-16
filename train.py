@@ -64,25 +64,44 @@ def train_gmm(opt, train_loader, model, board):
         agnostic = inputs['agnostic'].cuda()
         c = inputs['cloth'].cuda()
         cm = inputs['cloth_mask'].cuda()
+        pcm = inputs['parse_cloth_mask'].cuda()
         im_c =  inputs['parse_cloth'].cuda()
         im_g = inputs['grid_image'].cuda()
             
-        grid, theta = model(agnostic, c)
-        warped_cloth = F.grid_sample(c, grid, padding_mode='border')
-        warped_mask = F.grid_sample(cm, grid, padding_mode='zeros')
-        warped_grid = F.grid_sample(im_g, grid, padding_mode='zeros')
+        # grid, theta = model(agnostic, c)
+        # warped_cloth = F.grid_sample(c, grid, padding_mode='border')
+        # warped_mask = F.grid_sample(cm, grid, padding_mode='zeros')
+        # warped_grid = F.grid_sample(im_g, grid, padding_mode='zeros')
 
-        visuals = [ [im_h, shape, im_pose], 
-                   [c, warped_cloth, im_c], 
-                   [warped_grid, (warped_cloth+im)*0.5, im]]
+        warped_cloth = []
+        warped_mask = []
+        warped_grid = []
+        visuals = []
+        loss = 0
+        for i in range(c.shape[0]):
+            input_agnostic = torch.cat((agnostic,pcm[i]))
+            grid, theta = model(input_agnostic, c[i])
+            warped_cloth.append(F.grid_sample(c[i], grid, padding_mode='border'))
+            warped_mask.append(F.grid_sample(cm[i], grid, padding_mode='zeros'))
+            warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
+
+            visuals.append([ [im_h, shape, im_pose], 
+                       [c[i], warped_cloth, im_c[i]], 
+                       [warped_grid, (warped_cloth+im)*0.5, im]])
         
-        loss = criterionL1(warped_cloth, im_c)    
+        visuals.append([((((warped_cloth[0]+warped_cloth[1])*0.5 + warped_cloth[2])*0.5 + warped_cloth[3])*0.5 + im)*0.5, im])
+
+            loss += criterionL1(warped_cloth, im_c[i])    
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
             
         if (step+1) % opt.display_count == 0:
-            board_add_images(board, 'combine', visuals, step+1)
+            board_add_images(board, 'combine_inner', visuals[0], step+1)
+            board_add_images(board, 'combine_outer', visuals[1], step+1)
+            board_add_images(board, 'combine_bottom', visuals[2], step+1)
+            board_add_images(board, 'combine_shoe', visuals[3], step+1)
+            board_add_images(board, 'combine_all', visuals[4], step+1)
             board.add_scalar('metric', loss.item(), step+1)
             t = time.time() - iter_start_time
             print('step: %8d, time: %.3f, loss: %4f' % (step+1, t, loss.item()), flush=True)
