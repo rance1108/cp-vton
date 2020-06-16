@@ -79,8 +79,8 @@ def train_gmm(opt, train_loader, model, board):
         visuals = []
         loss = 0
         for i in range(c.shape[1]):
-            input_agnostic = torch.cat((agnostic,pcm[:,i]),0)
-            grid, theta = model(input_agnostic[:,i], c[:i])
+            input_agnostic = torch.cat((agnostic,pcm[:,i]),1)
+            grid, theta = model(input_agnostic, c[:i])
             warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
             warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
             warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
