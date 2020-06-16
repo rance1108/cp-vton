@@ -96,9 +96,9 @@ class CPDataset(data.Dataset):
 
         for n,i in enumerate(if_c):
             if i == False:
-                parse_cloth.append((parse_array > 5).astype(np.float32))
+                parse_cloth.append(torch.from_numpy((parse_array > 5).astype(np.float32)))
             else:
-                parse_cloth.append((parse_array == n+2).astype(np.float32))
+                parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
 
         # parse_inner = (parse_array == 2).astype(np.float32)
         # parse_outer = (parse_array == 3).astype(np.float32)
@@ -116,10 +116,9 @@ class CPDataset(data.Dataset):
         pcm_cloth = []
         im_cloth = []
         for i in parse_cloth:
-            pcm_cloth.append(torch.from_numpy(i)) # [0,1]
+            pcm_cloth.append(i) # [0,1]
 
             # inner cloth
-            print(type(i),type(im))
             im_cloth.append((im * i + (1 - i))) # [-1,1], fill 1 for other parts
 
         pcm_cloth = torch.cat(pcm_cloth,dim=0)
