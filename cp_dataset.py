@@ -81,7 +81,7 @@ class CPDataset(data.Dataset):
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
         cm = torch.stack(cm,dim=0)
-
+        print(cm.shape)
         # person image 
         im = Image.open(osp.join(self.data_path, im_name, "99.png"))
         im = self.transform(im) # [-1,1]
