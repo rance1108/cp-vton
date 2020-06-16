@@ -61,8 +61,8 @@ class CPDataset(data.Dataset):
                     cm.append(Image.open(cm_path))
                     if_c.append(True)
                 else:
-                    c.append(Image.new('RGB',(102,147)))
-                    cm.append(Image.new('L',(102,147)))
+                    c.append(Image.new('RGB',(192,256)))
+                    cm.append(Image.new('L',(192,256)))
                     if_c.append(False)
 
         else:
@@ -76,12 +76,12 @@ class CPDataset(data.Dataset):
 
 
         for i in range(len(cm)):
+            cm[i] = transforms.Resize((256,192))(cm[i])
             cm[i] = np.array(cm[i])
             cm[i] = (cm[i] >= 128).astype(np.float32)
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
         cm = torch.stack(cm,dim=0)
-        print(cm.shape)
         # person image 
         im = Image.open(osp.join(self.data_path, im_name, "99.png"))
         im = self.transform(im) # [-1,1]
