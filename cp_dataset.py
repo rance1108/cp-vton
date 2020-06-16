@@ -79,7 +79,6 @@ class CPDataset(data.Dataset):
             cm[i] = (cm[i] >= 128).astype(np.float32)
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
-        print(cm,len(cm))
         cm = torch.cat(cm,dim=0)
 
         # person image 
@@ -117,7 +116,7 @@ class CPDataset(data.Dataset):
         im_cloth = []
         for i in parse_cloth:
             pcm_cloth.append(i) # [0,1]
-
+            print(im.shape,i.shape)
             # inner cloth
             im_cloth.append((im * i + (1 - i))) # [-1,1], fill 1 for other parts
 
