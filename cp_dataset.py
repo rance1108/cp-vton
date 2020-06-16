@@ -87,6 +87,8 @@ class CPDataset(data.Dataset):
 
         # load parsing image
         im_parse = Image.open(osp.join(self.data_path, im_name, "12.png"))
+
+        im_parse = transforms.Resize((256,192))(im_parse)
         parse_array = np.array(im_parse)
         parse_shape = (parse_array > 0).astype(np.float32)
         parse_head = (parse_array == 1).astype(np.float32)
