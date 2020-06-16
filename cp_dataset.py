@@ -69,7 +69,7 @@ class CPDataset(data.Dataset):
             cm = Image.open(osp.join(self.data_path, 'warp-mask', c_name))
         
 
-
+        print(c[i],np.array(c[i]).shape)
         for i in range(len(c)):
             c[i] = self.transform(c[i])  # [-1,1]
         c = torch.cat(c,dim=0)
