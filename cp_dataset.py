@@ -118,7 +118,6 @@ class CPDataset(data.Dataset):
         im_cloth = []
         for i in parse_cloth:
             pcm_cloth.append(i) # [0,1]
-            print(im.shape,i.shape)
             # inner cloth
             im_cloth.append((im * i + (1 - i))) # [-1,1], fill 1 for other parts
 
@@ -175,7 +174,7 @@ class CPDataset(data.Dataset):
             im_g = ''
 
         result = {
-            'c_name':   c_name,     # for visualization
+            'c_name':   clothes,     # for visualization
             'im_name':  im_name,    # for visualization or ground truth
             'cloth':    c,          # for input
             'cloth_mask':     cm,   # for input
