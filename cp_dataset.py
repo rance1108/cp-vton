@@ -167,8 +167,7 @@ class CPDataset(data.Dataset):
         
         # cloth-agnostic representation
         agnostic = torch.cat([shape, im_h, pose_map], 0) 
-        print(agnostic.shape,shape.shape,im_h.shape,pose_map.shape,"LOLOLOL")
-
+        print("f_agnositc:", agnostic.shape)
         if self.stage == 'GMM':
             im_g = Image.open('grid.png')
             im_g = self.transform(im_g)
