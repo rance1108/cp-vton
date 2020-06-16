@@ -27,35 +27,29 @@ class CPDataset(data.Dataset):
         self.data_path = osp.join(opt.dataroot, opt.datamode)
         self.transform = transforms.Compose([  \
                 transforms.ToTensor(),   \
+                transforms.Resize((256,192)),   \
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         
         # load data list
         im_names = []
-        # c_names = []
         with open(osp.join(opt.dataroot, opt.data_list), 'r') as f:
             for line in f.readlines():
                 im_names.append(line.strip())
 
-        # with open(osp.join(opt.dataroot, opt.data_list), 'r') as f:
-        #     for line in f.readlines():
-        #         im_name, c_name = line.strip().split()
-        #         im_names.append(im_name)
-        #         c_names.append(c_name)
 
         self.im_names = im_names
-        # self.c_names = c_names
 
     def name(self):
         return "CPDataset"
 
     def __getitem__(self, index):
-        # c_name = self.c_names[index]
         im_name = self.im_names[index]
 
         # cloth image & cloth mask
         if self.stage == 'GMM':
             c = []
             cm = []
+            if_c = []
             clothes = ["0.png", "1.png", "2.png", "4.png"]
             masks = ["0_mask.png", "1_mask.png", "2_mask.png", "4_mask.png"]
             for f_name, fm_name in zip(clothes, masks):
@@ -64,17 +58,18 @@ class CPDataset(data.Dataset):
                 if os.path.isfile(c_path) and os.path.isfile(cm_path):
                     c.append(Image.open(c_path))
                     cm.append(Image.open(cm_path))
+                    if_c.append(True)
                 else:
                     c.append(Image.new('RGB',(102,147)))
                     c.append(Image.new('L',(102,147)))
+                    if_c.append(False)
 
-
-            # c = Image.open(osp.join(self.data_path, 'cloth', c_name))
-            # cm = Image.open(osp.join(self.data_path, 'cloth-mask', c_name))
         else:
             c = Image.open(osp.join(self.data_path, 'warp-cloth', c_name))
             cm = Image.open(osp.join(self.data_path, 'warp-mask', c_name))
         
+
+
         for i in range(len(c)):
             c[i] = self.transform(c[i])  # [-1,1]
         c = torch.cat(c,dim=0)
@@ -84,75 +79,71 @@ class CPDataset(data.Dataset):
             cm[i] = (cm[i] >= 128).astype(np.float32)
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
+
         cm = torch.cat(cm,dim=0)
 
         # person image 
         im = Image.open(osp.join(self.data_path, im_name, "99.png"))
         im = self.transform(im) # [-1,1]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         # load parsing image
         im_parse = Image.open(osp.join(self.data_path, im_name, "12.png"))
         parse_array = np.array(im_parse)
         parse_shape = (parse_array > 0).astype(np.float32)
-        parse_head = (parse_array == 1).astype(np.float32) + \
-                (parse_array == 2).astype(np.float32) + \
-                (parse_array == 4).astype(np.float32) + \
-                (parse_array == 13).astype(np.float32)
-        parse_cloth = (parse_array == 5).astype(np.float32) + \
-                (parse_array == 6).astype(np.float32) + \
-                (parse_array == 7).astype(np.float32)
+        parse_head = (parse_array == 1).astype(np.float32)
+
+        parse_cloth = []
+
+        for n,i in enumerate(if_c):
+            if i == False:
+                parse_cloth.append((parse_array > 5).astype(np.float32))
+            else:
+                parse_cloth.append((parse_array == n+2).astype(np.float32))
+
+        # parse_inner = (parse_array == 2).astype(np.float32)
+        # parse_outer = (parse_array == 3).astype(np.float32)
+        # parse_bottom = (parse_array == 4).astype(np.float32)
+        # parse_shoe = (parse_array == 5).astype(np.float32)
         
-        # # load parsing image
-        # parse_name = im_name.replace('.jpg', '.png')
-        # im_parse = Image.open(osp.join(self.data_path, 'image-parse', parse_name))
-        # parse_array = np.array(im_parse)
-        # parse_shape = (parse_array > 0).astype(np.float32)
-        # parse_head = (parse_array == 1).astype(np.float32) + \
-        #         (parse_array == 2).astype(np.float32) + \
-        #         (parse_array == 4).astype(np.float32) + \
-        #         (parse_array == 13).astype(np.float32)
-        # parse_cloth = (parse_array == 5).astype(np.float32) + \
-        #         (parse_array == 6).astype(np.float32) + \
-        #         (parse_array == 7).astype(np.float32)
-       
+
         # shape downsample
         parse_shape = Image.fromarray((parse_shape*255).astype(np.uint8))
         parse_shape = parse_shape.resize((self.fine_width//16, self.fine_height//16), Image.BILINEAR)
         parse_shape = parse_shape.resize((self.fine_width, self.fine_height), Image.BILINEAR)
         shape = self.transform(parse_shape) # [-1,1]
         phead = torch.from_numpy(parse_head) # [0,1]
-        pcm = torch.from_numpy(parse_cloth) # [0,1]
 
-        # upper cloth
-        im_c = im * pcm + (1 - pcm) # [-1,1], fill 1 for other parts
+        pcm_cloth = []
+        im_cloth = []
+        for i in parse_cloth:
+            pcm_cloth.append(torch.from_numpy(i)) # [0,1]
+
+            # inner cloth
+            im_cloth.append((im * i + (1 - i))) # [-1,1], fill 1 for other parts
+
+        pcm_cloth = torch.cat(pcm_cloth,dim=0)
+        im_cloth = torch.cat(im_cloth,dim=0)
+
+
+        # pcm_i = torch.from_numpy(parse_inner) # [0,1]
+        # pcm_o = torch.from_numpy(parse_outer) # [0,1]
+        # pcm_b = torch.from_numpy(parse_bottom) # [0,1]
+        # pcm_s = torch.from_numpy(parse_shoe) # [0,1]
+        # im_i = im * pcm_i + (1 - pcm_i) # [-1,1], fill 1 for other parts
+        # im_o = im * pcm_o + (1 - pcm_o) # [-1,1], fill 1 for other parts
+        # im_b = im * pcm_b + (1 - pcm_b) # [-1,1], fill 1 for other parts
+        # im_s = im * pcm_s + (1 - pcm_s) # [-1,1], fill 1 for other parts
+
         im_h = im * phead - (1 - phead) # [-1,1], fill 0 for other parts
 
         # load pose points
-        pose_name = im_name.replace('.jpg', '_keypoints.json')
-        with open(osp.join(self.data_path, 'pose', pose_name), 'r') as f:
-            pose_label = json.load(f)
-            pose_data = pose_label['people'][0]['pose_keypoints']
-            pose_data = np.array(pose_data)
-            pose_data = pose_data.reshape((-1,3))
+
+        
+        pose_name = osp.join(self.data_path, im_name, "pose.txt")
+        with open(pose_name, 'r') as f:
+            pose_label = f.readline().split()
+            pose_data = np.array(pose_label,dtype=int)
+            pose_data = pose_data.reshape((-1,2))
 
         point_num = pose_data.shape[0]
         pose_map = torch.zeros(point_num, self.fine_height, self.fine_width)
@@ -189,7 +180,8 @@ class CPDataset(data.Dataset):
             'cloth_mask':     cm,   # for input
             'image':    im,         # for visualization
             'agnostic': agnostic,   # for input
-            'parse_cloth': im_c,    # for ground truth
+            'parse_cloth': im_cloth,    # for ground truth
+            # 'parse_cloth': im_c,    # for ground truth
             'shape': shape,         # for visualization
             'head': im_h,           # for visualization
             'pose_image': im_pose,  # for visualization
