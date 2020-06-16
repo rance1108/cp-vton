@@ -26,8 +26,8 @@ class CPDataset(data.Dataset):
         self.radius = opt.radius
         self.data_path = osp.join(opt.dataroot, opt.datamode)
         self.transform = transforms.Compose([  \
-                transforms.ToTensor(),   \
                 transforms.Resize((256,192)),   \
+                transforms.ToTensor(),   \
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         
         # load data list
@@ -69,7 +69,6 @@ class CPDataset(data.Dataset):
             cm = Image.open(osp.join(self.data_path, 'warp-mask', c_name))
         
 
-        print(c[0],np.array(c[0]).shape)
         for i in range(len(c)):
             c[i] = self.transform(c[i])  # [-1,1]
         c = torch.cat(c,dim=0)
