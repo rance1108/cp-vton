@@ -73,7 +73,7 @@ class CPDataset(data.Dataset):
         for i in range(len(c)):
             c[i] = self.transform(c[i])  # [-1,1]
         c = torch.cat(c,dim=0)
-
+        print(c.shape)
         for i in range(len(cm)):
             cm[i] = np.array(cm[i])
             cm[i] = (cm[i] >= 128).astype(np.float32)
