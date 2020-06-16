@@ -55,8 +55,10 @@ class CPDataset(data.Dataset):
             for f_name, fm_name in zip(clothes, masks):
                 c_path = osp.join(self.data_path, im_name, f_name)
                 cm_path = osp.join(self.data_path, im_name, fm_name)
-                print(cm,osp.isfile(cm_path),"AAAAAAAA")
-                
+                print(cm,osp.isfile(cm_path),"AAAAAAAA",im_name)
+
+                print(c,osp.isfile(c_path),"BBBBBBB",im_name)
+
                 if osp.isfile(c_path) and osp.isfile(cm_path):
                     c.append(Image.open(c_path))
                     cm.append(Image.open(cm_path))
