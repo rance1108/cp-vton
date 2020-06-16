@@ -55,9 +55,6 @@ class CPDataset(data.Dataset):
             for f_name, fm_name in zip(clothes, masks):
                 c_path = osp.join(self.data_path, im_name, f_name)
                 cm_path = osp.join(self.data_path, im_name, fm_name)
-                print(cm_path,osp.isfile(cm_path),"AAAAAAAA",im_name)
-
-                print(c,osp.isfile(c_path),"BBBBBBB",im_name)
 
                 if osp.isfile(c_path) and osp.isfile(cm_path):
                     c.append(Image.open(c_path))
@@ -65,7 +62,7 @@ class CPDataset(data.Dataset):
                     if_c.append(True)
                 else:
                     c.append(Image.new('RGB',(102,147)))
-                    c.append(Image.new('L',(102,147)))
+                    cm.append(Image.new('L',(102,147)))
                     if_c.append(False)
 
         else:
@@ -122,6 +119,7 @@ class CPDataset(data.Dataset):
             pcm_cloth.append(torch.from_numpy(i)) # [0,1]
 
             # inner cloth
+            print(type(i),type(im))
             im_cloth.append((im * i + (1 - i))) # [-1,1], fill 1 for other parts
 
         pcm_cloth = torch.cat(pcm_cloth,dim=0)
