@@ -166,7 +166,7 @@ class CPDataset(data.Dataset):
         im_pose = self.transform(im_pose)
         
         # cloth-agnostic representation
-        agnostic = torch.stack(
+        agnostic = torch.stack(\
             torch.cat([shape, im_h, pose_map, pcm_cloth[0]], 0)\
             torch.cat([shape, im_h, pose_map, pcm_cloth[1]], 0)\
             torch.cat([shape, im_h, pose_map, pcm_cloth[2]], 0)\
