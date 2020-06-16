@@ -88,8 +88,8 @@ def train_gmm(opt, train_loader, model, board):
             warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
 
             visuals.append([ [im_h, shape, im_pose], 
-                       [c[:,i], warped_cloth, im_c[:,i]], 
-                       [warped_grid, (warped_cloth+im)*0.5, im]])
+                       [c[:,i], warped_cloth[i], im_c[:,i]], 
+                       [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
 
             loss += criterionL1(warped_cloth, im_c[:,i])    
         
