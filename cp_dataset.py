@@ -58,6 +58,7 @@ class CPDataset(data.Dataset):
                 if osp.isfile(c_path) and osp.isfile(cm_path):
                     c.append(Image.open(c_path))
                     cm.append(Image.open(cm_path))
+                    print(cm)
                     if_c.append(True)
                 else:
                     c.append(Image.new('RGB',(102,147)))
