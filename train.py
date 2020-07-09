@@ -20,10 +20,10 @@ def get_opt():
     parser.add_argument('-j', '--workers', type=int, default=1)
     parser.add_argument('-b', '--batch-size', type=int, default=4)
     
-    parser.add_argument("--dataroot", default = "data")
+    parser.add_argument("--dataroot", default = "data/zalando")
     parser.add_argument("--datamode", default = "train")
     parser.add_argument("--stage", default = "GMM")
-    parser.add_argument("--data_list", default = "train_id .txt")
+    parser.add_argument("--data_list", default = "train_id.txt")
     parser.add_argument("--fine_width", type=int, default = 192)
     parser.add_argument("--fine_height", type=int, default = 256)
     parser.add_argument("--radius", type=int, default = 5)
@@ -81,7 +81,7 @@ def train_gmm(opt, train_loader, model, board):
         for i in range(c.shape[1]):
             # import pdb
             # pdb.set_trace()
-            input_agnostic = torch.cat([agnostic,pcm[:,i].unsqueeze_(1)],dim=1)
+            input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
             grid, theta = model(input_agnostic, c[:,i])
             warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
             warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
@@ -93,7 +93,7 @@ def train_gmm(opt, train_loader, model, board):
 
             loss += criterionL1(warped_cloth[i], im_c[:,i])    
         
-        visuals.append([[((((warped_cloth[0]+warped_cloth[1])*0.5 + warped_cloth[2])*0.5 + warped_cloth[3])*0.5 + im)*0.5, im]])
+        visuals.append([[warped_cloth[0]+warped_cloth[1] + warped_cloth[2] + warped_cloth[3] + im, im]])
 
         optimizer.zero_grad()
         loss.backward()

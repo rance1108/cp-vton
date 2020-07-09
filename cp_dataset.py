@@ -3,6 +3,8 @@ import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
 
+import torch.nn.functional as F
+
 from PIL import Image
 from PIL import ImageDraw
 
@@ -74,19 +76,17 @@ class CPDataset(data.Dataset):
             c[i] = self.transform(c[i])  # [-1,1]
         c = torch.stack(c,dim=0)
 
-
+# 
         for i in range(len(cm)):
             cm[i] = transforms.Resize((256,192))(cm[i])
-            cm[i] = np.array(cm[i])
-            cm[i] = (cm[i] >= 128).astype(np.float32)
+            cm[i] = np.array(cm[i]).astype(np.float32)
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
         cm = torch.stack(cm,dim=0)
 
-
         # person image 
         im = Image.open(osp.join(self.data_path, im_name, "99.png"))
-        head = Image.open(osp.join(self.data_path, im_name, "8.png"))
+        im_h = Image.open(osp.join(self.data_path, im_name, "8.png"))
 
         ori_h, ori_w = np.array(im).shape[0],np.array(im).shape[1]
 
@@ -109,6 +109,7 @@ class CPDataset(data.Dataset):
 
 
         im = self.transform(im) # [-1,1]
+        im_h = self.transform(im_h) # [-1,1]
         # im_parse = transforms.Resize((256,192))(im_parse)
 
 
@@ -117,11 +118,13 @@ class CPDataset(data.Dataset):
         parse_shape = parse_shape.resize((self.fine_width//16, self.fine_height//16), Image.BILINEAR)
         parse_shape = parse_shape.resize((self.fine_width, self.fine_height), Image.BILINEAR)
         shape = self.transform(parse_shape) # [-1,1]
-        phead = torch.from_numpy(parse_head) # [0,1]
+        # phead = torch.from_numpy(parse_head) # [0,1]
 
         pcm_cloth = []
         im_cloth = []
         for i in parse_cloth:
+            i = transforms.ToPILImage()(i.unsqueeze_(0))
+            i = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(i))
             pcm_cloth.append(i) # [0,1]
             # inner cloth
             im_cloth.append((im * i + (1 - i))) # [-1,1], fill 1 for other parts
@@ -139,7 +142,7 @@ class CPDataset(data.Dataset):
         # im_b = im * pcm_b + (1 - pcm_b) # [-1,1], fill 1 for other parts
         # im_s = im * pcm_s + (1 - pcm_s) # [-1,1], fill 1 for other parts
 
-        im_h = im * phead - (1 - phead) # [-1,1], fill 0 for other parts
+        # im_h = im * phead - (1 - phead) # [-1,1], fill 0 for other parts
 
         # load pose points
 
@@ -156,7 +159,7 @@ class CPDataset(data.Dataset):
         im_pose = Image.new('L', (self.fine_width, self.fine_height))
         pose_draw = ImageDraw.Draw(im_pose)
         for i in range(point_num):
-            one_map = Image.new('L', (self.fine_width, self.fine_height))
+            one_map = Image.new('L', (ori_h, ori_w))
             draw = ImageDraw.Draw(one_map)
             pointx = pose_data[i,0]
             pointy = pose_data[i,1]
@@ -165,7 +168,6 @@ class CPDataset(data.Dataset):
                 pose_draw.rectangle((pointx-r, pointy-r, pointx+r, pointy+r), 'white', 'white')
             one_map = self.transform(one_map)
             pose_map[i] = one_map[0]
-
         # just for visualization
         im_pose = self.transform(im_pose)
         
