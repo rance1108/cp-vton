@@ -82,17 +82,21 @@ class CPDataset(data.Dataset):
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
         cm = torch.stack(cm,dim=0)
+
+
         # person image 
         im = Image.open(osp.join(self.data_path, im_name, "99.png"))
-        im = self.transform(im) # [-1,1]
+        head = Image.open(osp.join(self.data_path, im_name, "8.png"))
+
+        ori_h, ori_w = np.array(im).shape[0],np.array(im).shape[1]
 
         # load parsing image
         im_parse = Image.open(osp.join(self.data_path, im_name, "12.png"))
-
-        im_parse = transforms.Resize((256,192))(im_parse)
+        
         parse_array = np.array(im_parse)
         parse_shape = (parse_array > 0).astype(np.float32)
-        parse_head = (parse_array == 1).astype(np.float32)
+        # parse_head = (parse_array == 1).astype(np.float32)
+        parse_bg = (parse_array == 0).astype(np.float32)
 
         parse_cloth = []
 
@@ -102,11 +106,11 @@ class CPDataset(data.Dataset):
             else:
                 parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
 
-        # parse_inner = (parse_array == 2).astype(np.float32)
-        # parse_outer = (parse_array == 3).astype(np.float32)
-        # parse_bottom = (parse_array == 4).astype(np.float32)
-        # parse_shoe = (parse_array == 5).astype(np.float32)
-        
+
+
+        im = self.transform(im) # [-1,1]
+        # im_parse = transforms.Resize((256,192))(im_parse)
+
 
         # shape downsample
         parse_shape = Image.fromarray((parse_shape*255).astype(np.uint8))
