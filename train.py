@@ -67,7 +67,7 @@ def train_gmm(opt, train_loader, model, board):
         pcm = inputs['parse_cloth_mask'].cuda()
         im_c =  inputs['parse_cloth'].cuda()
         im_g = inputs['grid_image'].cuda()
-            
+        head_mask = inputs['head_mask'].cuda()
         # grid, theta = model(agnostic, c)
         # warped_cloth = F.grid_sample(c, grid, padding_mode='border')
         # warped_mask = F.grid_sample(cm, grid, padding_mode='zeros')
@@ -86,14 +86,14 @@ def train_gmm(opt, train_loader, model, board):
             warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
             warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
             warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
-
-            visuals.append([ [im_h, shape, im_pose], 
+            visuals.append([ [shape, im_h, im_pose], 
                        [c[:,i], warped_cloth[i], im_c[:,i]], 
                        [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
 
             loss += criterionL1(warped_cloth[i], im_c[:,i])    
-        
-        visuals.append([[warped_cloth[0]+warped_cloth[1] + warped_cloth[2] + warped_cloth[3] + im_h, im]])
+
+
+        visuals.append([[warped_cloth[0]+warped_cloth[1] + warped_cloth[2] + warped_cloth[3] + head_mask, im]])
 
         optimizer.zero_grad()
         loss.backward()
