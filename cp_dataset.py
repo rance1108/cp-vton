@@ -95,7 +95,7 @@ class CPDataset(data.Dataset):
         
         parse_array = np.array(im_parse)
         parse_shape = (parse_array > 0).astype(np.float32)
-        # parse_head = (parse_array == 1).astype(np.float32)
+        # parse_head = (parse_array == 1).astype(np.float32)   @@
         parse_bg = (parse_array == 0).astype(np.float32)
 
         head_mask = Image.open(osp.join(self.data_path, im_name, "11.png"))
