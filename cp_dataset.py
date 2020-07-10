@@ -153,7 +153,7 @@ class CPDataset(data.Dataset):
         # im_h = im * phead - (1 - phead) # [-1,1], fill 0 for other parts
 
         # load pose points
-
+        #111
         
         pose_name = osp.join(self.data_path, im_name, "pose.txt")
         with open(pose_name, 'r') as f:
