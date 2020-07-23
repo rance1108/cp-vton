@@ -60,7 +60,7 @@ def test_gmm(opt, test_loader, model, board):
         
         c_names = inputs['c_name']
         im_name = inputs['im_name']
-
+        print(im_name , c_names)
         warp_cloth_dir = os.path.join(save_dir, im_name)
         if not os.path.exists(warp_cloth_dir):
             os.makedirs(warp_cloth_dir)
@@ -88,7 +88,7 @@ def test_gmm(opt, test_loader, model, board):
         warped_mask = []
         warped_grid = []
         visuals = []
-        
+
         for i in range(c.shape[1]):
             input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
             grid, theta = model(input_agnostic, c[:,i])
