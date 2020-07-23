@@ -44,7 +44,6 @@ def board_add_images(board, tag_name, img_tensors_list, step_count):
         board.add_image('%s/%03d' % (tag_name, i), img, step_count)
 
 def save_images(img_tensors, img_names, save_dir):
-    print(save_dir,img_names)
     for img_tensor, img_name in zip(img_tensors, img_names):
         tensor = (img_tensor.clone()+1)*0.5 * 255
         tensor = tensor.cpu().clamp(0,255)
@@ -54,6 +53,6 @@ def save_images(img_tensors, img_names, save_dir):
             array = array.squeeze(0)
         elif array.shape[0] == 3:
             array = array.swapaxes(0, 1).swapaxes(1, 2)
-        print(os.path.join(save_dir, img_name))
-        Image.fromarray(array).save(os.path.join(save_dir, img_name))
+        # Image.fromarray(array).save(os.path.join(save_dir, img_name))
+        Image.fromarray(array).save(os.path.join(save_dir, img_names))
 
