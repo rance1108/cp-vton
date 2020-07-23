@@ -101,7 +101,7 @@ def test_gmm(opt, test_loader, model, board):
                        [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
         
             save_images(warped_cloth[i], str(c_names[i]+'wc'), warp_cloth_dir) 
-         save_images(warped_mask[i]*2-1, str(c_names[i]+'wcm'), warp_cloth_dir) 
+            save_images(warped_mask[i]*2-1, str(c_names[i]+'wcm'), warp_cloth_dir) 
         
 
         # save_images(warped_cloth, c_names, warp_cloth_dir) 
