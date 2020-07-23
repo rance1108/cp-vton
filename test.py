@@ -99,9 +99,9 @@ def test_gmm(opt, test_loader, model, board):
             visuals.append([ [shape, im_h, im_pose], 
                        [c[:,i], warped_cloth[i], im_c[:,i]], 
                        [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
-            
-            save_images(warped_cloth[i], c_names[i][0][:-4] +'_wc' , warp_cloth_dir) 
-            save_images(warped_mask[i]*2-1, c_names[i][0][:-4] +'_wcm' , warp_cloth_dir) 
+            print(c_names[i][0][:-4] +'_wc.png',c_names[i][0][:-4] +'_wcm.png')
+            save_images(warped_cloth[i], c_names[i][0][:-4] +'_wc.png' , warp_cloth_dir) 
+            save_images(warped_mask[i]*2-1, c_names[i][0][:-4] +'_wcm.png', warp_cloth_dir) 
         
 
         # save_images(warped_cloth, c_names, warp_cloth_dir) 
