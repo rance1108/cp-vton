@@ -42,20 +42,31 @@ def test_gmm(opt, test_loader, model, board):
     model.eval()
 
     base_name = os.path.basename(opt.checkpoint)
-    save_dir = os.path.join(opt.result_dir, base_name, opt.datamode)
+    # save_dir = os.path.join(opt.result_dir, base_name, opt.datamode)
+
+    save_dir = os.path.join(opt.result_dir, base_name)
+
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    warp_cloth_dir = os.path.join(save_dir, 'warp-cloth')
-    if not os.path.exists(warp_cloth_dir):
-        os.makedirs(warp_cloth_dir)
-    warp_mask_dir = os.path.join(save_dir, 'warp-mask')
-    if not os.path.exists(warp_mask_dir):
-        os.makedirs(warp_mask_dir)
+    # warp_cloth_dir = os.path.join(save_dir, 'warp-cloth')
+    # if not os.path.exists(warp_cloth_dir):
+    #     os.makedirs(warp_cloth_dir)
+    # warp_mask_dir = os.path.join(save_dir, 'warp-mask')
+    # if not os.path.exists(warp_mask_dir):
+    #     os.makedirs(warp_mask_dir)
 
     for step, inputs in enumerate(test_loader.data_loader):
         iter_start_time = time.time()
         
         c_names = inputs['c_name']
+        im_name = inputs['im_name']
+
+        warp_cloth_dir = os.path.join(save_dir, im_name)
+        if not os.path.exists(warp_cloth_dir):
+            os.makedirs(warp_cloth_dir)
+
+
+
         im = inputs['image'].cuda()
         im_pose = inputs['pose_image'].cuda()
         im_h = inputs['head'].cuda()
@@ -63,20 +74,39 @@ def test_gmm(opt, test_loader, model, board):
         agnostic = inputs['agnostic'].cuda()
         c = inputs['cloth'].cuda()
         cm = inputs['cloth_mask'].cuda()
+        pcm = inputs['parse_cloth_mask'].cuda()
         im_c =  inputs['parse_cloth'].cuda()
         im_g = inputs['grid_image'].cuda()
+        head_mask = inputs['head_mask'].cuda()
             
         grid, theta = model(agnostic, c)
         warped_cloth = F.grid_sample(c, grid, padding_mode='border')
         warped_mask = F.grid_sample(cm, grid, padding_mode='zeros')
         warped_grid = F.grid_sample(im_g, grid, padding_mode='zeros')
 
-        visuals = [ [im_h, shape, im_pose], 
-                   [c, warped_cloth, im_c], 
-                   [warped_grid, (warped_cloth+im)*0.5, im]]
+        warped_cloth = []
+        warped_mask = []
+        warped_grid = []
+        visuals = []
         
-        save_images(warped_cloth, c_names, warp_cloth_dir) 
-        save_images(warped_mask*2-1, c_names, warp_mask_dir) 
+        for i in range(c.shape[1]):
+            input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
+            grid, theta = model(input_agnostic, c[:,i])
+            warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
+            warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
+            warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
+
+
+            visuals.append([ [shape, im_h, im_pose], 
+                       [c[:,i], warped_cloth[i], im_c[:,i]], 
+                       [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
+        
+        save_images(warped_cloth, str(c_names+'wc'), warp_cloth_dir) 
+        save_images(warped_mask*2-1, str(c_names+'wcm'), warp_cloth_dir) 
+        
+
+        # save_images(warped_cloth, c_names, warp_cloth_dir) 
+        # save_images(warped_mask*2-1, c_names, warp_mask_dir) 
 
         if (step+1) % opt.display_count == 0:
             board_add_images(board, 'combine', visuals, step+1)
