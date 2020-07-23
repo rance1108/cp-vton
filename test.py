@@ -12,7 +12,6 @@ from networks import GMM, UnetGenerator, load_checkpoint
 from tensorboardX import SummaryWriter
 from visualization import board_add_image, board_add_images, save_images
 
-from torchvision.utils import save_image
 
 def get_opt():
     parser = argparse.ArgumentParser()
@@ -104,19 +103,20 @@ def test_gmm(opt, test_loader, model, board):
             # print((warped_cloth[i]).shape,warped_mask[i].shape)
             cname1 = c_names[i][0][:-4] +'_wc.png'
             cname2 = c_names[i][0][:-4] +'_wcm.png'
-
-            save_image(warped_cloth[i],  os.path.join(warp_cloth_dir,cname1)) 
-            save_image(warped_mask[i]*2-1, os.path.join(warp_cloth_dir,cname2))
+            save_images(warped_cloth[i], cname1, warp_cloth_dir) 
+            save_images(warped_mask[i]*2-1, cname2, warp_cloth_dir) 
         
 
         # save_images(warped_cloth, c_names, warp_cloth_dir) 
         # save_images(warped_mask*2-1, c_names, warp_mask_dir) 
 
         if (step+1) % opt.display_count == 0:
-            board_add_images(board, 'combine', visuals, step+1)
+            board_add_images(board, 'combine_inner', visuals[0], step+1)
+            board_add_images(board, 'combine_outer', visuals[1], step+1)
+            board_add_images(board, 'combine_bottom', visuals[2], step+1)
+            board_add_images(board, 'combine_shoe', visuals[3], step+1)
             t = time.time() - iter_start_time
             print('step: %8d, time: %.3f' % (step+1, t), flush=True)
-        
 
 
 def test_tom(opt, test_loader, model, board):
