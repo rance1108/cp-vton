@@ -53,6 +53,6 @@ def save_images(img_tensors, img_names, save_dir):
             array = array.squeeze(0)
         elif array.shape[0] == 3:
             array = array.swapaxes(0, 1).swapaxes(1, 2)
-            
+        print(os.path.join(save_dir, img_name))
         Image.fromarray(array).save(os.path.join(save_dir, img_name))
 
