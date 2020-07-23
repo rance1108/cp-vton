@@ -59,8 +59,7 @@ def test_gmm(opt, test_loader, model, board):
         iter_start_time = time.time()
         
         c_names = inputs['c_name']
-        im_name = inputs['im_name']
-        print(im_name , c_names)
+        im_name = inputs['im_name'][0]
         warp_cloth_dir = os.path.join(save_dir, im_name)
         if not os.path.exists(warp_cloth_dir):
             os.makedirs(warp_cloth_dir)
@@ -101,8 +100,8 @@ def test_gmm(opt, test_loader, model, board):
                        [c[:,i], warped_cloth[i], im_c[:,i]], 
                        [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
         
-        save_images(warped_cloth, str(c_names+'wc'), warp_cloth_dir) 
-        save_images(warped_mask*2-1, str(c_names+'wcm'), warp_cloth_dir) 
+            save_images(warped_cloth[i], str(c_names[i]+'wc'), warp_cloth_dir) 
+         save_images(warped_mask[i]*2-1, str(c_names[i]+'wcm'), warp_cloth_dir) 
         
 
         # save_images(warped_cloth, c_names, warp_cloth_dir) 
