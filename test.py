@@ -12,6 +12,7 @@ from networks import GMM, UnetGenerator, load_checkpoint
 from tensorboardX import SummaryWriter
 from visualization import board_add_image, board_add_images, save_images
 
+from torchvision.utils import save_image
 
 def get_opt():
     parser = argparse.ArgumentParser()
@@ -103,8 +104,9 @@ def test_gmm(opt, test_loader, model, board):
             # print((warped_cloth[i]).shape,warped_mask[i].shape)
             cname1 = c_names[i][0][:-4] +'_wc.png'
             cname2 = c_names[i][0][:-4] +'_wcm.png'
-            save_images(warped_cloth[i], cname1, warp_cloth_dir) 
-            save_images(warped_mask[i]*2-1, cname2, warp_cloth_dir) 
+
+            save_image(warped_cloth[i],  os.path.join(warp_cloth_dir,cname1)) 
+            save_image(warped_mask[i]*2-1, os.path.join(warp_cloth_dir,cname2))
         
 
         # save_images(warped_cloth, c_names, warp_cloth_dir) 
