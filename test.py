@@ -106,12 +106,14 @@ def test_gmm(opt, test_loader, model, board):
             cname2 = c_names[i][0][:-4] +'_wcm.png'
             cname3 = c_names[i][0][:-4] +'_orgwc.png'
             cname4 = c_names[i][0][:-4] +'_123.png'
+            cname5 = c_names[i][0][:-4] +'_1234.png'
             # print("a:",im_c[:,i].max(),"b:",im_c[:,i].min(),"c:",warped_cloth[i].max(),"d:",warped_cloth[i].min(),
             #     "e:",warped_mask[i].max(),"f:",warped_mask[i].min())
             save_image(warped_cloth[i], os.path.join(warp_cloth_dir, cname1)) 
             save_image(im_c[:,i], os.path.join(warp_cloth_dir, cname3)) 
             save_image(warped_mask[i]*2-1, os.path.join(warp_cloth_dir, cname2)) 
             save_image(im, os.path.join(warp_cloth_dir, cname4)) 
+            save_image((im+1)*0.5, os.path.join(warp_cloth_dir, cname5)) 
         
 
         # save_images(warped_cloth, c_names, warp_cloth_dir) 
