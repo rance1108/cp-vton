@@ -112,7 +112,6 @@ def test_gmm(opt, test_loader, model, board):
             save_image((warped_cloth[i]+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
             save_image((im_c[:,i]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
             save_image(warped_mask[i]*2-1, os.path.join(warp_cloth_dir, cname2)) 
-            print(os.path.join(warp_cloth_dir, cname2))
             # save_image(im, os.path.join(warp_cloth_dir, cname4)) 
             # save_image((im+1)*0.5, os.path.join(warp_cloth_dir, cname5)) 
         
