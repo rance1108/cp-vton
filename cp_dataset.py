@@ -21,6 +21,8 @@ class CPDataset(data.Dataset):
         self.opt = opt
         self.root = opt.dataroot
         self.datamode = opt.datamode # train or test or self-defined
+        self.tomroot = opt.tom_dataroot
+        print(tomroot, osp.join(self.tomroot,self.datamode))
         self.stage = opt.stage # GMM or TOM
         self.data_list = opt.data_list
         self.fine_height = opt.fine_height
