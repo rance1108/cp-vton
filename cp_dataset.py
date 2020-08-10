@@ -48,8 +48,8 @@ class CPDataset(data.Dataset):
     def __getitem__(self, index):
         im_name = self.im_names[index]
 
-        def get_concat_h(im1, im2):
-            dst = Image.new('RGB', (im1.width + im2.width, im1.height))
+        def get_concat_h(rgb, im1, im2):
+            dst = Image.new(rgb, (im1.width + im2.width, im1.height))
             dst.paste(im1, (0, 0))
             dst.paste(im2, (im1.width, 0))
             return dst
@@ -70,14 +70,14 @@ class CPDataset(data.Dataset):
                         im = Image.open(c_path)
                         im_flip = ImageOps.mirror(im)
                         ori_h, ori_w = np.array(im).shape[0],np.array(im).shape[1]
-                        j  = get_concat_h(im,im_flip)
+                        j  = get_concat_h('RGB', im, im_flip)
                         j_resized = j.resize((ori_w, ori_h))
                         c.append(j_resized)
 
                         im_m = Image.open(cm_path)
                         im_m_flip = ImageOps.mirror(im_m)
                         ori_h, ori_w = np.array(im_m).shape[0],np.array(im_m).shape[1]
-                        k  = get_concat_h(im_m,im_m_flip)
+                        k  = get_concat_h('L', im_m, im_m_flip)
                         k_resized = k.resize((ori_w, ori_h),resample=Image.NEAREST)
                         cm.append(k_resized)
 
