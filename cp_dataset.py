@@ -69,7 +69,7 @@ class CPDataset(data.Dataset):
 
                 if osp.isfile(c_path) and osp.isfile(cm_path):
                     print(f_name,"1111")
-                    if f_name = "4.png":
+                    if f_name == "4.png":
                         print("hi")
                         im = Image.open(c_path)
                         im_flip = ImageOps.mirror(im)
