@@ -53,7 +53,7 @@ class CPDataset(data.Dataset):
             dst.paste(im1, (0, 0))
             dst.paste(im2, (im1.width, 0))
             return dst
-            
+
         # cloth image & cloth mask
         if self.stage == 'GMM':
             c = []
@@ -81,9 +81,21 @@ class CPDataset(data.Dataset):
                         k_resized = k.resize((ori_w, ori_h),resample=Image.NEAREST)
                         cm.append(k_resized)
 
+
+                        print(ori_h, ori_w , f_name)
+                        print(ori_h, ori_w , fm_name)
+                        
                         if_c.append(True)
 
                     else:
+                        x = Image.open(c_path)
+                        ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
+
+                        x = Image.open(cm_path)
+                        ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
+                        print(ori_h, ori_w , f_name)
+                        print(ori_h, ori_w , fm_name)
+
                         c.append(Image.open(c_path))
                         cm.append(Image.open(cm_path))
                         if_c.append(True)
