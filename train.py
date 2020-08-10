@@ -69,7 +69,7 @@ def train_gmm(opt, train_loader, model, board):
         im_c =  inputs['parse_cloth'].cuda()
         im_g = inputs['grid_image'].cuda()
         head_mask = inputs['head_mask'].cuda()
-        if_c = inputs['if_c'].cuda()
+        # if_c = inputs['if_c'].cuda()
         # import pdb 
         # pdb.set_trace()
         # grid, theta = model(agnostic, c)
