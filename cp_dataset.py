@@ -68,6 +68,7 @@ class CPDataset(data.Dataset):
                 cm_path = osp.join(self.data_path, im_name, fm_name)
 
                 if osp.isfile(c_path) and osp.isfile(cm_path):
+                    print(f_name,"1111")
                     if f_name = "4.png":
                         print("hi")
                         im = Image.open(c_path)
