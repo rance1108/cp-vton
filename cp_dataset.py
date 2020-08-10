@@ -84,7 +84,7 @@ class CPDataset(data.Dataset):
 
                         print(ori_h, ori_w , f_name)
                         print(ori_h, ori_w , fm_name)
-                        
+
                         if_c.append(True)
 
                     else:
@@ -130,6 +130,7 @@ class CPDataset(data.Dataset):
 
 # 
         for i in range(len(cm)):
+            print(i)
             cm[i] = transforms.Resize((256,192))(cm[i])
             cm[i] = np.array(cm[i]).astype(np.float32)
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
