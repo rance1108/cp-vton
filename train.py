@@ -103,7 +103,7 @@ def train_gmm(opt, train_loader, model, board):
         if (step+1) % opt.display_count == 0:
             for j, k in zip(range(4),['combine_inner', 'combine_outer', 'combine_bottom', 'combine_shoe']):
 
-            board_add_images(board, k, visuals[j], step+1)
+                board_add_images(board, k, visuals[j], step+1)
 
             # board_add_images(board, 'combine_inner', visuals[0], step+1)
             # board_add_images(board, 'combine_outer', visuals[1], step+1)
