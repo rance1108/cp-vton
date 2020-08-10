@@ -130,11 +130,11 @@ class CPDataset(data.Dataset):
 
 # 
         for i in range(len(cm)):
-            print(i)
             cm[i] = transforms.Resize((256,192))(cm[i])
             cm[i] = np.array(cm[i]).astype(np.float32)
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
+            print(i,cm[i].shape)
         cm = torch.stack(cm,dim=0)
 
         # person image 
