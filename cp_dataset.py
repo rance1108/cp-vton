@@ -80,7 +80,7 @@ class CPDataset(data.Dataset):
                         k  = get_concat_h('L', im_m, im_m_flip)
                         k_resized = k.resize((ori_w, ori_h),resample=Image.NEAREST)
                         cm.append(k_resized)
-                        
+
                         if_c.append(True)
 
                     else:
@@ -248,7 +248,7 @@ class CPDataset(data.Dataset):
             'pose_image': im_pose,  # for visualization
             'grid_image': im_g,     # for visualization
             'head_mask' : head_mask,
-            'if_c': if_c
+            'if_c': torch.tensor(if_c)
             }
 
         return result
