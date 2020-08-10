@@ -46,6 +46,13 @@ class CPDataset(data.Dataset):
     def name(self):
         return "CPDataset"
 
+    def get_concat_h(im1, im2):
+        dst = Image.new('RGB', (im1.width + im2.width, im1.height))
+        dst.paste(im1, (0, 0))
+        dst.paste(im2, (im1.width, 0))
+        return dst
+
+
     def __getitem__(self, index):
         im_name = self.im_names[index]
 
@@ -61,6 +68,44 @@ class CPDataset(data.Dataset):
                 cm_path = osp.join(self.data_path, im_name, fm_name)
 
                 if osp.isfile(c_path) and osp.isfile(cm_path):
+                    if f_name = "4.png":
+                        print("hi")
+                        im = Image.open(c_path)
+                        im_flip = ImageOps.mirror(im)
+                        ori_h, ori_w = np.array(im).shape[0],np.array(im).shape[1]
+                        j  = get_concat_h(im,im_flip)
+                        j_resized = j.resize((ori_w, ori_h))
+                        c.append(j_resized)
+
+                        im_m = Image.open(cm_path)
+                        im_m_flip = ImageOps.mirror(im_m)
+                        ori_h, ori_w = np.array(im_m).shape[0],np.array(im_m).shape[1]
+                        k  = get_concat_h(im_m,im_m_flip)
+                        k_resized = k.resize((ori_w, ori_h),resample=Image.NEAREST)
+                        cm.append(k_resized)
+
+                        if_c.append(True)
+
+                    else:
+                        c.append(Image.open(c_path))
+                        cm.append(Image.open(cm_path))
+                        if_c.append(True)
+                else:
+                    c.append(Image.new('RGB',(192,256)))
+                    cm.append(Image.new('L',(192,256)))
+                    if_c.append(False)
+
+        else:
+            c = []
+            cm = []
+            if_c = []
+            clothes = ["0_wc.png", "1_wc.png", "2_wc.png", "4_wc.png"]
+            masks = ["0_wcm.png", "1_wcm.png", "2_wcm.png", "4_wcm.png"]
+            for f_name, fm_name in zip(clothes, masks):
+                c_path = osp.join(self.tomroot, self.datamode, im_name, f_name)
+                cm_path = osp.join(self.tomroot, self.datamode, im_name, fm_name)
+
+                if osp.isfile(c_path) and osp.isfile(cm_path):
                     c.append(Image.open(c_path))
                     cm.append(Image.open(cm_path))
                     if_c.append(True)
@@ -69,10 +114,6 @@ class CPDataset(data.Dataset):
                     cm.append(Image.new('L',(192,256)))
                     if_c.append(False)
 
-        else:
-            c = Image.open(osp.join(self.data_path, 'warp-cloth', c_name))
-            cm = Image.open(osp.join(self.data_path, 'warp-mask', c_name))
-        
 
         for i in range(len(c)):
             c[i] = self.transform(c[i])  # [-1,1]
@@ -203,7 +244,8 @@ class CPDataset(data.Dataset):
             'head': im_h,           # for visualization
             'pose_image': im_pose,  # for visualization
             'grid_image': im_g,     # for visualization
-            'head_mask' : head_mask
+            'head_mask' : head_mask,
+            'if_c': if_c
             }
 
         return result
