@@ -80,11 +80,7 @@ class CPDataset(data.Dataset):
                         k  = get_concat_h('L', im_m, im_m_flip)
                         k_resized = k.resize((ori_w, ori_h),resample=Image.NEAREST)
                         cm.append(k_resized)
-
-
-                        print(ori_h, ori_w , f_name)
-                        print(ori_h, ori_w , fm_name)
-
+                        
                         if_c.append(True)
 
                     else:
@@ -93,8 +89,6 @@ class CPDataset(data.Dataset):
 
                         x = Image.open(cm_path)
                         ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
-                        print(ori_h, ori_w , f_name)
-                        print(ori_h, ori_w , fm_name)
 
                         c.append(Image.open(c_path))
                         cm.append(Image.open(cm_path))
@@ -134,7 +128,6 @@ class CPDataset(data.Dataset):
             cm[i] = np.array(cm[i]).astype(np.float32)
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
-            print(i,cm[i].shape)
         cm = torch.stack(cm,dim=0)
 
         # person image 
