@@ -6,7 +6,7 @@ import torchvision.transforms as transforms
 import torch.nn.functional as F
 
 from PIL import Image
-from PIL import ImageDraw
+from PIL import ImageDraw, ImageOps
 
 import os.path as osp
 import numpy as np
@@ -22,7 +22,6 @@ class CPDataset(data.Dataset):
         self.root = opt.dataroot
         self.datamode = opt.datamode # train or test or self-defined
         self.tomroot = opt.tom_dataroot
-        print(self.tomroot, osp.join(self.tomroot,self.datamode))
         self.stage = opt.stage # GMM or TOM
         self.data_list = opt.data_list
         self.fine_height = opt.fine_height
@@ -68,9 +67,7 @@ class CPDataset(data.Dataset):
                 cm_path = osp.join(self.data_path, im_name, fm_name)
 
                 if osp.isfile(c_path) and osp.isfile(cm_path):
-                    print(f_name,"1111")
                     if f_name == "4.png":
-                        print("hi")
                         im = Image.open(c_path)
                         im_flip = ImageOps.mirror(im)
                         ori_h, ori_w = np.array(im).shape[0],np.array(im).shape[1]
