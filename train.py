@@ -84,17 +84,17 @@ def train_gmm(opt, train_loader, model, board):
         loss = 0
         
         for i in range(c.shape[1]):
-            if if_c[:,i].all() == True:
-                input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
-                grid, theta = model(input_agnostic, c[:,i])
-                warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
-                warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
-                warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
-                visuals.append([ [shape, im_h, im_pose], 
-                           [c[:,i], warped_cloth[i], im_c[:,i]], 
-                           [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
+            # if if_c[:,i].all() == True:
+            input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
+            grid, theta = model(input_agnostic, c[:,i])
+            warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
+            warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
+            warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
+            visuals.append([ [shape, im_h, im_pose], 
+                       [c[:,i], warped_cloth[i], im_c[:,i]], 
+                       [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
 
-                loss += criterionL1(warped_cloth[i], im_c[:,i])    
+            loss += criterionL1(warped_cloth[i], im_c[:,i])    
 
 
 
