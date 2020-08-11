@@ -158,6 +158,7 @@ def train_tom(opt, train_loader, model, board):
         loss_vgg = 0
         loss_mask = 0
         loss = 0
+        print("IM",im.shape)
         for i in range(c.shape[1]):
 
             if agnostic == None:
