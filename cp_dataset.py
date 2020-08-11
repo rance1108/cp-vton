@@ -130,7 +130,7 @@ class CPDataset(data.Dataset):
             cm[i]= torch.from_numpy(cm[i]) # [0,1]
             cm[i].unsqueeze_(0)
         cm = torch.stack(cm,dim=0)
-
+        print(cm.max(),cm.min())
         # person image 
         im = Image.open(osp.join(self.data_path, im_name, "99.png"))
         im_h = Image.open(osp.join(self.data_path, im_name, "8.png"))
