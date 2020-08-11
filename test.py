@@ -43,7 +43,7 @@ def test_gmm(opt, test_loader, model, board):
     model.cuda()
     model.eval()
 
-    base_name = os.path.basename(opt.checkpoint)
+    base_name = os.path.basename(opt.name)
     save_dir = os.path.join(opt.result_dir, base_name, opt.datamode)
 
     # save_dir = os.path.join(opt.result_dir, base_name)
