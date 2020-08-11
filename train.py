@@ -152,32 +152,28 @@ def train_tom(opt, train_loader, model, board):
 
         visuals = []
 
-        p_tryon = None
         agnostic = None
         loss_l1 = 0
         loss_vgg = 0
         loss_mask = 0
         loss = 0
-        print("IM",im.shape)
         for i in range(c.shape[1]):
 
             if agnostic == None:
                 agnostic = torch.cat([shape, bg, pose_map, padding], 1)
             else:
                 agnostic = torch.cat([shape, p_tryon, pose_map, padding], 1)
-            print(agnostic.shape,c[:,i].shape,torch.cat([agnostic,c[:,i]],dim=1).shape)
             input_agnostic = torch.cat([agnostic,c[:,i]],dim=1)
             outputs = model(input_agnostic)
 
             p_rendered, m_composite = torch.split(outputs, 3,1)
             p_rendered = F.tanh(p_rendered)
             m_composite = F.sigmoid(m_composite)
-            p_tryon = c * m_composite+ p_rendered * (1 - m_composite)
+            p_tryon = c[:,i] * m_composite+ p_rendered * (1 - m_composite)
 
             visuals.append([ [im_h, shape, im_pose], 
-                   [c, cm*2-1, m_composite*2-1], 
+                   [c[:,i], cm[:,i]*2-1, m_composite*2-1], 
                    [p_rendered, p_tryon, im]])
-            print("PP",p_rendered.shape,m_composite.shape,p_tryon.shape)
             loss_l1 += criterionL1(p_tryon, im)
             loss_vgg += criterionVGG(p_tryon, im)
             loss_mask += criterionMask(m_composite, cm)
