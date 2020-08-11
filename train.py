@@ -170,13 +170,14 @@ def train_tom(opt, train_loader, model, board):
             p_rendered = F.tanh(p_rendered)
             m_composite = F.sigmoid(m_composite)
             p_tryon = c[:,i] * m_composite+ p_rendered * (1 - m_composite)
-            print(im.shape,p_tryon.shape)
+
             visuals.append([ [im_h, shape, im_pose], 
                    [c[:,i], cm[:,i]*2-1, m_composite*2-1], 
                    [p_rendered, p_tryon, im]])
-            loss_l1 += criterionL1(p_tryon, im)
-            loss_vgg += criterionVGG(p_tryon, im)
-            loss_mask += criterionMask(m_composite, cm)
+            loss_mask += criterionMask(m_composite, cm[:,i])
+
+        loss_l1 = criterionL1(p_tryon, im)
+        loss_vgg = criterionVGG(p_tryon, im)
 
         loss = loss_l1 + loss_vgg + loss_mask
         optimizer.zero_grad()
