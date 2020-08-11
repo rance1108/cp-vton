@@ -166,7 +166,8 @@ def train_tom(opt, train_loader, model, board):
                 agnostic = torch.cat([shape, p_tryon, pose_map], 1)
 
             input_agnostic = torch.cat([agnostic,c[:,i]],dim=1)
-            outputs = model(input_agnostic, c[:,i])
+            outputs = model(input_agnostic)
+            
             p_rendered, m_composite = torch.split(outputs, 3,1)
             p_rendered = F.tanh(p_rendered)
             m_composite = F.sigmoid(m_composite)
