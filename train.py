@@ -156,6 +156,7 @@ def train_tom(opt, train_loader, model, board):
         loss_vgg = 0
         loss_mask = 0
         loss = 0
+
         for i in range(c.shape[1]):
 
             if i < 1 :
@@ -171,9 +172,10 @@ def train_tom(opt, train_loader, model, board):
             m_composite = F.sigmoid(m_composite)
             p_tryon = c[:,i] * m_composite+ p_rendered * (1 - m_composite)
 
-            visuals.append([ [im_h, shape, im_pose], 
+            visuals.append([ [bg, shape, im_pose], 
                    [c[:,i], cm[:,i]*2-1, m_composite*2-1], 
-                   [p_rendered, p_tryon, im]])
+                   [p_rendered, p_tryon, im],
+                   [bg,im,im_h]])
             loss_mask += criterionMask(m_composite, cm[:,i])
 
         loss_l1 = criterionL1(p_tryon, im)

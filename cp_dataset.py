@@ -113,7 +113,6 @@ class CPDataset(data.Dataset):
                     cm.append(Image.open(cm_path).convert('L'))
                     if_c.append(True)
                 else:
-                    print("FUCK")
                     c.append(Image.new('RGB',(192,256)))
                     cm.append(Image.new('L',(192,256)))
                     if_c.append(False)
