@@ -293,9 +293,12 @@ class CPDataLoader(object):
     def next_batch(self):
         try:
             batch = self.data_iter.__next__()
+            print(batch.shape)
         except StopIteration:
             self.data_iter = self.data_loader.__iter__()
             batch = self.data_iter.__next__()
+
+            print(batch.shape,"HIHIHIHI")
 
         return batch
 
