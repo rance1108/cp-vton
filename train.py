@@ -21,7 +21,7 @@ def get_opt():
     parser.add_argument('-b', '--batch-size', type=int, default=4)
     
     parser.add_argument("--dataroot", default = "data/zalando")
-    parser.add_argument("--tom_dataroot", default = "data/zalando")
+    parser.add_argument('-td', "--tom_dataroot", default = "data/zalando")
     parser.add_argument("--datamode", default = "train")
     parser.add_argument("--stage", default = "GMM")
     parser.add_argument("--data_list", default = "train_id.txt")
@@ -162,7 +162,7 @@ def train_tom(opt, train_loader, model, board):
                 agnostic = torch.cat([shape, bg, pose_map, padding], 1)
             else:
                 agnostic = torch.cat([shape, p_tryon, pose_map, padding], 1)
-                
+
             input_agnostic = torch.cat([agnostic,c[:,i]],dim=1)
             outputs = model(input_agnostic)
 
