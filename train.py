@@ -149,6 +149,7 @@ def train_tom(opt, train_loader, model, board):
 
         bg = inputs['bg'].cuda()
 
+        print(bg.shape)
 
         board_add_images(board, '1', bg, step+1)
         
