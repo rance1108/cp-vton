@@ -158,8 +158,9 @@ def train_tom(opt, train_loader, model, board):
         loss_mask = 0
         loss = 0
         for i in range(c.shape[1]):
-            if agnostic == None:
 
+            if agnostic == None:
+                print(shape.shape,bg.shape,im_pose.shape)
                 agnostic = torch.cat([shape, bg, im_pose], 0)
             else:
                 agnostic = torch.cat([shape, p_tryon, im_pose], 0)
@@ -178,7 +179,7 @@ def train_tom(opt, train_loader, model, board):
             loss_l1 += criterionL1(p_tryon, im)
             loss_vgg += criterionVGG(p_tryon, im)
             loss_mask += criterionMask(m_composite, cm)
-            
+
         loss = loss_l1 + loss_vgg + loss_mask
         optimizer.zero_grad()
         loss.backward()
