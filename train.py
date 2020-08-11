@@ -138,14 +138,13 @@ def train_tom(opt, train_loader, model, board):
         inputs = train_loader.next_batch()
             
         im = inputs['image'].cuda()
-        im_pose = inputs['pose_image']
-        im_h = inputs['head']
-        shape = inputs['shape']
+        im_pose = inputs['pose_image'].cuda()
+        im_h = inputs['head'].cuda()
+        shape = inputs['shape'].cuda()
 
-        agnostic = inputs['agnostic'].cuda()
+        # agnostic = inputs['agnostic'].cuda()
         c = inputs['cloth'].cuda()
         cm = inputs['cloth_mask'].cuda()
-
 
         bg = inputs['bg'].cuda()
 
