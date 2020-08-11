@@ -157,34 +157,34 @@ def train_tom(opt, train_loader, model, board):
         loss_mask = 0
         loss = 0
 
-        # for i in range(c.shape[1]):
+        for i in range(c.shape[1]):
 
-        #     if i < 1 :
-        #         agnostic = torch.cat([shape, bg, pose_map, padding], 1)
-        #     else:
-        #         agnostic = torch.cat([shape, p_tryon, pose_map, padding], 1)
+            if i < 1 :
+                agnostic = torch.cat([shape, bg, pose_map, padding], 1)
+            else:
+                agnostic = torch.cat([shape, p_tryon, pose_map, padding], 1)
 
-        #     input_agnostic = torch.cat([agnostic,c[:,i]],dim=1)
-        #     outputs = model(input_agnostic)
+            input_agnostic = torch.cat([agnostic,c[:,i]],dim=1)
+            outputs = model(input_agnostic)
 
-        #     p_rendered, m_composite = torch.split(outputs, 3,1)
-        #     p_rendered = F.tanh(p_rendered)
-        #     m_composite = F.sigmoid(m_composite)
-        #     p_tryon = c[:,i] * m_composite+ p_rendered * (1 - m_composite)
+            p_rendered, m_composite = torch.split(outputs, 3,1)
+            p_rendered = F.tanh(p_rendered)
+            m_composite = F.sigmoid(m_composite)
+            p_tryon = c[:,i] * m_composite+ p_rendered * (1 - m_composite)
 
-        #     visuals.append([ [bg, shape, im_pose], 
-        #            [c[:,i], cm[:,i]*2-1, m_composite*2-1], 
-        #            [p_rendered, p_tryon, im],
-        #            [bg,im,im_h]])
-        #     loss_mask += criterionMask(m_composite, cm[:,i])
+            visuals.append([ [bg, shape, im_pose], 
+                   [c[:,i], cm[:,i]*2-1, m_composite*2-1], 
+                   [p_rendered, p_tryon, im],
+                   [bg,im,im_h]])
+            loss_mask += criterionMask(m_composite, cm[:,i])
 
-        # loss_l1 = criterionL1(p_tryon, im)
-        # loss_vgg = criterionVGG(p_tryon, im)
+        loss_l1 = criterionL1(p_tryon, im)
+        loss_vgg = criterionVGG(p_tryon, im)
 
-        # loss = loss_l1 + loss_vgg + loss_mask
-        # optimizer.zero_grad()
-        # loss.backward()
-        # optimizer.step()
+        loss = loss_l1 + loss_vgg + loss_mask
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
 
 
@@ -207,22 +207,22 @@ def train_tom(opt, train_loader, model, board):
         # loss.backward()
         # optimizer.step()
             
-        # if (step+1) % opt.display_count == 0:
-        #     board_add_images(board, 'combine_inner', visuals[0], step+1)
-        #     board_add_images(board, 'combine_outer', visuals[1], step+1)
-        #     board_add_images(board, 'combine_bottom', visuals[2], step+1)
-        #     board_add_images(board, 'combine_shoe', visuals[3], step+1)
-        #     board.add_scalar('metric', loss.item(), step+1)
-        #     board.add_scalar('L1', loss_l1.item(), step+1)
-        #     board.add_scalar('VGG', loss_vgg.item(), step+1)
-        #     board.add_scalar('MaskL1', loss_mask.item(), step+1)
-        #     t = time.time() - iter_start_time
-        #     print('step: %8d, time: %.3f, loss: %.4f, l1: %.4f, vgg: %.4f, mask: %.4f' 
-        #             % (step+1, t, loss.item(), loss_l1.item(), 
-        #             loss_vgg.item(), loss_mask.item()), flush=True)
+        if (step+1) % opt.display_count == 0:
+            board_add_images(board, 'combine_inner', visuals[0], step+1)
+            board_add_images(board, 'combine_outer', visuals[1], step+1)
+            board_add_images(board, 'combine_bottom', visuals[2], step+1)
+            board_add_images(board, 'combine_shoe', visuals[3], step+1)
+            board.add_scalar('metric', loss.item(), step+1)
+            board.add_scalar('L1', loss_l1.item(), step+1)
+            board.add_scalar('VGG', loss_vgg.item(), step+1)
+            board.add_scalar('MaskL1', loss_mask.item(), step+1)
+            t = time.time() - iter_start_time
+            print('step: %8d, time: %.3f, loss: %.4f, l1: %.4f, vgg: %.4f, mask: %.4f' 
+                    % (step+1, t, loss.item(), loss_l1.item(), 
+                    loss_vgg.item(), loss_mask.item()), flush=True)
 
-        # if (step+1) % opt.save_count == 0:
-        #     save_checkpoint(model, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d.pth' % (step+1)))
+        if (step+1) % opt.save_count == 0:
+            save_checkpoint(model, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d.pth' % (step+1)))
 
 
 
