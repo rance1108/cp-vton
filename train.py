@@ -177,7 +177,7 @@ def train_tom(opt, train_loader, model, board):
             visuals.append([ [im_h, shape, im_pose], 
                    [c, cm*2-1, m_composite*2-1], 
                    [p_rendered, p_tryon, im]])
-
+            print("PP",p_rendered.shape,m_composite.shape,p_tryon.shape)
             loss_l1 += criterionL1(p_tryon, im)
             loss_vgg += criterionVGG(p_tryon, im)
             loss_mask += criterionMask(m_composite, cm)
