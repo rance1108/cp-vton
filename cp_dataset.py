@@ -256,7 +256,8 @@ class CPDataset(data.Dataset):
             'pose_image': im_pose,  # for visualization
             'grid_image': im_g,     # for visualization
             'head_mask' : head_mask,
-            'bg': bg
+            'bg': bg,
+            'pose_map':pose_map
             # 'if_c': torch.tensor(if_c)
             }
 

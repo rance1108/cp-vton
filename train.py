@@ -139,6 +139,7 @@ def train_tom(opt, train_loader, model, board):
             
         im = inputs['image'].cuda()
         im_pose = inputs['pose_image'].cuda()
+        pose_map = inputs['pose_map'].cuda()
         im_h = inputs['head'].cuda()
         shape = inputs['shape'].cuda()
 
@@ -160,10 +161,9 @@ def train_tom(opt, train_loader, model, board):
         for i in range(c.shape[1]):
 
             if agnostic == None:
-                print(shape.shape,bg.shape,im_pose.shape)
-                agnostic = torch.cat([shape, bg, im_pose], 0)
+                agnostic = torch.cat([shape, bg, pose_map], 1)
             else:
-                agnostic = torch.cat([shape, p_tryon, im_pose], 0)
+                agnostic = torch.cat([shape, p_tryon, pose_map], 1)
 
             input_agnostic = torch.cat([agnostic,c[:,i]],dim=1)
             outputs = model(input_agnostic, c[:,i])
