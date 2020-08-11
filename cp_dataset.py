@@ -145,14 +145,15 @@ class CPDataset(data.Dataset):
         parse_bg = (parse_array == 0).astype(np.float32)
 
         head_mask = Image.open(osp.join(self.data_path, im_name, "11.png"))
-        head_mask = transforms.Resize((256,192))(head_mask)
+        # head_mask = transforms.Resize((256,192))(head_mask)
 
         head_mask = np.array(head_mask)
-        head_mask = (head_mask == 1).astype(np.float32)
+        # head_mask = (head_mask == 1).astype(np.float32)
 
-        head_mask = torch.from_numpy(head_mask).unsqueeze_(0)
+        # head_mask = torch.from_numpy(head_mask).unsqueeze_(0)
 
         parse_cloth = []
+
 
         for n,i in enumerate(if_c):
             if i == False:
@@ -165,6 +166,12 @@ class CPDataset(data.Dataset):
         im = self.transform(im) # [-1,1]
         im_h = self.transform(im_h) # [-1,1]
         # im_parse = transforms.Resize((256,192))(im_parse)
+
+        parse_head_bg = (parse_array == 0).astype(np.float32) + (head_mask == 1).astype(np.float32)  
+        parse_head_bg = transforms.ToPILImage()(parse_head_bg.unsqueeze_(0))
+        parse_head_bg = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(i))
+
+        bg = ((im* parse_head_bg) + 1 - parse_head_bg)
 
 
         # shape downsample
@@ -247,7 +254,8 @@ class CPDataset(data.Dataset):
             'head': im_h,           # for visualization
             'pose_image': im_pose,  # for visualization
             'grid_image': im_g,     # for visualization
-            'head_mask' : head_mask
+            'head_mask' : head_mask,
+            'bg': bg
             # 'if_c': torch.tensor(if_c)
             }
 

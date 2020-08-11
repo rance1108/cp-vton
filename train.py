@@ -145,6 +145,12 @@ def train_tom(opt, train_loader, model, board):
         agnostic = inputs['agnostic'].cuda()
         c = inputs['cloth'].cuda()
         cm = inputs['cloth_mask'].cuda()
+
+
+        bg = inputs['bg'].cuda()
+
+
+        board_add_images(board, '1', bg, step+1)
         
         outputs = model(torch.cat([agnostic, c],1))
         p_rendered, m_composite = torch.split(outputs, 3,1)
@@ -165,6 +171,7 @@ def train_tom(opt, train_loader, model, board):
         optimizer.step()
             
         if (step+1) % opt.display_count == 0:
+            board_add_images(board, '1', bg, step+1)
             board_add_images(board, 'combine', visuals, step+1)
             board.add_scalar('metric', loss.item(), step+1)
             board.add_scalar('L1', loss_l1.item(), step+1)
