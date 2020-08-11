@@ -152,17 +152,17 @@ def train_tom(opt, train_loader, model, board):
 
         visuals = []
 
-        agnostic = None
         loss_l1 = 0
         loss_vgg = 0
         loss_mask = 0
         loss = 0
         for i in range(c.shape[1]):
 
-            if agnostic == None:
+            if i < 1 :
                 agnostic = torch.cat([shape, bg, pose_map, padding], 1)
             else:
                 agnostic = torch.cat([shape, p_tryon, pose_map, padding], 1)
+                
             input_agnostic = torch.cat([agnostic,c[:,i]],dim=1)
             outputs = model(input_agnostic)
 
