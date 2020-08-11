@@ -148,7 +148,7 @@ def train_tom(opt, train_loader, model, board):
         cm = inputs['cloth_mask'].cuda()
 
         bg = inputs['bg'].cuda()
-
+        print(c.shape)
         padding = torch.zeros((im.shape[0],2,im.shape[2],im.shape[3])).cuda()
 
         visuals = []
