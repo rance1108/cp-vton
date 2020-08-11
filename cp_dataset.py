@@ -109,11 +109,11 @@ class CPDataset(data.Dataset):
                 cm_path = osp.join(self.tomroot, self.datamode, im_name, fm_name)
 
                 if osp.isfile(c_path) and osp.isfile(cm_path):
-                    print("hihi")
                     c.append(Image.open(c_path))
                     cm.append(Image.open(cm_path))
                     if_c.append(True)
                 else:
+                    print("FUCK")
                     c.append(Image.new('RGB',(192,256)))
                     cm.append(Image.new('L',(192,256)))
                     if_c.append(False)
