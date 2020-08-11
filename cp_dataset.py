@@ -123,14 +123,23 @@ class CPDataset(data.Dataset):
             c[i] = self.transform(c[i])  # [-1,1]
         c = torch.stack(c,dim=0)
 
-# 
-        for i in range(len(cm)):
-            cm[i] = transforms.Resize((256,192))(cm[i])
-            cm[i] = np.array(cm[i]).astype(np.float32)
-            cm[i]= torch.from_numpy(cm[i]) # [0,1]
-            cm[i].unsqueeze_(0)
-        cm = torch.stack(cm,dim=0)
-        print(cm.max(),cm.min())
+        if self.stage == 'GMM':
+            for i in range(len(cm)):
+                cm[i] = transforms.Resize((256,192))(cm[i])
+                cm[i] = np.array(cm[i]).astype(np.float32)
+                cm[i]= torch.from_numpy(cm[i]) # [0,1]
+                cm[i].unsqueeze_(0)
+            cm = torch.stack(cm,dim=0)
+            
+        else:
+            for i in range(len(cm)):
+                cm[i] = transforms.Resize((256,192))(cm[i])
+                cm[i] = np.array(cm[i])
+                cm[i]  = (cm[i]  >= 128).astype(np.float32)
+                cm[i]= torch.from_numpy(cm[i]) # [0,1]
+                cm[i].unsqueeze_(0)
+            cm = torch.stack(cm,dim=0)
+
         # person image 
         im = Image.open(osp.join(self.data_path, im_name, "99.png"))
         im_h = Image.open(osp.join(self.data_path, im_name, "8.png"))
