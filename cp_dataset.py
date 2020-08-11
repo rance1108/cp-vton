@@ -171,6 +171,8 @@ class CPDataset(data.Dataset):
                 parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
 
 
+        im_nobg = Image.open(osp.join(self.data_path, im_name, "9.png"))
+        im_nobg = self.transform(im_nobg) # [-1,1]
 
         im = self.transform(im) # [-1,1]
         im_h = self.transform(im_h) # [-1,1]
@@ -191,17 +193,21 @@ class CPDataset(data.Dataset):
         shape = self.transform(parse_shape) # [-1,1]
         # phead = torch.from_numpy(parse_head) # [0,1]
 
-        pcm_cloth = []
-        im_cloth = []
-        for i in parse_cloth:
-            i = transforms.ToPILImage()(i.unsqueeze_(0))
-            i = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(i))
-            pcm_cloth.append(i) # [0,1]
-            # inner cloth
-            im_cloth.append((im * i + (1 - i))) # [-1,1], fill 1 for other parts
+        if self.stage == 'GMM':
+            pcm_cloth = []
+            im_cloth = []
+            for i in parse_cloth:
+                i = transforms.ToPILImage()(i.unsqueeze_(0))
+                i = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(i))
+                pcm_cloth.append(i) # [0,1]
+                # inner cloth
+                im_cloth.append((im * i + (1 - i))) # [-1,1], fill 1 for other parts
 
-        pcm_cloth = torch.stack(pcm_cloth,dim=0)
-        im_cloth = torch.stack(im_cloth,dim=0)
+            pcm_cloth = torch.stack(pcm_cloth,dim=0)
+            im_cloth = torch.stack(im_cloth,dim=0)
+        else:
+            pcm_cloth = ''
+            im_cloth = ''
 
 
         # pcm_i = torch.from_numpy(parse_inner) # [0,1]
@@ -266,7 +272,8 @@ class CPDataset(data.Dataset):
             'grid_image': im_g,     # for visualization
             'head_mask' : head_mask,
             'bg': bg,
-            'pose_map':pose_map
+            'pose_map':pose_map,
+            'im_nobg': im_nobg
             # 'if_c': torch.tensor(if_c)
             }
 

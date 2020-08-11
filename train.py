@@ -138,6 +138,7 @@ def train_tom(opt, train_loader, model, board):
         inputs = train_loader.next_batch()
             
         im = inputs['image'].cuda()
+        im_nobg = inputs['im_nobg'].cuda()
         im_pose = inputs['pose_image'].cuda()
         pose_map = inputs['pose_map'].cuda()
         im_h = inputs['head'].cuda()
@@ -160,7 +161,7 @@ def train_tom(opt, train_loader, model, board):
         for i in range(c.shape[1]):
 
             if i < 1 :
-                agnostic = torch.cat([shape, bg, pose_map, padding], 1)
+                agnostic = torch.cat([shape, im_h, pose_map, padding], 1)
             else:
                 agnostic = torch.cat([shape, p_tryon, pose_map, padding], 1)
 
@@ -174,12 +175,12 @@ def train_tom(opt, train_loader, model, board):
 
             visuals.append([ [bg, shape, im_pose], 
                    [c[:,i], cm[:,i]*2-1, m_composite*2-1], 
-                   [p_rendered, p_tryon, im],
-                   [bg,im,im_h]])
+                   [p_rendered, p_tryon, im_nobg],
+                   [bg,im_nobg,im_h]])
             loss_mask += criterionMask(m_composite, cm[:,i])
 
-        loss_l1 = criterionL1(p_tryon, im)
-        loss_vgg = criterionVGG(p_tryon, im)
+        loss_l1 = criterionL1(p_tryon, im_nobg)
+        loss_vgg = criterionVGG(p_tryon, im_nobg)
 
         loss = loss_l1 + loss_vgg + loss_mask
         optimizer.zero_grad()
