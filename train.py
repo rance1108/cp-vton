@@ -149,6 +149,7 @@ def train_tom(opt, train_loader, model, board):
 
         bg = inputs['bg'].cuda()
 
+        padding = torch.zeros((im.shape[0],2,im.shape[2],im.shape[3]))
 
         visuals = []
 
@@ -161,9 +162,9 @@ def train_tom(opt, train_loader, model, board):
         for i in range(c.shape[1]):
 
             if agnostic == None:
-                agnostic = torch.cat([shape, bg, pose_map], 1)
+                agnostic = torch.cat([shape, bg, pose_map, padding], 1)
             else:
-                agnostic = torch.cat([shape, p_tryon, pose_map], 1)
+                agnostic = torch.cat([shape, p_tryon, pose_map, padding], 1)
 
             input_agnostic = torch.cat([agnostic,c[:,i]],dim=1)
             outputs = model(input_agnostic)
@@ -250,7 +251,7 @@ def main():
         train_gmm(opt, train_loader, model, board)
         save_checkpoint(model, os.path.join(opt.checkpoint_dir, opt.name, 'gmm_final.pth'))
     elif opt.stage == 'TOM':
-        model = UnetGenerator(23, 4, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        model = UnetGenerator(25, 4, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):
             load_checkpoint(model, opt.checkpoint)
         train_tom(opt, train_loader, model, board)
