@@ -148,10 +148,11 @@ def train_tom(opt, train_loader, model, board):
 
 
         bg = inputs['bg'].cuda()
-
+        v = [ [shape, im_h, im_pose], 
+                       [bg, bg, im]]
         print(bg.shape)
 
-        board_add_images(board, '1', bg, step+1)
+        board_add_images(board, '1', v, step+1)
         
         outputs = model(torch.cat([agnostic, c],1))
         p_rendered, m_composite = torch.split(outputs, 3,1)
