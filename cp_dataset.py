@@ -167,7 +167,8 @@ class CPDataset(data.Dataset):
         im_h = self.transform(im_h) # [-1,1]
         # im_parse = transforms.Resize((256,192))(im_parse)
 
-        parse_head_bg = torch.from_numpy((parse_array == 0).astype(np.float32) + (head_mask == 1).astype(np.float32))
+        parse_head_bg = (parse_array == 0).astype(np.float32) + (head_mask == 1).astype(np.float32)  
+        parse_head_bg = torch.from_numpy(parse_head_bg)
         parse_head_bg = transforms.ToPILImage()(parse_head_bg.unsqueeze_(0))
         parse_head_bg = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(i))
 
