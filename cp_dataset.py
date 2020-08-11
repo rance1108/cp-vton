@@ -170,7 +170,7 @@ class CPDataset(data.Dataset):
         parse_head_bg = (parse_array == 0).astype(np.float32) + (head_mask == 1).astype(np.float32)  
         parse_head_bg = torch.from_numpy(parse_head_bg)
         parse_head_bg = transforms.ToPILImage()(parse_head_bg.unsqueeze_(0))
-        parse_head_bg = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(i))
+        parse_head_bg = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(parse_head_bg))
 
         bg = ((im* parse_head_bg) + 1 - parse_head_bg)
 
