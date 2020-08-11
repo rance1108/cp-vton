@@ -121,7 +121,6 @@ class CPDataset(data.Dataset):
         for i in range(len(c)):
             c[i] = self.transform(c[i])  # [-1,1]
         c = torch.stack(c,dim=0)
-        print(c.shape,"ccccccccccc")
 
         if self.stage == 'GMM':
             for i in range(len(cm)):
@@ -139,7 +138,6 @@ class CPDataset(data.Dataset):
                 cm[i]= torch.from_numpy(cm[i]) # [0,1]
                 cm[i].unsqueeze_(0)
             cm = torch.stack(cm,dim=0)
-            print(cm.shape,"mmmmmmmmmmmmm")
 
         # person image 
         im = Image.open(osp.join(self.data_path, im_name, "99.png"))
