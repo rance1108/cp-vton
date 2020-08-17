@@ -149,7 +149,40 @@ def train_tom(opt, train_loader, model, board):
         cm = inputs['cloth_mask'].cuda()
 
         bg = inputs['bg'].cuda()
-        padding = torch.zeros((im.shape[0],2,im.shape[2],im.shape[3])).cuda()
+        # padding = torch.zeros((im.shape[0],2,im.shape[2],im.shape[3])).cuda()
+
+
+        # for i in range(c.shape[1]):
+
+        #     if i < 1 :
+        #         agnostic = torch.cat([shape, im_h, pose_map, padding], 1)
+        #     else:
+        #         agnostic = torch.cat([shape, p_tryon, pose_map, padding], 1)
+
+        #     input_agnostic = torch.cat([agnostic,c[:,i]],dim=1)
+        #     outputs = model(input_agnostic)
+
+        #     p_rendered, m_composite = torch.split(outputs, 3,1)
+        #     p_rendered = F.tanh(p_rendered)
+        #     m_composite = F.sigmoid(m_composite)
+        #     p_tryon = c[:,i] * m_composite+ p_rendered * (1 - m_composite)
+
+        #     visuals.append([ [im_h, shape, im_pose], 
+        #            [c[:,i], cm[:,i]*2-1, m_composite*2-1], 
+        #            [p_rendered, p_tryon, im_nobg]])
+        #     loss_mask += criterionMask(m_composite, cm[:,i])
+
+        # loss_l1 = criterionL1(p_tryon, im_nobg)
+        # loss_vgg = criterionVGG(p_tryon, im_nobg)
+
+        # loss = loss_l1 + loss_vgg + loss_mask
+        # optimizer.zero_grad()
+        # loss.backward()
+        # optimizer.step()
+
+
+
+        agnostic = inputs['agnostic'].cuda()
 
         visuals = []
 
@@ -158,25 +191,28 @@ def train_tom(opt, train_loader, model, board):
         loss_mask = 0
         loss = 0
 
-        for i in range(c.shape[1]):
 
-            if i < 1 :
-                agnostic = torch.cat([shape, im_h, pose_map, padding], 1)
-            else:
-                agnostic = torch.cat([shape, p_tryon, pose_map, padding], 1)
+        input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
+        print(input_agnostic.shape)
+        outputs = model(input_agnostic)
 
-            input_agnostic = torch.cat([agnostic,c[:,i]],dim=1)
-            outputs = model(input_agnostic)
+        p_rendered, m_composite = torch.split(outputs, 3,1)
+        p_rendered = F.tanh(p_rendered)
+        m_composite = F.sigmoid(m_composite)
+        p_tryon = c[:,0] * m_composite[:,0]+ \
+                    c[:,1] * m_composite[:,1]+ \
+                    c[:,2] * m_composite[:,2]+ \
+                    c[:,3] * m_composite[:,3]+ \
+        p_rendered * (1 - torch.mean(m_composite,1))
 
-            p_rendered, m_composite = torch.split(outputs, 3,1)
-            p_rendered = F.tanh(p_rendered)
-            m_composite = F.sigmoid(m_composite)
-            p_tryon = c[:,i] * m_composite+ p_rendered * (1 - m_composite)
-
-            visuals.append([ [im_h, shape, im_pose], 
-                   [c[:,i], cm[:,i]*2-1, m_composite*2-1], 
-                   [p_rendered, p_tryon, im_nobg]])
-            loss_mask += criterionMask(m_composite, cm[:,i])
+        visuals.append([ [im_h, shape, im_pose], 
+               [c[:,0], cm[:,0]*2-1, m_composite[:,0]*2-1],
+               [c[:,1], cm[:,1]*2-1, m_composite[:,1]*2-1],
+               [c[:,2], cm[:,2]*2-1, m_composite[:,2]*2-1],
+               [c[:,3], cm[:,3]*2-1, m_composite[:,3]*2-1], 
+               [p_rendered, p_tryon, im_nobg]])
+        for i in range(4):
+            loss_mask += criterionMask(m_composite[:,i], cm[:,i])
 
         loss_l1 = criterionL1(p_tryon, im_nobg)
         loss_vgg = criterionVGG(p_tryon, im_nobg)
