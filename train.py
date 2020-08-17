@@ -211,9 +211,9 @@ def train_tom(opt, train_loader, model, board):
                [c[:,2], cm[:,2]*2-1, m_composite[:,2]*2-1],
                [c[:,3], cm[:,3]*2-1, m_composite[:,3]*2-1], 
                [p_rendered, p_tryon, im_nobg]])
-        print(m_composite.shape,cm.shape,cm[:,0].shape,m_composite[:,0:0].shape)
+        print(m_composite.shape,cm.shape,cm[:,0].shape,m_composite[:,0:1].shape)
         for i in range(4):
-            loss_mask += criterionMask(m_composite[:,i], cm[:,i])
+            loss_mask += criterionMask(m_composite[:,:i], cm[:,i])
 
         loss_l1 = criterionL1(p_tryon, im_nobg)
         loss_vgg = criterionVGG(p_tryon, im_nobg)
