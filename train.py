@@ -244,9 +244,9 @@ def train_tom(opt, train_loader, model, board):
             
         if (step+1) % opt.display_count == 0:
             board_add_images(board, 'combine_inner', visuals[0], step+1)
-            board_add_images(board, 'combine_outer', visuals[1], step+1)
-            board_add_images(board, 'combine_bottom', visuals[2], step+1)
-            board_add_images(board, 'combine_shoe', visuals[3], step+1)
+            # board_add_images(board, 'combine_outer', visuals[1], step+1)
+            # board_add_images(board, 'combine_bottom', visuals[2], step+1)
+            # board_add_images(board, 'combine_shoe', visuals[3], step+1)
             board.add_scalar('metric', loss.item(), step+1)
             board.add_scalar('L1', loss_l1.item(), step+1)
             board.add_scalar('VGG', loss_vgg.item(), step+1)
