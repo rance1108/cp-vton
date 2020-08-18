@@ -312,6 +312,7 @@ class CPDataset(data.Dataset):
         else:
             im_g = ''
 
+        print("here")
         result = {
             'c_name':   clothes,     # for visualization
             'im_name':  im_name,    # for visualization or ground truth
