@@ -77,22 +77,29 @@ def train_gmm(opt, train_loader, model, board):
         visuals = []
         loss = 0
         
-        for j in range(pcm.shape[1]):
-            if j ==4:
-                i =3
-                jj = j
-            else:
-                i = j
-                jj = i
+        for i in range(pcm.shape[1]):
+            if i !=4:
 
-            input_agnostic = torch.cat([agnostic,pcm[:,jj]],dim=1)
-            grid, theta = model(input_agnostic, c[:,i])
-            warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
-            warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
-            warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
-            visuals.append([ [shape, im_h, im_pose], 
-                       [c[:,i], warped_cloth[i], im_c[:,i]], 
-                       [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
+                input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
+                grid, theta = model(input_agnostic, c[:,i])
+                warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
+                warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
+                warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
+                visuals.append([ [shape, im_h, im_pose], 
+                           [c[:,i], warped_cloth[i], im_c[:,i]],
+                           [pcm[:,i]*2-1, cm[:,i]*2-1, warped_mask[:,i]*2-1],
+                           [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
+            else:
+
+                input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
+                grid, theta = model(input_agnostic, c[:,i-1])
+                warped_cloth.append(F.grid_sample(c[:,i-1], grid, padding_mode='border'))
+                warped_mask.append(F.grid_sample(cm[:,i-1], grid, padding_mode='zeros'))
+                warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
+                visuals.append([ [shape, im_h, im_pose], 
+                           [c[:,i-1], warped_cloth[i], im_c[:,i]], 
+                           [pcm[:,i]*2-1, cm[:,i-1]*2-1, warped_mask[:,i]*2-1],
+                           [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
 
             loss += criterionL1(warped_cloth[i], im_c[:,i])    
 
@@ -103,7 +110,6 @@ def train_gmm(opt, train_loader, model, board):
         optimizer.step()
             
         if (step+1) % opt.display_count == 0:
-            print(len(visuals),pcm.shape[1])
             for j, k in zip(range(5),['combine_inner', 'combine_outer', 'combine_bottom',
                                          'combine_shoe_left', 'combine_shoe_right']):
 
