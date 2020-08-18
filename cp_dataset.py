@@ -323,7 +323,7 @@ class CPDataset(data.Dataset):
         print(im.shape,'image')
         print(agnostic.shape,'agnostic')
         print(im_cloth.shape,'parse_cloth')
-        print(pcm_cloth.shape'parse_cloth_mask')
+        print(pcm_cloth.shape,'parse_cloth_mask')
         print(shape.shape,'shape')
         print(im_h.shape,'head')
         print(im_pose.shape,'pose_image')
