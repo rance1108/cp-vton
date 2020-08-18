@@ -167,7 +167,7 @@ class CPDataset(data.Dataset):
         for n,i in enumerate(if_c):
             if i == False:
                 parse_cloth.append(torch.from_numpy((parse_array > 5).astype(np.float32)))
-            elif n< len(if_c)-2:
+            elif n < len(if_c)-1:
                 parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
             elif n == len(if_c)-1:
                 im_parse_shoe = Image.open(osp.join(self.data_path, im_name, "10.png"))
