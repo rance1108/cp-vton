@@ -208,7 +208,6 @@ class CPDataset(data.Dataset):
                 parse_cloth.append(torch.from_numpy((parse_array_shoe == 18).astype(np.float32)))
                 parse_cloth.append(torch.from_numpy((parse_array_shoe == 19).astype(np.float32)))
 
-
         im_nobg = Image.open(osp.join(self.data_path, im_name, "9.png"))
         im_nobg = self.transform(im_nobg) # [-1,1]
 
@@ -311,6 +310,9 @@ class CPDataset(data.Dataset):
             im_g = self.transform(im_g)
         else:
             im_g = ''
+
+            
+        print(len(parse_cloth))
 
         result = {
             'c_name':   clothes,     # for visualization

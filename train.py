@@ -80,10 +80,12 @@ def train_gmm(opt, train_loader, model, board):
         for j in range(pcm.shape[1]):
             if j ==4:
                 i =3
+                jj = j
             else:
                 i = j
+                jj = i
 
-            input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
+            input_agnostic = torch.cat([agnostic,pcm[:,jj]],dim=1)
             grid, theta = model(input_agnostic, c[:,i])
             warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
             warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
