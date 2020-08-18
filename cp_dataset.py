@@ -167,8 +167,18 @@ class CPDataset(data.Dataset):
         for n,i in enumerate(if_c):
             if i == False:
                 parse_cloth.append(torch.from_numpy((parse_array > 5).astype(np.float32)))
-            else:
+            elif n< len(if_c):
+                print(n+2)
                 parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
+            elif n == len(if_c):
+                print("shoe")
+                im_parse_shoe = Image.open(osp.join(self.data_path, im_name, "10.png"))
+
+                parse_array_shoe = np.array(im_parse_shoe)
+
+                parse_cloth.append(torch.from_numpy((parse_array_shoe == 18).astype(np.float32)))
+                parse_cloth.append(torch.from_numpy((parse_array_shoe == 19).astype(np.float32)))
+        print(len(parse_cloth))
 
 
         im_nobg = Image.open(osp.join(self.data_path, im_name, "9.png"))
@@ -230,10 +240,28 @@ class CPDataset(data.Dataset):
             pose_data = np.array(pose_label,dtype=int)
             pose_data = pose_data.reshape((-1,2))
 
+        # point_num = pose_data.shape[0]
+        # pose_map = torch.zeros(point_num, self.fine_height, self.fine_width)
+        # r = self.radius
+        # im_pose = Image.new('L', (self.fine_width, self.fine_height))
+        # pose_draw = ImageDraw.Draw(im_pose)
+        # for i in range(point_num):
+        #     one_map = Image.new('L', (ori_h, ori_w))
+        #     draw = ImageDraw.Draw(one_map)
+        #     pointx = pose_data[i,0]
+        #     pointy = pose_data[i,1]
+        #     if pointx > 1 and pointy > 1:
+        #         draw.rectangle((pointx-r, pointy-r, pointx+r, pointy+r), 'white', 'white')
+        #         pose_draw.rectangle((pointx-r, pointy-r, pointx+r, pointy+r), 'white', 'white')
+        #     one_map = self.transform(one_map)
+        #     pose_map[i] = one_map[0]
+        # # just for visualization
+        # im_pose = self.transform(im_pose)
+
         point_num = pose_data.shape[0]
-        pose_map = torch.zeros(point_num, self.fine_height, self.fine_width)
+        pose_map = torch.zeros(point_num, ori_h, ori_w)
         r = self.radius
-        im_pose = Image.new('L', (self.fine_width, self.fine_height))
+        im_pose = Image.new('L', (ori_w, ori_h))
         pose_draw = ImageDraw.Draw(im_pose)
         for i in range(point_num):
             one_map = Image.new('L', (ori_h, ori_w))
