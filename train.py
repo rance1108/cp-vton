@@ -77,7 +77,7 @@ def train_gmm(opt, train_loader, model, board):
         visuals = []
         loss = 0
         
-        for j in range(c.shape[1]):
+        for j in range(pcm.shape[1]):
             if j ==4:
                 i =3
             else:
