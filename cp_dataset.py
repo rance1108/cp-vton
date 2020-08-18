@@ -128,7 +128,6 @@ class CPDataset(data.Dataset):
                     cm.append(Image.new('L',(192,256)))
                     if_c.append(False)
                     if f_name == "4.png":
-                        print("hi")
                         c.append(Image.new('RGB',(192,256)))
                         cm.append(Image.new('L',(192,256)))
                         if_c.append(False)
@@ -317,22 +316,22 @@ class CPDataset(data.Dataset):
         else:
             im_g = ''
 
-        # # print(clothes.shape,'c_name')
-        # # print(im_name.shape,'im_name')
-        # print(c.shape,'cloth')
-        # print(cm.shape,'cloth_mask')
-        # print(im.shape,'image')
-        # print(agnostic.shape,'agnostic')
-        # print(im_cloth.shape,'parse_cloth')
-        # print(pcm_cloth.shape,'parse_cloth_mask')
-        # print(shape.shape,'shape')
-        # print(im_h.shape,'head')
-        # print(im_pose.shape,'pose_image')
-        # print(im_g.shape,'grid_image')
-        # # print(head_mask.shape,'head_mask')
-        # print(bg.shape,'bg')
-        # print(pose_map.shape,'pose_map')
-        # print(im_nobg.shape,'im_nobg')
+        # print(clothes.shape,'c_name')
+        # print(im_name.shape,'im_name')
+        print(c.shape,'cloth')
+        print(cm.shape,'cloth_mask')
+        print(im.shape,'image')
+        print(agnostic.shape,'agnostic')
+        print(im_cloth.shape,'parse_cloth')
+        print(pcm_cloth.shape,'parse_cloth_mask')
+        print(shape.shape,'shape')
+        print(im_h.shape,'head')
+        print(im_pose.shape,'pose_image')
+        print(im_g.shape,'grid_image')
+        # print(head_mask.shape,'head_mask')
+        print(bg.shape,'bg')
+        print(pose_map.shape,'pose_map')
+        print(im_nobg.shape,'im_nobg')
 
 
         result = {
