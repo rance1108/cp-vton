@@ -69,18 +69,20 @@ class CPDataset(data.Dataset):
                     if f_name == "4.png":
                         im = Image.open(c_path)
                         ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
-                        # im_flip = ImageOps.mirror(im)
+                        im_flip = ImageOps.mirror(im)
                         c.append(im)
-                        # c.append(im_flip)
+                        c.append(im_flip)
 
                         im_m = Image.open(cm_path)
                         ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
-                        # im_m_flip = ImageOps.mirror(im_m)
+                        im_m_flip = ImageOps.mirror(im_m)
                         cm.append(im_m)
-                        # cm.append(im_m_flip)
+                        cm.append(im_m_flip)
 
                         if_c.append(True)
-                        # if_c.append(True)
+                        if_c.append(True)
+                        clothes.append('5.png')
+                        masks.append('5_mask.png')
 
                     else:
                         x = Image.open(c_path)
@@ -125,10 +127,13 @@ class CPDataset(data.Dataset):
                     c.append(Image.new('RGB',(192,256)))
                     cm.append(Image.new('L',(192,256)))
                     if_c.append(False)
-                    # if f_name == "4.png":
-                    #     c.append(Image.new('RGB',(192,256)))
-                    #     cm.append(Image.new('L',(192,256)))
-                    #     if_c.append(False)
+                    if f_name == "4.png":
+                        c.append(Image.new('RGB',(192,256)))
+                        cm.append(Image.new('L',(192,256)))
+                        if_c.append(False)
+                        clothes.append('5.png')
+                        masks.append('5_mask.png')
+
 
 
         else:
@@ -200,9 +205,9 @@ class CPDataset(data.Dataset):
         for n,i in enumerate(if_c):
             if i == False:
                 parse_cloth.append(torch.from_numpy((parse_array > 5).astype(np.float32)))
-            elif n < len(if_c)-1:
+            elif n <=3:
                 parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
-            elif n == len(if_c)-1:
+            else:
                 im_parse_shoe = Image.open(osp.join(self.data_path, im_name, "10.png"))
                 parse_array_shoe = np.array(im_parse_shoe)
                 parse_cloth.append(torch.from_numpy((parse_array_shoe == 18).astype(np.float32)))
@@ -311,7 +316,7 @@ class CPDataset(data.Dataset):
         else:
             im_g = ''
 
-            
+
 
         result = {
             'c_name':   clothes,     # for visualization
