@@ -81,8 +81,8 @@ class CPDataset(data.Dataset):
 
                         if_c.append(True)
                         if_c.append(True)
-                        clothes.append('5.png')
-                        masks.append('5_mask.png')
+                        # clothes.append('5.png')
+                        # masks.append('5_mask.png')
 
                     else:
                         x = Image.open(c_path)
@@ -131,8 +131,8 @@ class CPDataset(data.Dataset):
                         c.append(Image.new('RGB',(192,256)))
                         cm.append(Image.new('L',(192,256)))
                         if_c.append(False)
-                        clothes.append('5.png')
-                        masks.append('5_mask.png')
+                        # clothes.append('5.png')
+                        # masks.append('5_mask.png')
 
 
 
@@ -328,7 +328,7 @@ class CPDataset(data.Dataset):
         print(im_h.shape,'head')
         print(im_pose.shape,'pose_image')
         print(im_g.shape,'grid_image')
-        print(head_mask.shape,'head_mask')
+        # print(head_mask.shape,'head_mask')
         print(bg.shape,'bg')
         print(pose_map.shape,'pose_map')
         print(im_nobg.shape,'im_nobg')
@@ -348,7 +348,7 @@ class CPDataset(data.Dataset):
             'head': im_h,           # for visualization
             'pose_image': im_pose,  # for visualization
             'grid_image': im_g,     # for visualization
-            'head_mask' : head_mask,
+            # 'head_mask' : head_mask,
             'bg': bg,
             'pose_map':pose_map,
             'im_nobg': im_nobg
