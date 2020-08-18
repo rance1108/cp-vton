@@ -165,9 +165,10 @@ class CPDataset(data.Dataset):
 
 
         for n,i in enumerate(if_c):
+            print(n,len(if_c))
             if i == False:
                 parse_cloth.append(torch.from_numpy((parse_array > 5).astype(np.float32)))
-            elif n< len(if_c)-1:
+            elif n< len(if_c):
                 print(n+2)
                 parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
             elif n == len(if_c):
