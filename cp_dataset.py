@@ -68,20 +68,19 @@ class CPDataset(data.Dataset):
                 if osp.isfile(c_path) and osp.isfile(cm_path):
                     if f_name == "4.png":
                         im = Image.open(c_path)
-                        im_flip = ImageOps.mirror(im)
-                        ori_h, ori_w = np.array(im).shape[0],np.array(im).shape[1]
-                        j  = get_concat_h('RGB', im, im_flip)
-                        j_resized = j.resize((ori_w, ori_h))
-                        c.append(j_resized)
+                        ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
+                        # im_flip = ImageOps.mirror(im)
+                        c.append(im)
+                        # c.append(im_flip)
 
                         im_m = Image.open(cm_path)
-                        im_m_flip = ImageOps.mirror(im_m)
-                        ori_h, ori_w = np.array(im_m).shape[0],np.array(im_m).shape[1]
-                        k  = get_concat_h('L', im_m, im_m_flip)
-                        k_resized = k.resize((ori_w, ori_h),resample=Image.NEAREST)
-                        cm.append(k_resized)
+                        ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
+                        # im_m_flip = ImageOps.mirror(im_m)
+                        cm.append(im_m)
+                        # cm.append(im_m_flip)
 
                         if_c.append(True)
+                        # if_c.append(True)
 
                     else:
                         x = Image.open(c_path)
@@ -93,10 +92,44 @@ class CPDataset(data.Dataset):
                         c.append(Image.open(c_path))
                         cm.append(Image.open(cm_path))
                         if_c.append(True)
+
+                # if osp.isfile(c_path) and osp.isfile(cm_path):
+                #     if f_name == "4.png":
+                #         im = Image.open(c_path)
+                #         im_flip = ImageOps.mirror(im)
+                #         ori_h, ori_w = np.array(im).shape[0],np.array(im).shape[1]
+                #         j  = get_concat_h('RGB', im, im_flip)
+                #         j_resized = j.resize((ori_w, ori_h))
+                #         c.append(j_resized)
+
+                #         im_m = Image.open(cm_path)
+                #         im_m_flip = ImageOps.mirror(im_m)
+                #         ori_h, ori_w = np.array(im_m).shape[0],np.array(im_m).shape[1]
+                #         k  = get_concat_h('L', im_m, im_m_flip)
+                #         k_resized = k.resize((ori_w, ori_h),resample=Image.NEAREST)
+                #         cm.append(k_resized)
+
+                #         if_c.append(True)
+
+                #     else:
+                #         x = Image.open(c_path)
+                #         ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
+
+                #         x = Image.open(cm_path)
+                #         ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
+
+                #         c.append(Image.open(c_path))
+                #         cm.append(Image.open(cm_path))
+                #         if_c.append(True)
                 else:
                     c.append(Image.new('RGB',(192,256)))
                     cm.append(Image.new('L',(192,256)))
                     if_c.append(False)
+                    # if f_name == "4.png":
+                    #     c.append(Image.new('RGB',(192,256)))
+                    #     cm.append(Image.new('L',(192,256)))
+                    #     if_c.append(False)
+
 
         else:
             c = []
@@ -171,12 +204,9 @@ class CPDataset(data.Dataset):
                 parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
             elif n == len(if_c)-1:
                 im_parse_shoe = Image.open(osp.join(self.data_path, im_name, "10.png"))
-
                 parse_array_shoe = np.array(im_parse_shoe)
-
                 parse_cloth.append(torch.from_numpy((parse_array_shoe == 18).astype(np.float32)))
                 parse_cloth.append(torch.from_numpy((parse_array_shoe == 19).astype(np.float32)))
-            print(n,len(parse_cloth))
 
 
         im_nobg = Image.open(osp.join(self.data_path, im_name, "9.png"))
@@ -257,7 +287,7 @@ class CPDataset(data.Dataset):
         # im_pose = self.transform(im_pose)
 
         point_num = pose_data.shape[0]
-        pose_map = torch.zeros(point_num, ori_h, ori_w)
+        pose_map = torch.zeros(point_num, self.fine_height, self.fine_width)
         r = self.radius
         im_pose = Image.new('L', (ori_w, ori_h))
         pose_draw = ImageDraw.Draw(im_pose)

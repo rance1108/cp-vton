@@ -70,12 +70,6 @@ def train_gmm(opt, train_loader, model, board):
         im_g = inputs['grid_image'].cuda()
         head_mask = inputs['head_mask'].cuda()
         # if_c = inputs['if_c'].cuda()
-        # import pdb 
-        # pdb.set_trace()
-        # grid, theta = model(agnostic, c)
-        # warped_cloth = F.grid_sample(c, grid, padding_mode='border')
-        # warped_mask = F.grid_sample(cm, grid, padding_mode='zeros')
-        # warped_grid = F.grid_sample(im_g, grid, padding_mode='zeros')
 
         warped_cloth = []
         warped_mask = []
@@ -83,8 +77,12 @@ def train_gmm(opt, train_loader, model, board):
         visuals = []
         loss = 0
         
-        for i in range(c.shape[1]):
-            # if if_c[:,i].all() == True:
+        for j in range(c.shape[1]):
+            if j ==4:
+                i =3
+            else:
+                i = j
+
             input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
             grid, theta = model(input_agnostic, c[:,i])
             warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
@@ -103,7 +101,8 @@ def train_gmm(opt, train_loader, model, board):
         optimizer.step()
             
         if (step+1) % opt.display_count == 0:
-            for j, k in zip(range(4),['combine_inner', 'combine_outer', 'combine_bottom', 'combine_shoe']):
+            for j, k in zip(range(4),['combine_inner', 'combine_outer', 'combine_bottom',
+                                         'combine_shoe_left', 'combine_shoe_right']):
 
                 board_add_images(board, k, visuals[j], step+1)
 
