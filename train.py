@@ -103,6 +103,7 @@ def train_gmm(opt, train_loader, model, board):
         optimizer.step()
             
         if (step+1) % opt.display_count == 0:
+            print(len(visuals),pcm.shape[1])
             for j, k in zip(range(5),['combine_inner', 'combine_outer', 'combine_bottom',
                                          'combine_shoe_left', 'combine_shoe_right']):
 

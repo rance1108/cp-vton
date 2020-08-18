@@ -312,7 +312,6 @@ class CPDataset(data.Dataset):
             im_g = ''
 
             
-        print(len(parse_cloth))
 
         result = {
             'c_name':   clothes,     # for visualization
