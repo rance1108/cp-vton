@@ -128,6 +128,7 @@ class CPDataset(data.Dataset):
                     cm.append(Image.new('L',(192,256)))
                     if_c.append(False)
                     if f_name == "4.png":
+                        print("hi")
                         c.append(Image.new('RGB',(192,256)))
                         cm.append(Image.new('L',(192,256)))
                         if_c.append(False)
