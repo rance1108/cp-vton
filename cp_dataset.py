@@ -316,8 +316,8 @@ class CPDataset(data.Dataset):
         else:
             im_g = ''
 
-        print(clothes.shape,'c_name')
-        print(im_name.shape,'im_name')
+        # print(clothes.shape,'c_name')
+        # print(im_name.shape,'im_name')
         print(c.shape,'cloth')
         print(cm.shape,'cloth_mask')
         print(im.shape,'image')
