@@ -196,12 +196,12 @@ def train_tom(opt, train_loader, model, board):
         p_rendered = F.tanh(p_rendered)
         m_composite = F.sigmoid(m_composite)
 
-        p_tryon = (c[:,0] * m_composite[:,0:1])+ \
-                    (c[:,1] * m_composite[:,1:2])+ \
-                    (c[:,2] * m_composite[:,2:3])+ \
-                    (c[:,3] * m_composite[:,3:4])+ \
-                    (c[:,4] * m_composite[:,4:5])+ \
-        p_rendered * (1 - torch.mean(m_composite,1,keepdim=True))
+        p_tryon = 1.0*(c[:,0] * m_composite[:,0:1])+ \
+                    1.0*(c[:,1] * m_composite[:,1:2])+ \
+                    1.0*(c[:,2] * m_composite[:,2:3])+ \
+                    1.0*(c[:,3] * m_composite[:,3:4])+ \
+                    1.0*(c[:,4] * m_composite[:,4:5])+ \
+        p_rendered * (1 - torch.sum(m_composite,1,keepdim=True))
         visuals.append([ [im_h, shape, im_pose], 
                [c[:,0], cm[:,0]*2-1, m_composite[:,0:1]*2-1],
                [c[:,1], cm[:,1]*2-1, m_composite[:,1:2]*2-1],
