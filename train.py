@@ -200,8 +200,8 @@ def train_tom(opt, train_loader, model, board):
                     0.2*(c[:,2] * m_composite[:,2:3])+ \
                     0.2*(c[:,3] * m_composite[:,3:4])+ \
                     0.2*(c[:,4] * m_composite[:,4:5])+ \
-        p_rendered * (1 - torch.mean(m_composite,1))
-
+        p_rendered * (1 - torch.mean(m_composite,2))
+        print(m_composite[:,5:6].shape)
         visuals.append([ [im_h, shape, im_pose], 
                [c[:,0], cm[:,0]*2-1, m_composite[:,0:1]*2-1],
                [c[:,1], cm[:,1]*2-1, m_composite[:,1:2]*2-1],
