@@ -90,31 +90,31 @@ def test_gmm(opt, test_loader, model, board):
         warped_grid = []
         visuals = []
 
-        for i in range(c.shape[1]):
-            input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
-            grid, theta = model(input_agnostic, c[:,i])
-            warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
-            warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
-            warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
+        # for i in range(c.shape[1]):
+        #     input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
+        #     grid, theta = model(input_agnostic, c[:,i])
+        #     warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
+        #     warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
+        #     warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
 
 
-            visuals.append([ [shape, im_h, im_pose], 
-                       [c[:,i], warped_cloth[i], im_c[:,i]], 
-                       [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
-            # print(c_names[i][0][:-4] +'_wc.png',c_names[i][0][:-4] +'_wcm.png')
-            # print((warped_cloth[i]).shape,warped_mask[i].shape)
-            cname1 = c_names[i][0][:-4] +'_wc.png'
-            cname2 = c_names[i][0][:-4] +'_wcm.png'
-            cname3 = c_names[i][0][:-4] +'_orgwc.png'
-            # cname4 = c_names[i][0][:-4] +'_123.png'
-            # cname5 = c_names[i][0][:-4] +'_1234.png'
-            # print("a:",im_c[:,i].max(),"b:",im_c[:,i].min(),"c:",warped_cloth[i].max(),"d:",warped_cloth[i].min(),
-            #     "e:",warped_mask[i].max(),"f:",warped_mask[i].min())
-            save_image((warped_cloth[i]+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
-            save_image((im_c[:,i]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
-            save_image(warped_mask[i]*2-1, os.path.join(warp_cloth_dir, cname2)) 
-            # save_image(im, os.path.join(warp_cloth_dir, cname4)) 
-            # save_image((im+1)*0.5, os.path.join(warp_cloth_dir, cname5)) 
+        #     visuals.append([ [shape, im_h, im_pose], 
+        #                [c[:,i], warped_cloth[i], im_c[:,i]], 
+        #                [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
+        #     # print(c_names[i][0][:-4] +'_wc.png',c_names[i][0][:-4] +'_wcm.png')
+        #     # print((warped_cloth[i]).shape,warped_mask[i].shape)
+        #     cname1 = c_names[i][0][:-4] +'_wc.png'
+        #     cname2 = c_names[i][0][:-4] +'_wcm.png'
+        #     cname3 = c_names[i][0][:-4] +'_orgwc.png'
+        #     # cname4 = c_names[i][0][:-4] +'_123.png'
+        #     # cname5 = c_names[i][0][:-4] +'_1234.png'
+        #     # print("a:",im_c[:,i].max(),"b:",im_c[:,i].min(),"c:",warped_cloth[i].max(),"d:",warped_cloth[i].min(),
+        #     #     "e:",warped_mask[i].max(),"f:",warped_mask[i].min())
+        #     save_image((warped_cloth[i]+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
+        #     save_image((im_c[:,i]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
+        #     save_image(warped_mask[i]*2-1, os.path.join(warp_cloth_dir, cname2)) 
+        #     # save_image(im, os.path.join(warp_cloth_dir, cname4)) 
+        #     # save_image((im+1)*0.5, os.path.join(warp_cloth_dir, cname5)) 
 
         for i in range(c.shape[1]):
 
@@ -128,7 +128,7 @@ def test_gmm(opt, test_loader, model, board):
                        [cm[:,i]*2-1, warped_mask[i]*2-1, pcm[:,i]*2-1],
                        [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
 
-            print(i,len(c.shape[1])-1, len(c.shape[1]),len(c_names))
+            # print(i,len(c.shape[1])-1, len(c.shape[1]),len(c_names))
             if i < len(c.shape[1])-1:
                 cname1 = c_names[i][0][:-4] +'_wc.png'
                 cname2 = c_names[i][0][:-4] +'_wcm.png'
