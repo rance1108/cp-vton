@@ -205,9 +205,11 @@ def train_tom(opt, train_loader, model, board):
 
         p_tryon = ((c[:,0] )+ (c[:,1] )+ (c[:,2] )+ \
         (c[:,3] )+ (c[:,4] ))*m_composite + \
+        p_rendered * (1 - m_composite)
+
         # p_tryon = ((c[:,0] * cm[:,0])+ (c[:,1] * cm[:,1])+ (c[:,2] * cm[:,2])+ \
         # (c[:,3] * cm[:,3])+ (c[:,4] * cm[:,4]))*m_composite + \
-        p_rendered * (1 - m_composite)
+        # p_rendered * (1 - m_composite)
 
 
 
