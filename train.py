@@ -195,6 +195,7 @@ def train_tom(opt, train_loader, model, board):
         p_rendered, m_composite = torch.split(outputs, [3,5],1)
         p_rendered = F.tanh(p_rendered)
         m_composite = F.sigmoid(m_composite)
+        print(c.shape,m_composite.shape)
         p_tryon = 0.2*(c[:,0] * m_composite[:,0])+ \
                     0.2*(c[:,1] * m_composite[:,1])+ \
                     0.2*(c[:,2] * m_composite[:,2])+ \
