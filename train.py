@@ -202,12 +202,11 @@ def train_tom(opt, train_loader, model, board):
         #             0.2*(c[:,3] * m_composite[:,3:4])+ \
         #             0.2*(c[:,4] * m_composite[:,4:5])+ \
         # p_rendered * (1 - torch.mean(m_composite,1,keepdim=True))
-
-        p_tryon = m_composite * torch.clamp((c[:,0] * cm[:,0])+ \
+        p_tryon = m_composite * (torch.clamp((c[:,0] * cm[:,0])+ \
                     (c[:,1] * cm[:,1])+ \
                     (c[:,2] * cm[:,2])+ \
                     (c[:,3] * cm[:,3])+ \
-                    (c[:,4] * cm[:,4]),0,1)+ \
+                    (c[:,4] * cm[:,4]),0,1) +1 - torch.sum(cm,1) )+ \
         p_rendered * (1 - m_composite)
 
 
