@@ -70,6 +70,8 @@ def train_gmm(opt, train_loader, model, board):
         im_g = inputs['grid_image'].cuda()
         # head_mask = inputs['head_mask'].cuda()
 
+
+        
         warped_cloth = []
         warped_mask = []
         warped_grid = []
