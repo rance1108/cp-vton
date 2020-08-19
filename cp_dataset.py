@@ -140,8 +140,8 @@ class CPDataset(data.Dataset):
             c = []
             cm = []
             if_c = []
-            clothes = ["0_wc.png", "1_wc.png", "2_wc.png", "4_wc.png"]
-            masks = ["0_wcm.png", "1_wcm.png", "2_wcm.png", "4_wcm.png"]
+            clothes = ["0_wc.png", "1_wc.png", "2_wc.png", "4_wc.png", "5_wc.png"]
+            masks = ["0_wcm.png", "1_wcm.png", "2_wcm.png", "4_wcm.png", "5_wcm.png"]
             for f_name, fm_name in zip(clothes, masks):
                 c_path = osp.join(self.tomroot, self.datamode, im_name, f_name)
                 cm_path = osp.join(self.tomroot, self.datamode, im_name, fm_name)
