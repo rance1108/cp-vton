@@ -203,11 +203,11 @@ def train_tom(opt, train_loader, model, board):
         #             0.2*(c[:,4] * m_composite[:,4:5])+ \
         # p_rendered * (1 - torch.mean(m_composite,1,keepdim=True))
 
-        p_tryon = m_composite * ((c[:,0] )+ \
-                    (c[:,1] )+ \
-                    (c[:,2] )+ \
-                    (c[:,3] )+ \
-                    (c[:,4] ))+ \
+        p_tryon = m_composite * torch.clamp((c[:,0] * cm[:,0])+ \
+                    (c[:,1] * cm[:,1])+ \
+                    (c[:,2] * cm[:,2])+ \
+                    (c[:,3] * cm[:,3])+ \
+                    (c[:,4] * cm[:,4]),-1,1)+ \
         p_rendered * (1 - m_composite)
 
 
@@ -224,7 +224,7 @@ def train_tom(opt, train_loader, model, board):
         #     loss_mask += criterionMask(m_composite[:,i:i+1], cm[:,i])
 
 
-        loss_mask += criterionMask(m_composite, torch.sum(cm,1))
+        loss_mask += criterionMask(m_composite, torch.sum(cm[],1))
 
         loss_l1 = criterionL1(p_tryon, im_nobg)
         loss_vgg = criterionVGG(p_tryon, im_nobg)
