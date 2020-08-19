@@ -71,7 +71,7 @@ def train_gmm(opt, train_loader, model, board):
         # head_mask = inputs['head_mask'].cuda()
 
 
-        
+
         warped_cloth = []
         warped_mask = []
         warped_grid = []
@@ -192,13 +192,14 @@ def train_tom(opt, train_loader, model, board):
         input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
         outputs = model(input_agnostic)
 
-        p_rendered, m_composite = torch.split(outputs, [3,4],1)
+        p_rendered, m_composite = torch.split(outputs, [3,5],1)
         p_rendered = F.tanh(p_rendered)
         m_composite = F.sigmoid(m_composite)
-        p_tryon = 0.25*(c[:,0] * m_composite[:,0])+ \
-                    0.25*(c[:,1] * m_composite[:,1])+ \
-                    0.25*(c[:,2] * m_composite[:,2])+ \
-                    0.25*(c[:,3] * m_composite[:,3])+ \
+        p_tryon = 0.2*(c[:,0] * m_composite[:,0])+ \
+                    0.2*(c[:,1] * m_composite[:,1])+ \
+                    0.2*(c[:,2] * m_composite[:,2])+ \
+                    0.2*(c[:,3] * m_composite[:,3])+ \
+                    0.2*(c[:,3] * m_composite[:,4])+ \
         p_rendered * (1 - torch.mean(m_composite,1))
 
         visuals.append([ [im_h, shape, im_pose], 
@@ -206,8 +207,9 @@ def train_tom(opt, train_loader, model, board):
                [c[:,1], cm[:,1]*2-1, m_composite[:,1]*2-1],
                [c[:,2], cm[:,2]*2-1, m_composite[:,2]*2-1],
                [c[:,3], cm[:,3]*2-1, m_composite[:,3]*2-1], 
+               [c[:,4], cm[:,4]*2-1, m_composite[:,4]*2-1], 
                [p_rendered, p_tryon, im_nobg]])
-        for i in range(4):
+        for i in range(5):
             loss_mask += criterionMask(m_composite[:,i:i+1], cm[:,i])
 
         loss_l1 = criterionL1(p_tryon, im_nobg)
@@ -282,7 +284,7 @@ def main():
         train_gmm(opt, train_loader, model, board)
         save_checkpoint(model, os.path.join(opt.checkpoint_dir, opt.name, 'gmm_final.pth'))
     elif opt.stage == 'TOM':
-        model = UnetGenerator(25+7, 4+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        model = UnetGenerator(25+7, 5+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):
             load_checkpoint(model, opt.checkpoint)
         train_tom(opt, train_loader, model, board)
