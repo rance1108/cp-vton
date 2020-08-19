@@ -196,7 +196,8 @@ def train_tom(opt, train_loader, model, board):
         p_rendered = F.tanh(p_rendered)
         m_composite = F.sigmoid(m_composite)
         print(c.shape,m_composite.shape)
-        print(c[:,4].shape, m_composite[:,4].shape)
+        print(c[:,4].shape, m_composite[:,0:1].shape)
+        print(c[:,4].shape, m_composite[:,4:5].shape)
         p_tryon = 0.2*(c[:,0] * m_composite[:,0])+ \
                     0.2*(c[:,1] * m_composite[:,1])+ \
                     0.2*(c[:,2] * m_composite[:,2])+ \
