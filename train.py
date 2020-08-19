@@ -224,7 +224,7 @@ def train_tom(opt, train_loader, model, board):
         #     loss_mask += criterionMask(m_composite[:,i:i+1], cm[:,i])
 
 
-        loss_mask += criterionMask(m_composite, torch.sum(cm[],1))
+        loss_mask += criterionMask(m_composite, torch.sum(cm,1))
 
         loss_l1 = criterionL1(p_tryon, im_nobg)
         loss_vgg = criterionVGG(p_tryon, im_nobg)
