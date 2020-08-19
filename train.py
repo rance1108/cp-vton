@@ -189,6 +189,12 @@ def train_tom(opt, train_loader, model, board):
         loss = 0
 
 
+        c[:,0] = (c[:,0] * cm[:,0])
+        c[:,1] = (c[:,1] * cm[:,1])
+        c[:,2] = (c[:,2] * cm[:,2])
+        c[:,3] = (c[:,3] * cm[:,3])
+        c[:,4] = (c[:,4] * cm[:,4])
+
         input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
         outputs = model(input_agnostic)
 
