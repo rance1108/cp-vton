@@ -128,7 +128,7 @@ def test_gmm(opt, test_loader, model, board):
                        [cm[:,i]*2-1, warped_mask[i]*2-1, pcm[:,i]*2-1],
                        [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
 
-            if i != len(c.shape[1])-1
+            if i != len(c.shape[1])-1:
                 cname1 = c_names[i][0][:-4] +'_wc.png'
                 cname2 = c_names[i][0][:-4] +'_wcm.png'
                 cname3 = c_names[i][0][:-4] +'_orgwc.png'
