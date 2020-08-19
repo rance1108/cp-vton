@@ -192,7 +192,7 @@ def train_tom(opt, train_loader, model, board):
         input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
         outputs = model(input_agnostic)
 
-        p_rendered, m_composite = torch.split(outputs, [3,1],1)
+        p_rendered, m_composite = torch.split(outputs, [3,5],1)
         p_rendered = F.tanh(p_rendered)
         m_composite = F.sigmoid(m_composite)
 
@@ -203,41 +203,24 @@ def train_tom(opt, train_loader, model, board):
         #             0.2*(c[:,4] * m_composite[:,4:5])+ \
         # p_rendered * (1 - torch.mean(m_composite,1,keepdim=True))
 
-        p_tryon = ((c[:,0] )+ (c[:,1] )+ (c[:,2] )+ \
-        (c[:,3] )+ (c[:,4] ))*m_composite + \
-        p_rendered * (1 - m_composite)
-
-        # p_tryon = ((c[:,0] * cm[:,0])+ (c[:,1] * cm[:,1])+ (c[:,2] * cm[:,2])+ \
-        # (c[:,3] * cm[:,3])+ (c[:,4] * cm[:,4]))*m_composite + \
-        # p_rendered * (1 - m_composite)
+        p_tryon = torch.clamp((0.5*(c[:,0] * m_composite[:,0:1])+ \
+                    0.5*(c[:,1] * m_composite[:,1:2])+ \
+                    0.5*(c[:,2] * m_composite[:,2:3])+ \
+                    0.5*(c[:,3] * m_composite[:,3:4])+ \
+                    0.5*(c[:,4] * m_composite[:,4:5])),0,1)+ \
+        p_rendered * (1 - torch.mean(m_composite,1,keepdim=True))
 
 
 
         visuals.append([ [im_h, shape, im_pose], 
-               # [c[:,0], cm[:,0]*2-1, m_composite[:,0:1]*2-1],
-               # [c[:,1], cm[:,1]*2-1, m_composite[:,1:2]*2-1],
-               # [c[:,2], cm[:,2]*2-1, m_composite[:,2:3]*2-1],
-               # [c[:,3], cm[:,3]*2-1, m_composite[:,3:4]*2-1], 
-               # [c[:,4], cm[:,4]*2-1, m_composite[:,4:5]*2-1], 
-
-               [c[:,0], cm[:,0]*2-1, m_composite*2-1],
-               [c[:,1], cm[:,1]*2-1, m_composite*2-1],
-               [c[:,2], cm[:,2]*2-1, m_composite*2-1],
-               [c[:,3], cm[:,3]*2-1, m_composite*2-1], 
-               [c[:,4], cm[:,4]*2-1, m_composite*2-1],
-               [p_rendered, p_tryon, im_nobg], 
-               [((c[:,0] * cm[:,0])+ (c[:,1] * cm[:,1])+ (c[:,2] * cm[:,2])+ \
-        (c[:,3] * cm[:,3])+ (c[:,4] * cm[:,4])), ((c[:,0] )+ (c[:,1] )+ (c[:,2] )+ \
-        (c[:,3] )+ (c[:,4] ))*m_composite , ((c[:,0] )+ (c[:,1] )+ (c[:,2] )+ \
-        (c[:,3] )+ (c[:,4] ))]])
-
-
-        
+               [c[:,0], cm[:,0]*2-1, m_composite[:,0:1]*2-1],
+               [c[:,1], cm[:,1]*2-1, m_composite[:,1:2]*2-1],
+               [c[:,2], cm[:,2]*2-1, m_composite[:,2:3]*2-1],
+               [c[:,3], cm[:,3]*2-1, m_composite[:,3:4]*2-1], 
+               [c[:,4], cm[:,4]*2-1, m_composite[:,4:5]*2-1], 
+               [p_rendered, p_tryon, im_nobg]])
         for i in range(5):
-            loss_mask += criterionMask(m_composite, torch.sum(cm,1))
-        
-        # for i in range(5):
-        #     loss_mask += criterionMask(m_composite[:,i:i+1], cm[:,i])
+            loss_mask += criterionMask(m_composite[:,i:i+1], cm[:,i])
 
         loss_l1 = criterionL1(p_tryon, im_nobg)
         loss_vgg = criterionVGG(p_tryon, im_nobg)
@@ -311,7 +294,7 @@ def main():
         train_gmm(opt, train_loader, model, board)
         save_checkpoint(model, os.path.join(opt.checkpoint_dir, opt.name, 'gmm_final.pth'))
     elif opt.stage == 'TOM':
-        model = UnetGenerator(25+10, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        model = UnetGenerator(25+10, 5+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):
             load_checkpoint(model, opt.checkpoint)
         train_tom(opt, train_loader, model, board)
