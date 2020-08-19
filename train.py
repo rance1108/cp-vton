@@ -203,21 +203,22 @@ def train_tom(opt, train_loader, model, board):
         #             0.2*(c[:,4] * m_composite[:,4:5])+ \
         # p_rendered * (1 - torch.mean(m_composite,1,keepdim=True))
 
-        p_tryon = torch.clamp((0.5*(c[:,0] * m_composite[:,0:1])+ \
-                    0.5*(c[:,1] * m_composite[:,1:2])+ \
-                    0.5*(c[:,2] * m_composite[:,2:3])+ \
-                    0.5*(c[:,3] * m_composite[:,3:4])+ \
-                    0.5*(c[:,4] * m_composite[:,4:5])),0,1)+ \
-        p_rendered * (1 - torch.mean(m_composite,1,keepdim=True))
+        p_tryon = m_composite * torch.clamp((c[:,0] * cm[:,0])+ \
+                    (c[:,1] * cm[:,1])+ \
+                    (c[:,2] * cm[:,2])+ \
+                    (c[:,3] * cm[:,3])+ \
+                    (c[:,4] * cm[:,4]),0,1)+ \
+        p_rendered * (1 - m_composite)
 
 
 
         visuals.append([ [im_h, shape, im_pose], 
-               [c[:,0], cm[:,0]*2-1, m_composite[:,0:1]*2-1],
-               [c[:,1], cm[:,1]*2-1, m_composite[:,1:2]*2-1],
-               [c[:,2], cm[:,2]*2-1, m_composite[:,2:3]*2-1],
-               [c[:,3], cm[:,3]*2-1, m_composite[:,3:4]*2-1], 
-               [c[:,4], cm[:,4]*2-1, m_composite[:,4:5]*2-1], 
+               [c[:,0], cm[:,0]*2-1, cm[:,0]*2-1],
+               [c[:,1], cm[:,1]*2-1, cm[:,1]*2-1],
+               [c[:,2], cm[:,2]*2-1, cm[:,2]*2-1],
+               [c[:,3], cm[:,3]*2-1, cm[:,3]*2-1], 
+               [c[:,4], cm[:,4]*2-1, cm[:,4]*2-1], 
+               [p_rendered, p_tryon, m_composite*2-1], 
                [p_rendered, p_tryon, im_nobg]])
         for i in range(5):
             loss_mask += criterionMask(m_composite[:,i:i+1], cm[:,i])
