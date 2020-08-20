@@ -191,7 +191,7 @@ def test_tom(opt, test_loader, model, board):
         # cm = inputs['cloth_mask'].cuda()
 
 
-
+        agnostic = inputs['agnostic'].cuda()
         im = inputs['image'].cuda()
         im_nobg = inputs['im_nobg'].cuda()
         im_pose = inputs['pose_image'].cuda()
