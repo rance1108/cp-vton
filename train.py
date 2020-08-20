@@ -194,8 +194,11 @@ def train_tom(opt, train_loader, model, board):
         c[:,2] = (c[:,2] * cm[:,2])
         c[:,3] = (c[:,3] * cm[:,3])
         c[:,4] = (c[:,4] * cm[:,4])
+        
+        agnostic = torch.cat([shape, bg, pose_map], 1)
 
         input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
+        # input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
         outputs = model(input_agnostic)
 
         p_rendered, m_composite = torch.split(outputs, [3,1],1)
@@ -233,15 +236,15 @@ def train_tom(opt, train_loader, model, board):
                     (c[:,2] )+ \
                     (c[:,3] )+ \
                     (c[:,4] )), m_composite*2-1], 
-               [p_rendered, p_tryon, im_nobg]])
+               [p_rendered, p_tryon, im]])
         # for i in range(5):
         #     loss_mask += criterionMask(m_composite[:,i:i+1], cm[:,i])
 
 
         loss_mask += criterionMask(m_composite, torch.sum(cm,1))
 
-        loss_l1 = criterionL1(p_tryon, im_nobg)
-        loss_vgg = criterionVGG(p_tryon, im_nobg)
+        loss_l1 = criterionL1(p_tryon, im)
+        loss_vgg = criterionVGG(p_tryon, im)
 
         loss = loss_l1 + loss_vgg + loss_mask
         optimizer.zero_grad()
