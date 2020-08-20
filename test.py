@@ -169,13 +169,22 @@ def test_tom(opt, test_loader, model, board):
     model.cuda()
     model.eval()
     
-    base_name = os.path.basename(opt.checkpoint)
+    # base_name = os.path.basename(opt.checkpoint)
+    # save_dir = os.path.join(opt.result_dir, base_name, opt.datamode)
+    # if not os.path.exists(save_dir):
+    #     os.makedirs(save_dir)
+    # try_on_dir = os.path.join(save_dir, 'try-on')
+    # if not os.path.exists(try_on_dir):
+    #     os.makedirs(try_on_dir)
+
+
+    base_name = os.path.basename(opt.name)
     save_dir = os.path.join(opt.result_dir, base_name, opt.datamode)
+
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    try_on_dir = os.path.join(save_dir, 'try-on')
-    if not os.path.exists(try_on_dir):
-        os.makedirs(try_on_dir)
+
+
     print('Dataset size: %05d!' % (len(test_loader.dataset)), flush=True)
     for step, inputs in enumerate(test_loader.data_loader):
         iter_start_time = time.time()
@@ -190,6 +199,12 @@ def test_tom(opt, test_loader, model, board):
         # c = inputs['cloth'].cuda()
         # cm = inputs['cloth_mask'].cuda()
 
+        c_names = inputs['c_name']
+        im_name = inputs['im_name'][0]
+        warp_cloth_dir = os.path.join(save_dir, im_name)
+        if not os.path.exists(warp_cloth_dir):
+            os.makedirs(warp_cloth_dir)
+
 
         agnostic = inputs['agnostic'].cuda()
         im = inputs['image'].cuda()
@@ -201,11 +216,7 @@ def test_tom(opt, test_loader, model, board):
         c = inputs['cloth'].cuda()
         cm = inputs['cloth_mask'].cuda()
         bg = inputs['bg'].cuda()
-        
-
-
-
-
+    
 
         # outputs = model(torch.cat([agnostic, c],1))
         # p_rendered, m_composite = torch.split(outputs, 3,1)
@@ -220,7 +231,6 @@ def test_tom(opt, test_loader, model, board):
 
 
 
-        visuals = []
 
         c[:,0] = (c[:,0] * cm[:,0])
         c[:,1] = (c[:,1] * cm[:,1])
@@ -244,7 +254,7 @@ def test_tom(opt, test_loader, model, board):
 
 
 
-        visuals.append([ [im_h, shape, im_pose], 
+        visuals = ([ [im_h, shape, im_pose], 
                [c[:,0], cm[:,0]*2-1, cm[:,0]*2-1],
                [c[:,1], cm[:,1]*2-1, cm[:,1]*2-1],
                [c[:,2], cm[:,2]*2-1, cm[:,2]*2-1],
@@ -262,8 +272,13 @@ def test_tom(opt, test_loader, model, board):
                [p_rendered, p_tryon, im_nobg]])
 
 
+        cname = '999.png'
 
-        save_images(p_tryon, im_names, try_on_dir) 
+        save_image(p_tryon, os.path.join(warp_cloth_dir, cname)) 
+
+
+        # save_images(p_tryon, im_names, try_on_dir) 
+
         if (step+1) % opt.display_count == 0:
             board_add_images(board, 'combine', visuals, step+1)
             t = time.time() - iter_start_time
