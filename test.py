@@ -220,7 +220,7 @@ def test_tom(opt, test_loader, model, board):
 
 
 
-
+        visuals = []
 
         c[:,0] = (c[:,0] * cm[:,0])
         c[:,1] = (c[:,1] * cm[:,1])
@@ -262,7 +262,7 @@ def test_tom(opt, test_loader, model, board):
                [p_rendered, p_tryon, im_nobg]])
 
 
-        
+
         save_images(p_tryon, im_names, try_on_dir) 
         if (step+1) % opt.display_count == 0:
             board_add_images(board, 'combine', visuals, step+1)
