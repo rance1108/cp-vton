@@ -180,26 +180,89 @@ def test_tom(opt, test_loader, model, board):
     for step, inputs in enumerate(test_loader.data_loader):
         iter_start_time = time.time()
         
-        im_names = inputs['im_name']
-        im = inputs['image'].cuda()
-        im_pose = inputs['pose_image']
-        im_h = inputs['head']
-        shape = inputs['shape']
+        # im_names = inputs['im_name']
+        # im = inputs['image'].cuda()
+        # im_pose = inputs['pose_image']
+        # im_h = inputs['head']
+        # shape = inputs['shape']
 
-        agnostic = inputs['agnostic'].cuda()
+        # agnostic = inputs['agnostic'].cuda()
+        # c = inputs['cloth'].cuda()
+        # cm = inputs['cloth_mask'].cuda()
+
+
+
+        im = inputs['image'].cuda()
+        im_nobg = inputs['im_nobg'].cuda()
+        im_pose = inputs['pose_image'].cuda()
+        pose_map = inputs['pose_map'].cuda()
+        im_h = inputs['head'].cuda()
+        shape = inputs['shape'].cuda()
         c = inputs['cloth'].cuda()
         cm = inputs['cloth_mask'].cuda()
+        bg = inputs['bg'].cuda()
         
-        outputs = model(torch.cat([agnostic, c],1))
-        p_rendered, m_composite = torch.split(outputs, 3,1)
+
+
+
+
+
+        # outputs = model(torch.cat([agnostic, c],1))
+        # p_rendered, m_composite = torch.split(outputs, 3,1)
+        # p_rendered = F.tanh(p_rendered)
+        # m_composite = F.sigmoid(m_composite)
+        # p_tryon = c * m_composite + p_rendered * (1 - m_composite)
+
+        # visuals = [ [im_h, shape, im_pose], 
+        #            [c, 2*cm-1, m_composite], 
+        #            [p_rendered, p_tryon, im]]
+            
+
+
+
+
+
+        c[:,0] = (c[:,0] * cm[:,0])
+        c[:,1] = (c[:,1] * cm[:,1])
+        c[:,2] = (c[:,2] * cm[:,2])
+        c[:,3] = (c[:,3] * cm[:,3])
+        c[:,4] = (c[:,4] * cm[:,4])
+
+        input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
+        outputs = model(input_agnostic)
+
+        p_rendered, m_composite = torch.split(outputs, [3,1],1)
         p_rendered = F.tanh(p_rendered)
         m_composite = F.sigmoid(m_composite)
-        p_tryon = c * m_composite + p_rendered * (1 - m_composite)
 
-        visuals = [ [im_h, shape, im_pose], 
-                   [c, 2*cm-1, m_composite], 
-                   [p_rendered, p_tryon, im]]
-            
+        p_tryon = m_composite * (((c[:,0] )+ \
+                    (c[:,1] )+ \
+                    (c[:,2] )+ \
+                    (c[:,3] )+ \
+                    (c[:,4] ))+(1-torch.sum(cm,1)))+ \
+        p_rendered * (1 - m_composite)
+
+
+
+        visuals.append([ [im_h, shape, im_pose], 
+               [c[:,0], cm[:,0]*2-1, cm[:,0]*2-1],
+               [c[:,1], cm[:,1]*2-1, cm[:,1]*2-1],
+               [c[:,2], cm[:,2]*2-1, cm[:,2]*2-1],
+               [c[:,3], cm[:,3]*2-1, cm[:,3]*2-1], 
+               [c[:,4], cm[:,4]*2-1, cm[:,4]*2-1], 
+               [(((c[:,0] )+ \
+                    (c[:,1] )+ \
+                    (c[:,2] )+ \
+                    (c[:,3] )+ \
+                    (c[:,4] ))+(1-torch.sum(cm,1))), ((c[:,0] )+ \
+                    (c[:,1] )+ \
+                    (c[:,2] )+ \
+                    (c[:,3] )+ \
+                    (c[:,4] )), m_composite*2-1], 
+               [p_rendered, p_tryon, im_nobg]])
+
+
+        
         save_images(p_tryon, im_names, try_on_dir) 
         if (step+1) % opt.display_count == 0:
             board_add_images(board, 'combine', visuals, step+1)
@@ -230,7 +293,7 @@ def main():
         with torch.no_grad():
             test_gmm(opt, train_loader, model, board)
     elif opt.stage == 'TOM':
-        model = UnetGenerator(25, 4, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        model = UnetGenerator(25+10, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         load_checkpoint(model, opt.checkpoint)
         with torch.no_grad():
             test_tom(opt, train_loader, model, board)
