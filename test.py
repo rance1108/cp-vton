@@ -231,7 +231,7 @@ def test_tom(opt, test_loader, model, board):
 
 
 
-
+####"HI"
         c[:,0] = (c[:,0] * cm[:,0])
         c[:,1] = (c[:,1] * cm[:,1])
         c[:,2] = (c[:,2] * cm[:,2])
