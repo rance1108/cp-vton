@@ -264,12 +264,9 @@ def test_tom(opt, test_loader, model, board):
                     (c[:,1] )+ \
                     (c[:,2] )+ \
                     (c[:,3] )+ \
-                    (c[:,4] ))+(1-torch.sum(cm,1))), ((c[:,0] )+ \
-                    (c[:,1] )+ \
-                    (c[:,2] )+ \
-                    (c[:,3] )+ \
-                    (c[:,4] )), m_composite*2-1], 
-               [p_rendered, p_tryon, im_nobg]])
+                    (c[:,4] ))+(1-torch.sum(cm,1))),
+               bg, m_composite*2-1], 
+               [p_rendered, p_tryon, im]])
 
 
         cname = '999.png'

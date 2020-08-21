@@ -194,7 +194,7 @@ def train_tom(opt, train_loader, model, board):
         c[:,2] = (c[:,2] * cm[:,2])
         c[:,3] = (c[:,3] * cm[:,3])
         c[:,4] = (c[:,4] * cm[:,4])
-        
+
         agnostic = torch.cat([shape, bg, pose_map], 1)
 
         input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
@@ -231,11 +231,8 @@ def train_tom(opt, train_loader, model, board):
                     (c[:,1] )+ \
                     (c[:,2] )+ \
                     (c[:,3] )+ \
-                    (c[:,4] ))+(1-torch.sum(cm,1))), ((c[:,0] )+ \
-                    (c[:,1] )+ \
-                    (c[:,2] )+ \
-                    (c[:,3] )+ \
-                    (c[:,4] )), m_composite*2-1], 
+                    (c[:,4] ))+(1-torch.sum(cm,1))),
+               bg, m_composite*2-1], 
                [p_rendered, p_tryon, im]])
         # for i in range(5):
         #     loss_mask += criterionMask(m_composite[:,i:i+1], cm[:,i])
