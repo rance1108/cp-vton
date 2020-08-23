@@ -127,9 +127,9 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
 
 
-        optimizer.zero_grad()
+        optimizerG.zero_grad()
         loss.backward()
-        optimizer.step()
+        optimizerG.step()
             
         if (step+1) % opt.display_count == 0:
             for j, k in zip(range(5),['combine_inner', 'combine_outer', 'combine_bottom',
