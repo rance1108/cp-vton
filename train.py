@@ -13,6 +13,8 @@ from tensorboardX import SummaryWriter
 from visualization import board_add_image, board_add_images
 
 
+import itertools
+
 def get_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", default = "GMM")
@@ -46,12 +48,29 @@ def train_gmm(opt, train_loader, model, board):
     model.cuda()
     model.train()
 
+
+def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
+    G_A.cuda()
+    G_A.train()
+    
+    G_B.cuda()
+    G_B.train()
+
+
     # criterion
     criterionL1 = nn.L1Loss()
     
     # optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.5, 0.999))
-    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda = lambda step: 1.0 -
+    optimizerG = torch.optim.Adam(itertools.chain(G_A.parameters(), G_B.parameters()), lr=opt.lr, betas=(0.5, 0.999))
+    optimizerD = torch.optim.Adam(itertools.chain(D_A.parameters(), D_B.parameters()), lr=opt.lr, betas=(0.5, 0.999))
+
+    # optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.5, 0.999))
+
+
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizerG, lr_lambda = lambda step: 1.0 -
+            max(0, step - opt.keep_step) / float(opt.decay_step + 1))
+
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizerD, lr_lambda = lambda step: 1.0 -
             max(0, step - opt.keep_step) / float(opt.decay_step + 1))
     
     for step in range(opt.keep_step + opt.decay_step):
@@ -75,20 +94,36 @@ def train_gmm(opt, train_loader, model, board):
         warped_cloth = []
         warped_mask = []
         warped_grid = []
+        reverse_c = []
+        reverse_m = []
+        reverse_grid = []
         visuals = []
         loss = 0
         
         for i in range(c.shape[1]):
 
             input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
-            grid, theta = model(input_agnostic, c[:,i])
+            grid, theta = G_A(input_agnostic, c[:,i])
             warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
             warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
             warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
+
+            warped_cloth = torch.cat(warped_cloth, dim=1)
+            assert((warped_cloth.shape[0],warped_cloth.shape[1],warped_cloth.shape[2]) == (4,4,3))
+            warped_mask = torch.cat(warped_mask, dim=1)
+
+            input_agnostic = torch.cat([agnostic,warped_mask[:,i]],dim=1)
+            grid2, theta2 = G_B(input_agnostic, warped_cloth[:,i])
+            reverse_c.append(F.grid_sample(warped_cloth[:,i], grid2, padding_mode='border'))
+            reverse_m.append(F.grid_sample(warped_mask[:,i], grid2, padding_mode='zeros'))
+            reverse_grid.append(F.grid_sample(im_g, grid2, padding_mode='zeros'))
+
+
             visuals.append([ [shape, im_h, im_pose], 
                        [c[:,i], warped_cloth[i], im_c[:,i]],
                        [cm[:,i]*2-1, warped_mask[i]*2-1, pcm[:,i]*2-1],
-                       [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
+                       [warped_grid[i], (warped_cloth[i]+im)*0.5, im],
+                       [reverse_grid[i], (reverse_c[i]+im)*0.5, reverse_m]])
 
             loss += criterionL1(warped_cloth[i], im_c[:,i])    
 
@@ -195,7 +230,7 @@ def train_tom(opt, train_loader, model, board):
         c[:,3] = (c[:,3] * cm[:,3])
         c[:,4] = (c[:,4] * cm[:,4])
 
-        agnostic = torch.cat([shape, bg, pose_map], 1)
+        # agnostic = torch.cat([shape, bg, pose_map], 1)
 
         input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
         # input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
@@ -306,11 +341,19 @@ def main():
    
     # create model & train & save the final checkpoint
     if opt.stage == 'GMM':
-        model = GMM(opt)
+        G_A = GMM(opt)
+        G_B = GMM(opt)
+        D_A = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)
+        D_B = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)  
+
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):
             load_checkpoint(model, opt.checkpoint)
-        train_gmm(opt, train_loader, model, board)
-        save_checkpoint(model, os.path.join(opt.checkpoint_dir, opt.name, 'gmm_final.pth'))
+
+        train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board)
+
+        save_checkpoint(G_A, os.path.join(opt.checkpoint_dir, opt.name, 'gmmA2B_final.pth'))
+        save_checkpoint(G_B, os.path.join(opt.checkpoint_dir, opt.name, 'gmmB2A_final.pth'))
+
     elif opt.stage == 'TOM':
         model = UnetGenerator(25+10, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):
