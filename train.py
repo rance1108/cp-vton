@@ -120,8 +120,10 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             visuals.append([ [shape, im_h, im_pose], 
                        [c[:,i], warped_cloth[i], im_c[:,i]],
                        [cm[:,i]*2-1, warped_mask[i]*2-1, pcm[:,i]*2-1],
+                       
                        [warped_grid[i], (warped_cloth[i]+im)*0.5, im],
-                       [reverse_grid[i], (reverse_c[i]+im)*0.5, reverse_m]])
+
+                       [reverse_grid[i], (reverse_c[i]+im)*0.5, reverse_m[i]*2-1]])
 
             loss += criterionL1(warped_cloth[i], im_c[:,i])    
 
