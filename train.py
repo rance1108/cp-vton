@@ -108,14 +108,12 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
             warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
 
-            warped_cloth = torch.cat(warped_cloth, dim=1)
-            assert((warped_cloth.shape[0],warped_cloth.shape[1],warped_cloth.shape[2]) == (4,4,3))
-            warped_mask = torch.cat(warped_mask, dim=1)
 
-            input_agnostic = torch.cat([agnostic,warped_mask[:,i]],dim=1)
-            grid2, theta2 = G_B(input_agnostic, warped_cloth[:,i])
-            reverse_c.append(F.grid_sample(warped_cloth[:,i], grid2, padding_mode='border'))
-            reverse_m.append(F.grid_sample(warped_mask[:,i], grid2, padding_mode='zeros'))
+
+            input_agnostic = torch.cat([agnostic,warped_mask[i]],dim=1)
+            grid2, theta2 = G_B(input_agnostic, warped_cloth[i])
+            reverse_c.append(F.grid_sample(warped_cloth[i], grid2, padding_mode='border'))
+            reverse_m.append(F.grid_sample(warped_mask[i], grid2, padding_mode='zeros'))
             reverse_grid.append(F.grid_sample(im_g, grid2, padding_mode='zeros'))
 
 
