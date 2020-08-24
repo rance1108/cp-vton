@@ -156,10 +156,10 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
             ##################BACKPROP#########################################################
 
-            for param in D_A.features.parameters():
+            for param in D_A.parameters():
                 param.requires_grad = False
 
-            for param in D_B.features.parameters():
+            for param in D_B.parameters():
                 param.requires_grad = False
 
 
@@ -209,10 +209,10 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             optimizer_G.step()  
 
 
-            for param in D_A.features.parameters():
+            for param in D_A.parameters():
                 param.requires_grad = True
                 
-            for param in D_B.features.parameters():
+            for param in D_B.parameters():
                 param.requires_grad = True
 
             optimizer_D.zero_grad() 
