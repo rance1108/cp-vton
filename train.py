@@ -148,10 +148,10 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             C_warpGT_unwarp.append(F.grid_sample(im_c[:,i], grid3, padding_mode='border'))
             M_warpGT_unwarp.append(F.grid_sample(pcm[:,i], grid3, padding_mode='zeros'))
             G_warpGT_unwarp.append(F.grid_sample(im_g, grid3, padding_mode='zeros'))
-            input_agnostic = torch.cat([agnostic,M_warpGT_unwarp[:,i]],dim=1)
-            grid4, theta = G_A(input_agnostic, C_warpGT_unwarp[:,i])                                 # G_A(G_B(B))
-            C_warpGT_unwarp_warp.append(F.grid_sample(C_warpGT_unwarp[:,i], grid4, padding_mode='border'))
-            M_warpGT_unwarp_warp.append(F.grid_sample(M_warpGT_unwarp[:,i], grid4, padding_mode='zeros'))
+            input_agnostic = torch.cat([agnostic,M_warpGT_unwarp[i]],dim=1)
+            grid4, theta = G_A(input_agnostic, C_warpGT_unwarp[i])                                 # G_A(G_B(B))
+            C_warpGT_unwarp_warp.append(F.grid_sample(C_warpGT_unwarp[i], grid4, padding_mode='border'))
+            M_warpGT_unwarp_warp.append(F.grid_sample(M_warpGT_unwarp[i], grid4, padding_mode='zeros'))
             G_warpGT_unwarp_warp.append(F.grid_sample(im_g, grid4, padding_mode='zeros'))
 
             ##################BACKPROP#########################################################
@@ -188,15 +188,15 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
                 loss_idt_B = 0
 
             # GAN loss D_A(G_A(A))
-            loss_G_A = criterionGAN(D_A(C_unwarp_warp[:,i]), True)
+            loss_G_A = criterionGAN(D_A(C_unwarp_warp[i]), True)
             # GAN loss D_B(G_B(B))
-            loss_G_B = criterionGAN(D_B(C_warpGT_unwarp[:,i]), True)
+            loss_G_B = criterionGAN(D_B(C_warpGT_unwarp[i]), True)
             # Forward cycle loss || G_B(G_A(A)) - A||
-            loss_cycle_A = criterionCycle(C_unwarp_warp_unwarp[:,i], c[:,i]) * lambda_A
+            loss_cycle_A = criterionCycle(C_unwarp_warp_unwarp[i], c[:,i]) * lambda_A
             # Backward cycle loss || G_A(G_B(B)) - B||
-            loss_cycle_B = criterionCycle(C_warpGT_unwarp_warp[:,i], im_c[:,i]) * lambda_B
+            loss_cycle_B = criterionCycle(C_warpGT_unwarp_warp[i], im_c[:,i]) * lambda_B
 
-            loss_L1 =  criterionL1(C_unwarp_warp[:,i], im_c[:,i]) * lambda_L1
+            loss_L1 =  criterionL1(C_unwarp_warp[i], im_c[:,i]) * lambda_L1
             # combined loss and calculate gradients
             loss_G = loss_G_A + loss_G_B + loss_cycle_A + loss_cycle_B + loss_idt_A + loss_idt_B + loss_L1
             loss_G.backward()
@@ -206,8 +206,8 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             set_requires_grad([D_A, D_B], True)
             optimizer_D.zero_grad() 
 
-            loss_DA = backward_D_basic(D_A, im_c[:,i], C_unwarp_warp[:,i])
-            loss_DB = backward_D_basic(D_B, c[:,i], C_warpGT_unwarp_warp[:,i])
+            loss_DA = backward_D_basic(D_A, im_c[:,i], C_unwarp_warp[i])
+            loss_DB = backward_D_basic(D_B, c[:,i], C_warpGT_unwarp_warp[i])
             self.optimizer_D.step()
 
 
@@ -217,7 +217,11 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
                        [G_unwarp_warp[i], (C_unwarp_warp[i]+im)*0.5, im],
 
-                       [G_unwarp_warp_unwarp[i], (C_unwarp_warp_unwarp[i]+c[:,i])*0.5, M_unwarp_warp_unwarp[i]*2-1]])
+                       [G_unwarp_warp_unwarp[i], (C_unwarp_warp_unwarp[i]+c[:,i])*0.5, M_unwarp_warp_unwarp[i]*2-1],
+
+                       [G_warpGT_unwarp[i], (C_warpGT_unwarp[i]+c[:,i])*0.5, M_warpGT_unwarp[i]*2-1],
+
+                       [G_warpGT_unwarp_warp[i], (C_warpGT_unwarp_warp[i]+c[:,i])*0.5, M_warpGT_unwarp_warp[i]*2-1]])
 
 
 
