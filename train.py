@@ -7,7 +7,7 @@ import argparse
 import os
 import time
 from cp_dataset import CPDataset, CPDataLoader
-from networks import GMM, UnetGenerator, VGGLoss, load_checkpoint, save_checkpoint, NLayerDiscriminator
+from networks import GMM, UnetGenerator, VGGLoss, load_checkpoint, save_checkpoint, NLayerDiscriminator, GANLoss
 
 from tensorboardX import SummaryWriter
 from visualization import board_add_image, board_add_images
@@ -44,9 +44,6 @@ def get_opt():
     opt = parser.parse_args()
     return opt
 
-def train_gmm(opt, train_loader, model, board):
-    model.cuda()
-    model.train()
 
 
 def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
@@ -57,9 +54,18 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
     G_B.train()
 
 
+
     # criterion
     criterionL1 = nn.L1Loss()
-    
+    criterionGAN = GANLoss('lsgan').cuda()
+    criterionCycle = torch.nn.L1Loss()
+    criterionIdt = torch.nn.L1Loss()
+    """Calculate the loss for generators G_A and G_B"""
+    lambda_idt = 0.5    
+    lambda_A = 10.0
+    lambda_B = 10.0
+    lambda_L1 = 10.0
+
     # optimizer
     optimizerG = torch.optim.Adam(itertools.chain(G_A.parameters(), G_B.parameters()), lr=opt.lr, betas=(0.5, 0.999))
     optimizerD = torch.optim.Adam(itertools.chain(D_A.parameters(), D_B.parameters()), lr=opt.lr, betas=(0.5, 0.999))
@@ -91,47 +97,139 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
 
 
-        warped_cloth = []
-        warped_mask = []
-        warped_grid = []
-        reverse_c = []
-        reverse_m = []
-        reverse_grid = []
+        C_unwarp_warp = []
+        M_unwarp_warp = []
+        G_unwarp_warp = []
+
+        C_unwarp_warp_unwarp = []
+        M_unwarp_warp_unwarp = []
+        G_unwarp_warp_unwarp = []
+
+        C_warpGT_unwarp = []
+        M_warpGT_unwarp = []
+        G_warpGT_unwarp = []
+
+
+
+        C_warpGT_unwarp_warp = []
+        M_warpGT_unwarp_warp = []
+        G_warpGT_unwarp_warp = []
+
+
+        C_itself_1 = []
+        M_itself_1 = []
+        G_itself_1 = []
+
+
+        C_itself_2 = []
+        M_itself_2 = []
+        G_itself_2 = []
+
         visuals = []
         loss = 0
         
         for i in range(c.shape[1]):
 
             input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
-            grid, theta = G_A(input_agnostic, c[:,i])
-            warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
-            warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
-            warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
+            grid, theta = G_A(input_agnostic, c[:,i])                                                  #G_A(A)
+            C_unwarp_warp.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
+            M_unwarp_warp.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
+            G_unwarp_warp.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
+            input_agnostic = torch.cat([agnostic,M_unwarp_warp[i]],dim=1)
+            grid2, theta = G_B(input_agnostic, C_unwarp_warp[i])                                # G_B(G_A(A))
+            C_unwarp_warp_unwarp.append(F.grid_sample(C_unwarp_warp[i], grid2, padding_mode='border'))
+            M_unwarp_warp_unwarp.append(F.grid_sample(M_unwarp_warp[i], grid2, padding_mode='zeros'))
+            G_unwarp_warp_unwarp.append(F.grid_sample(im_g, grid2, padding_mode='zeros'))
 
 
 
-            input_agnostic = torch.cat([agnostic,warped_mask[i]],dim=1)
-            grid2, theta2 = G_B(input_agnostic, warped_cloth[i])
-            reverse_c.append(F.grid_sample(warped_cloth[i], grid2, padding_mode='border'))
-            reverse_m.append(F.grid_sample(warped_mask[i], grid2, padding_mode='zeros'))
-            reverse_grid.append(F.grid_sample(im_g, grid2, padding_mode='zeros'))
+            input_agnostic = torch.cat([agnostic,cm[:,i]],dim=1)
+            grid3, theta = G_B(input_agnostic, im_c[:,i])                                # G_B(B) # G_A(G_B(B))
+            C_warpGT_unwarp.append(F.grid_sample(im_c[:,i], grid3, padding_mode='border'))
+            M_warpGT_unwarp.append(F.grid_sample(pcm[:,i], grid3, padding_mode='zeros'))
+            G_warpGT_unwarp.append(F.grid_sample(im_g, grid3, padding_mode='zeros'))
+            input_agnostic = torch.cat([agnostic,M_warpGT_unwarp[:,i]],dim=1)
+            grid4, theta = G_A(input_agnostic, C_warpGT_unwarp[:,i])                                 # G_A(G_B(B))
+            C_warpGT_unwarp_warp.append(F.grid_sample(C_warpGT_unwarp[:,i], grid4, padding_mode='border'))
+            M_warpGT_unwarp_warp.append(F.grid_sample(M_warpGT_unwarp[:,i], grid4, padding_mode='zeros'))
+            G_warpGT_unwarp_warp.append(F.grid_sample(im_g, grid4, padding_mode='zeros'))
+
+            ##################BACKPROP#########################################################
+
+            set_requires_grad([D_A, D_B], False) 
+            optimizer_G.zero_grad()
+
+            # Identity loss
+            if lambda_idt > 0:
+                # G_A should be identity if real_B is fed: ||G_A(B) - B||
+
+
+                input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
+                grid5, theta = G_A(input_agnostic,im_c[:,i])                                                  #G_A(A)
+                C_itself_1.append(F.grid_sample(im_c[:,i], grid5, padding_mode='border'))
+                M_itself_1.append(F.grid_sample(pcm[:,i], grid5, padding_mode='zeros'))
+                G_itself_1.append(F.grid_sample(im_g, grid5, padding_mode='zeros'))
+
+                loss_idt_A = criterionIdt(C_itself_1[:,i], im_c[:,i]) * lambda_B * lambda_idt
+
+
+                # G_B should be identity if real_A is fed: ||G_B(A) - A||
+
+                input_agnostic = torch.cat([agnostic,cm[:,i]],dim=1)
+                grid6, theta = G_B(input_agnostic,c[:,i])                                                  #G_A(A)
+                C_itself_2.append(F.grid_sample(c[:,i], grid6, padding_mode='border'))
+                M_itself_2.append(F.grid_sample(cm[:,i], grid6, padding_mode='zeros'))
+                G_itself_2.append(F.grid_sample(im_g, grid6, padding_mode='zeros'))
+
+
+                loss_idt_B = criterionIdt(C_itself_2[:,i], c[:,i]) * lambda_A * lambda_idt
+            else:
+                loss_idt_A = 0
+                loss_idt_B = 0
+
+            # GAN loss D_A(G_A(A))
+            loss_G_A = criterionGAN(D_A(C_unwarp_warp[:,i]), True)
+            # GAN loss D_B(G_B(B))
+            loss_G_B = criterionGAN(D_B(C_warpGT_unwarp[:,i]), True)
+            # Forward cycle loss || G_B(G_A(A)) - A||
+            loss_cycle_A = criterionCycle(C_unwarp_warp_unwarp[:,i], c[:,i]) * lambda_A
+            # Backward cycle loss || G_A(G_B(B)) - B||
+            loss_cycle_B = criterionCycle(C_warpGT_unwarp_warp[:,i], im_c[:,i]) * lambda_B
+
+            loss_L1 =  criterionL1(C_unwarp_warp[:,i], im_c[:,i]) * lambda_L1
+            # combined loss and calculate gradients
+            loss_G = loss_G_A + loss_G_B + loss_cycle_A + loss_cycle_B + loss_idt_A + loss_idt_B + loss_L1
+            loss_G.backward()
+            optimizer_G.step()  
+
+
+            set_requires_grad([D_A, D_B], True)
+            optimizer_D.zero_grad() 
+
+            loss_DA = backward_D_basic(D_A, im_c[:,i], C_unwarp_warp[:,i])
+            loss_DB = backward_D_basic(D_B, c[:,i], C_warpGT_unwarp_warp[:,i])
+            self.optimizer_D.step()
 
 
             visuals.append([ [shape, im_h, im_pose], 
-                       [c[:,i], warped_cloth[i], im_c[:,i]],
-                       [cm[:,i]*2-1, warped_mask[i]*2-1, pcm[:,i]*2-1],
-                       
-                       [warped_grid[i], (warped_cloth[i]+im)*0.5, im],
+                       [c[:,i], C_unwarp_warp[i], im_c[:,i]],
+                       [cm[:,i]*2-1, M_unwarp_warp[i]*2-1, pcm[:,i]*2-1],
 
-                       [reverse_grid[i], (reverse_c[i]+im)*0.5, reverse_m[i]*2-1]])
+                       [G_unwarp_warp[i], (C_unwarp_warp[i]+im)*0.5, im],
 
-            loss += criterionL1(warped_cloth[i], im_c[:,i])    
+                       [G_unwarp_warp_unwarp[i], (C_unwarp_warp_unwarp[i]+c[:,i])*0.5, M_unwarp_warp_unwarp[i]*2-1]])
 
 
 
-        optimizerG.zero_grad()
-        loss.backward()
-        optimizerG.step()
+
+
+            # loss += criterionL1(C_unwarp_warp[i], im_c[:,i])    
+
+
+
+        # optimizerG.zero_grad()
+        # loss.backward()
+        # optimizerG.step()
             
         if (step+1) % opt.display_count == 0:
             for j, k in zip(range(5),['combine_inner', 'combine_outer', 'combine_bottom',
@@ -143,7 +241,17 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             # board_add_images(board, 'combine_outer', visuals[1], step+1)
             # board_add_images(board, 'combine_bottom', visuals[2], step+1)
             # board_add_images(board, 'combine_shoe', visuals[3], step+1)
-            board.add_scalar('metric', loss.item(), step+1)
+            board.add_scalar('TOTAL loss', loss.item(), step+1)
+            board.add_scalar('loss_G_A', loss_G_A.item(), step+1)
+            board.add_scalar('loss_G_B', loss_G_B.item(), step+1)
+            board.add_scalar('loss_L1', loss_L1.item(), step+1)
+            board.add_scalar('loss_cycle_A', loss_cycle_A.item(), step+1)
+            board.add_scalar('loss_cycle_B', loss_cycle_B.item(), step+1)
+            board.add_scalar('loss_idt_A', loss_idt_A.item(), step+1)
+            board.add_scalar('loss_idt_B', loss_idt_B.item(), step+1)
+            board.add_scalar('loss_DA', loss_DA.item(), step+1)
+            board.add_scalar('loss_DB', loss_DB.item(), step+1)
+
             t = time.time() - iter_start_time
             print('step: %8d, time: %.3f, loss: %4f' % (step+1, t, loss.item()), flush=True)
 
@@ -320,6 +428,44 @@ def train_tom(opt, train_loader, model, board):
 
         if (step+1) % opt.save_count == 0:
             save_checkpoint(model, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d.pth' % (step+1)))
+
+
+def backward_D_basic(self, netD, real, fake):
+    """Calculate GAN loss for the discriminator
+    Parameters:
+        netD (network)      -- the discriminator D
+        real (tensor array) -- real images
+        fake (tensor array) -- images generated by a generator
+    Return the discriminator loss.
+    We also call loss_D.backward() to calculate the gradients.
+    """
+    # Real
+    pred_real = netD(real)
+    loss_D_real = criterionGAN(pred_real, True)
+    # Fake
+    pred_fake = netD(fake.detach())
+    loss_D_fake = criterionGAN(pred_fake, False)
+    # Combined loss and calculate gradients
+    loss_D = (loss_D_real + loss_D_fake) * 0.5
+    loss_D.backward()
+    return loss_D
+
+
+
+
+def set_requires_grad(self, nets, requires_grad=False):
+    """Set requies_grad=Fasle for all the networks to avoid unnecessary computations
+    Parameters:
+        nets (network list)   -- a list of networks
+        requires_grad (bool)  -- whether the networks require gradients or not
+    """
+    if not isinstance(nets, list):
+        nets = [nets]
+    for net in nets:
+        if net is not None:
+            for param in net.parameters():
+                param.requires_grad = requires_grad
+
 
 
 
