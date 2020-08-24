@@ -455,7 +455,7 @@ def train_tom(opt, train_loader, model, board):
             save_checkpoint(model, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d.pth' % (step+1)))
 
 
-def backward_D_basic(self, netD, real, fake):
+def backward_D_basic(netD, real, fake):
     """Calculate GAN loss for the discriminator
     Parameters:
         netD (network)      -- the discriminator D
