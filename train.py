@@ -156,7 +156,13 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
             ##################BACKPROP#########################################################
 
-            set_requires_grad([D_A, D_B], False) 
+            for param in D_A.features.parameters():
+                param.requires_grad = False
+
+            for param in D_B.features.parameters():
+                param.requires_grad = False
+
+
             optimizer_G.zero_grad()
 
             # Identity loss
@@ -203,7 +209,12 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             optimizer_G.step()  
 
 
-            set_requires_grad([D_A, D_B], True)
+            for param in D_A.features.parameters():
+                param.requires_grad = True
+                
+            for param in D_B.features.parameters():
+                param.requires_grad = True
+
             optimizer_D.zero_grad() 
 
             loss_DA = backward_D_basic(D_A, im_c[:,i], C_unwarp_warp[i])
@@ -457,18 +468,7 @@ def backward_D_basic(self, netD, real, fake):
 
 
 
-def set_requires_grad(self, nets, requires_grad=False):
-    """Set requies_grad=Fasle for all the networks to avoid unnecessary computations
-    Parameters:
-        nets (network list)   -- a list of networks
-        requires_grad (bool)  -- whether the networks require gradients or not
-    """
-    if not isinstance(nets, list):
-        nets = [nets]
-    for net in nets:
-        if net is not None:
-            for param in net.parameters():
-                param.requires_grad = requires_grad
+
 
 
 
