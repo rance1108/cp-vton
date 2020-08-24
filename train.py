@@ -224,7 +224,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
             loss_DA = backward_D_basic(D_A, im_c[:,i], C_unwarp_warp[i])
             loss_DB = backward_D_basic(D_B, c[:,i], C_warpGT_unwarp_warp[i])
-            self.optimizerD.step()
+            optimizerD.step()
 
 
             visuals.append([ [shape, im_h, im_pose], 
@@ -463,7 +463,7 @@ def backward_D_basic(netD, real, fake):
     Return the discriminator loss.
     We also call loss_D.backward() to calculate the gradients.
     """
-    
+
     criterionGAN = GANLoss('lsgan').cuda()
     # Real
     pred_real = netD(real)
