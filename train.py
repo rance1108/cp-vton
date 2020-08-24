@@ -163,7 +163,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
                 param.requires_grad = False
 
 
-            optimizer_G.zero_grad()
+            optimizerG.zero_grad()
 
             # Identity loss
             if lambda_idt > 0:
@@ -206,7 +206,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             # combined loss and calculate gradients
             loss_G = loss_G_A + loss_G_B + loss_cycle_A + loss_cycle_B + loss_idt_A + loss_idt_B + loss_L1
             loss_G.backward()
-            optimizer_G.step()  
+            optimizerG.step()  
 
 
             for param in D_A.parameters():
@@ -215,11 +215,11 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             for param in D_B.parameters():
                 param.requires_grad = True
 
-            optimizer_D.zero_grad() 
+            optimizerD.zero_grad() 
 
             loss_DA = backward_D_basic(D_A, im_c[:,i], C_unwarp_warp[i])
             loss_DB = backward_D_basic(D_B, c[:,i], C_warpGT_unwarp_warp[i])
-            self.optimizer_D.step()
+            self.optimizerD.step()
 
 
             visuals.append([ [shape, im_h, im_pose], 
