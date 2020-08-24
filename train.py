@@ -47,6 +47,7 @@ def get_opt():
 
 
 def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
+    cpuTensor = cpuTensor.cuda()
     G_A.cuda()
     G_A.train()
     
@@ -265,7 +266,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             # board_add_images(board, 'combine_outer', visuals[1], step+1)
             # board_add_images(board, 'combine_bottom', visuals[2], step+1)
             # board_add_images(board, 'combine_shoe', visuals[3], step+1)
-            board.add_scalar('TOTAL loss', loss.item(), step+1)
+            board.add_scalar('TOTAL loss', loss, step+1)
             board.add_scalar('loss_G_A', loss_G_A.item(), step+1)
             board.add_scalar('loss_G_B', loss_G_B.item(), step+1)
             board.add_scalar('loss_L1', loss_L1.item(), step+1)
