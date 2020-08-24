@@ -198,7 +198,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             else:
                 loss_idt_A = 0
                 loss_idt_B = 0
-            print(type(C_unwarp_warp[i]))
+            # print(type(C_unwarp_warp[i]))
             # GAN loss D_A(G_A(A))
             loss_G_A = criterionGAN(D_A(C_unwarp_warp[i]), True)
             # GAN loss D_B(G_B(B))
