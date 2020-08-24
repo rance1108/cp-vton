@@ -463,6 +463,8 @@ def backward_D_basic(netD, real, fake):
     Return the discriminator loss.
     We also call loss_D.backward() to calculate the gradients.
     """
+    
+    criterionGAN = GANLoss('lsgan').cuda()
     # Real
     pred_real = netD(real)
     loss_D_real = criterionGAN(pred_real, True)
