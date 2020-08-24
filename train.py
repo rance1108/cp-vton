@@ -53,6 +53,12 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
     G_B.cuda()
     G_B.train()
 
+    D_A.cuda()
+    D_A.train()
+
+    D_B.cuda()
+    D_B.train()
+
 
 
     # criterion
