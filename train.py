@@ -59,8 +59,6 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
     D_B.cuda()
     D_B.train()
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 
     # criterion
     criterionL1 = nn.L1Loss()
@@ -139,16 +137,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
             input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
             grid, theta = G_A(input_agnostic, c[:,i])                                                  #G_A(A)
-
-            x =(F.grid_sample(c[:,i], grid, padding_mode='border'))
-            x = x.to(device)
-
-
-            print(type(x),"kk")
-
             C_unwarp_warp.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
-            print(type(C_unwarp_warp[i]),"jj")
-
             M_unwarp_warp.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
             G_unwarp_warp.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
             input_agnostic = torch.cat([agnostic,M_unwarp_warp[i]],dim=1)
