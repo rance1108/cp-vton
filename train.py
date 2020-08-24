@@ -138,7 +138,14 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
             input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
             grid, theta = G_A(input_agnostic, c[:,i])                                                  #G_A(A)
+
+            x =(F.grid_sample(c[:,i], grid, padding_mode='border'))
+
+            print(type(x),"kk")
+
             C_unwarp_warp.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
+            print(type(C_unwarp_warp[i]),"jj")
+
             M_unwarp_warp.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
             G_unwarp_warp.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
             input_agnostic = torch.cat([agnostic,M_unwarp_warp[i]],dim=1)
