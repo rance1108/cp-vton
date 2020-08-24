@@ -136,7 +136,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         for i in range(c.shape[1]):
 
             input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
-            print(type(agnostic),type(pcm[:,i]),input_agnostic)
+            print(type(agnostic),type(pcm[:,i]),type(input_agnostic))
             grid, theta = G_A(input_agnostic, c[:,i])                                                  #G_A(A)
             C_unwarp_warp.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
             M_unwarp_warp.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
