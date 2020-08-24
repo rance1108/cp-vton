@@ -140,7 +140,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
             grid, theta = G_A(input_agnostic, c[:,i])                                                  #G_A(A)
 
-            x =(F.grid_sample(c[:,i], grid, padding_mode='border')
+            x =(F.grid_sample(c[:,i], grid, padding_mode='border'))
             x = x.to(device)
 
 
