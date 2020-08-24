@@ -116,14 +116,14 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         G_warpGT_unwarp_warp = []
 
 
-        C_itself_1 = []
-        M_itself_1 = []
-        G_itself_1 = []
+        C_itself_A = []
+        M_itself_A = []
+        G_itself_A = []
 
 
-        C_itself_2 = []
-        M_itself_2 = []
-        G_itself_2 = []
+        C_itself_B = []
+        M_itself_B = []
+        G_itself_B = []
 
         visuals = []
         loss = 0
@@ -172,23 +172,23 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
                 input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
                 grid5, theta = G_A(input_agnostic,im_c[:,i])                                                  #G_A(A)
-                C_itself_1.append(F.grid_sample(im_c[:,i], grid5, padding_mode='border'))
-                M_itself_1.append(F.grid_sample(pcm[:,i], grid5, padding_mode='zeros'))
-                G_itself_1.append(F.grid_sample(im_g, grid5, padding_mode='zeros'))
+                C_itself_A.append(F.grid_sample(im_c[:,i], grid5, padding_mode='border'))
+                M_itself_A.append(F.grid_sample(pcm[:,i], grid5, padding_mode='zeros'))
+                G_itself_A.append(F.grid_sample(im_g, grid5, padding_mode='zeros'))
 
-                loss_idt_A = criterionIdt(C_itself_1[:,i], im_c[:,i]) * lambda_B * lambda_idt
+                loss_idt_A = criterionIdt(C_itself_A[i], im_c[:,i]) * lambda_B * lambda_idt
 
 
                 # G_B should be identity if real_A is fed: ||G_B(A) - A||
 
                 input_agnostic = torch.cat([agnostic,cm[:,i]],dim=1)
                 grid6, theta = G_B(input_agnostic,c[:,i])                                                  #G_A(A)
-                C_itself_2.append(F.grid_sample(c[:,i], grid6, padding_mode='border'))
-                M_itself_2.append(F.grid_sample(cm[:,i], grid6, padding_mode='zeros'))
-                G_itself_2.append(F.grid_sample(im_g, grid6, padding_mode='zeros'))
+                C_itself_B.append(F.grid_sample(c[:,i], grid6, padding_mode='border'))
+                M_itself_B.append(F.grid_sample(cm[:,i], grid6, padding_mode='zeros'))
+                G_itself_B.append(F.grid_sample(im_g, grid6, padding_mode='zeros'))
 
 
-                loss_idt_B = criterionIdt(C_itself_2[:,i], c[:,i]) * lambda_A * lambda_idt
+                loss_idt_B = criterionIdt(C_itself_B[i], c[:,i]) * lambda_A * lambda_idt
             else:
                 loss_idt_A = 0
                 loss_idt_B = 0
@@ -232,7 +232,11 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
                        [G_warpGT_unwarp[i], (C_warpGT_unwarp[i]+c[:,i])*0.5, M_warpGT_unwarp[i]*2-1],
 
-                       [G_warpGT_unwarp_warp[i], (C_warpGT_unwarp_warp[i]+c[:,i])*0.5, M_warpGT_unwarp_warp[i]*2-1]])
+                       [G_warpGT_unwarp_warp[i], (C_warpGT_unwarp_warp[i]+im)*0.5, M_warpGT_unwarp_warp[i]*2-1],
+
+                       [G_itself_A[i], (C_itself_A[i]+c[:,i])*0.5, M_itself_A[i]*2-1],
+
+                       [G_itself_B[i], (C_itself_B[i]+im)*0.5, M_itself_B[i]*2-1]])
 
 
 
