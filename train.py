@@ -240,9 +240,9 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
                        [G_warpGT_unwarp_warp[i], (C_warpGT_unwarp_warp[i]+im)*0.5, M_warpGT_unwarp_warp[i]*2-1],
 
-                       [G_itself_A[i], (C_itself_A[i]+c[:,i])*0.5, M_itself_A[i]*2-1],
+                       [G_itself_A[i], (C_itself_A[i]), M_itself_A[i]*2-1],
 
-                       [G_itself_B[i], (C_itself_B[i]+im)*0.5, M_itself_B[i]*2-1]])
+                       [G_itself_B[i], (C_itself_B[i]), M_itself_B[i]*2-1]])
 
 
 
@@ -279,12 +279,15 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
             t = time.time() - iter_start_time
             # print('step: %8d, time: %.3f, loss: %4f' % (step+1, t, loss.item()), flush=True)
-            print('step: %8d, time: %.3f, loss: %4f loss_G: %4f loss_D: %4f loss_cyc: %4f loss_idt: %4f' \
-                % (step+1, t, loss_G, loss_G_A.item()+loss_G_B.item(), loss_DA.item()+loss_DB.item(), \
+            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f loss_cyc: %4f loss_idt: %4f' \
+                % (step+1, t, loss_G, loss_L1.item(), loss_G_A.item()+loss_G_B.item(), loss_DA.item()+loss_DB.item(), \
                     loss_cycle_A.item()+loss_cycle_B.item(),loss_idt_A.item()+loss_idt_A.item() ), flush=True)
 
         if (step+1) % opt.save_count == 0:
-            save_checkpoint(model, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d.pth' % (step+1)))
+            save_checkpoint(G_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_G_A.pth' % (step+1)))
+            save_checkpoint(G_B, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_G_B.pth' % (step+1)))
+            save_checkpoint(D_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_D_A.pth' % (step+1)))
+            save_checkpoint(D_B, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_D_B.pth' % (step+1)))
 
 
 def train_tom(opt, train_loader, model, board):
