@@ -429,9 +429,8 @@ class GMM(nn.Module):
             return grid, theta
         else:
             K = torch.cat([inputA,inputB],dim=2)
-            K = K.view(K.size(0), K.size(1)*K.size(2), K.size(3), K.size(4))
+            K = K.contiguous().view(K.size(0), K.size(1)*K.size(2), K.size(3), K.size(4))
             xy = self.translator(K)
-            print(xy.shape)
             for j in range(inputA.shape[0]):
                 for i in range(inputA.shape[1]):
                     inputA[j,i] = torch.roll(inputA[j,i], shifts=(int(256*xy[j,i]),int(192*xy[j,i+1])), dims=(-2,-1))
