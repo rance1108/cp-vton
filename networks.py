@@ -415,7 +415,7 @@ class GMM(nn.Module):
         self.gridGen = TpsGridGen(opt.fine_height, opt.fine_width, use_cuda=True, grid_size=opt.grid_size)
         self.translator = translator()
         
-    def forward(self, inputA, inputB,translator=False):
+    def forward(self, inputA, inputB, inputC, translator=False):
         if not translator:
             featureA = self.extractionA(inputA)
             featureB = self.extractionB(inputB)
@@ -428,10 +428,12 @@ class GMM(nn.Module):
 
             return grid, theta
         else:
-            xy = self.translator(inputA)
+            xy = self.translator(torch.cat([inputA,inputB],dim=1))
             for i in range(inputA.shape[1]):
-                inputA = torch.roll(inputA, shifts=(xy[i],xy[i+1]), dims=(-2,-1))
-            return inputA
+                inputA[:,i] = torch.roll(inputA[:,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
+                inputB[:,i] = torch.roll(inputB[:,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
+                inputC[:,i] = torch.roll(inputC[:,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
+            return inputA, inputB, inputC
 
 def save_checkpoint(model, save_path):
     if not os.path.exists(os.path.dirname(save_path)):
@@ -501,7 +503,7 @@ class NLayerDiscriminator(nn.Module):
 class translator(nn.Module):
     """Defines a PatchGAN discriminator"""
 
-    def __init__(self, input_nc=3, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d):
+    def __init__(self, input_nc=20, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d):
         """Construct a PatchGAN discriminator
         Parameters:
             input_nc (int)  -- the number of channels in input images
@@ -552,7 +554,7 @@ class translator(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.linear(x)
         x = self.tanh(x)
-        print(x.shape)
+        print(x.shape,'translator')
         return x
 
 
