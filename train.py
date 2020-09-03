@@ -551,7 +551,7 @@ def main():
     if opt.stage == 'GMM':
         G_A = GMM(opt)
         # G_B = GMM(opt)
-        # D_A = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)
+        D_A = NLayerDiscriminator(15, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)
         # D_B = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)  
 
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):
