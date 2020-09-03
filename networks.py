@@ -4,6 +4,7 @@ import torch.nn as nn
 from torch.nn import init
 from torchvision import models
 import os
+import torch.nn.functional as F
 
 import numpy as np
 import functools
@@ -412,17 +413,25 @@ class GMM(nn.Module):
         self.correlation = FeatureCorrelation()
         self.regression = FeatureRegression(input_nc=192, output_dim=2*opt.grid_size**2, use_cuda=True)
         self.gridGen = TpsGridGen(opt.fine_height, opt.fine_width, use_cuda=True, grid_size=opt.grid_size)
+        self.translator = translator()
         
-    def forward(self, inputA, inputB):
-        featureA = self.extractionA(inputA)
-        featureB = self.extractionB(inputB)
-        featureA = self.l2norm(featureA)
-        featureB = self.l2norm(featureB)
-        correlation = self.correlation(featureA, featureB)
+    def forward(self, inputA, inputB,translator=False):
+        if not translator:
+            featureA = self.extractionA(inputA)
+            featureB = self.extractionB(inputB)
+            featureA = self.l2norm(featureA)
+            featureB = self.l2norm(featureB)
+            correlation = self.correlation(featureA, featureB)
 
-        theta = self.regression(correlation)
-        grid = self.gridGen(theta)
-        return grid, theta
+            theta = self.regression(correlation)
+            grid = self.gridGen(theta)
+
+            return grid, theta
+        else:
+            xy = self.translator(inputA)
+            for i in range(inputA.shape[1]):
+                inputA = torch.roll(inputA, shifts=(xy[i],xy[i+1]), dims=(-2,-1))
+            return inputA
 
 def save_checkpoint(model, save_path):
     if not os.path.exists(os.path.dirname(save_path)):
@@ -488,6 +497,63 @@ class NLayerDiscriminator(nn.Module):
     def forward(self, input):
         """Standard forward."""
         return self.model(input)
+
+class translator(nn.Module):
+    """Defines a PatchGAN discriminator"""
+
+    def __init__(self, input_nc=3, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d):
+        """Construct a PatchGAN discriminator
+        Parameters:
+            input_nc (int)  -- the number of channels in input images
+            ndf (int)       -- the number of filters in the last conv layer
+            n_layers (int)  -- the number of conv layers in the discriminator
+            norm_layer      -- normalization layer
+        """
+        super(translator, self).__init__()
+        if type(norm_layer) == functools.partial:  # no need to use bias as BatchNorm2d has affine parameters
+            use_bias = norm_layer.func == nn.InstanceNorm2d
+        else:
+            use_bias = norm_layer == nn.InstanceNorm2d
+
+        kw = 4
+        padw = 1
+        sequence = [nn.Conv2d(input_nc, ndf, kernel_size=kw, stride=2, padding=padw), nn.LeakyReLU(0.2, True)]
+        nf_mult = 1
+        nf_mult_prev = 1
+        for n in range(1, n_layers):  # gradually increase the number of filters
+            nf_mult_prev = nf_mult
+            nf_mult = min(2 ** n, 8)
+            sequence += [
+                nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=kw, stride=2, padding=padw, bias=use_bias),
+                norm_layer(ndf * nf_mult),
+                nn.LeakyReLU(0.2, True)
+            ]
+
+        nf_mult_prev = nf_mult
+        nf_mult = min(2 ** n_layers, 8)
+        sequence += [
+            nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=kw, stride=1, padding=padw, bias=use_bias),
+            norm_layer(ndf * nf_mult),
+            nn.LeakyReLU(0.2, True)
+        ]
+
+        sequence += [nn.Conv2d(ndf * nf_mult, 1, kernel_size=kw, stride=1, padding=padw)]  # output 1 channel prediction map
+        self.model = nn.Sequential(*sequence)
+        self.linear = nn.Linear(ndf * nf_mult, 2*5)
+
+        self.tanh = nn.Tanh()
+
+        init_weights(self.model, init_type='normal')
+        init_weights(self.linear, init_type='normal')
+
+    def forward(self, input):
+        """Standard forward."""
+        x = self.model(input)
+        x = x.view(x.size(0), -1)
+        x = self.linear(x)
+        x = self.tanh(x)
+        print(x.shape)
+        return x
 
 
 class GANLoss(nn.Module):

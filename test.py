@@ -257,22 +257,43 @@ def test_tom(opt, test_loader, model, board):
 
         visuals = ([ [im_h, shape, im_pose], 
                [c[:,0], cm[:,0]*2-1, cm[:,0]*2-1],
+
                [c[:,1], cm[:,1]*2-1, cm[:,1]*2-1],
+
                [c[:,2], cm[:,2]*2-1, cm[:,2]*2-1],
+
                [c[:,3], cm[:,3]*2-1, cm[:,3]*2-1], 
+
                [c[:,4], cm[:,4]*2-1, cm[:,4]*2-1], 
+
                [(((c[:,0] )+ \
                     (c[:,1] )+ \
                     (c[:,2] )+ \
                     (c[:,3] )+ \
                     (c[:,4] ))+(1-torch.sum(cm,1))),
-               bg, m_composite*2-1], 
-               [p_rendered, p_tryon, im]])
+
+               bg, 
+
+               m_composite*2-1], 
+
+               [p_rendered, 
+
+               p_tryon, 
+               
+               im]])
 
 
         cname = '999.png'
 
         save_image(p_tryon, os.path.join(warp_cloth_dir, cname)) 
+
+        cname1 = 'all.png'
+
+        save_image((((c[:,0] )+ \
+                    (c[:,1] )+ \
+                    (c[:,2] )+ \
+                    (c[:,3] )+ \
+                    (c[:,4] ))+(1-torch.sum(cm,1))), os.path.join(warp_cloth_dir, cname1)) 
 
 
         # save_images(p_tryon, im_names, try_on_dir) 
