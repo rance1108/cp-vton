@@ -430,7 +430,7 @@ class GMM(nn.Module):
         else:
             K = torch.cat([inputA,inputB],dim=2)
             K = K.view(K.size(0), K.size(1)*K.size(2), K.size(3), K.size(4))
-            xy = self.translator(K)
+            xy = int(256*self.translator(K))
             for i in range(inputA.shape[1]):
                 inputA[:,i] = torch.roll(inputA[:,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
                 inputB[:,i] = torch.roll(inputB[:,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
@@ -543,7 +543,7 @@ class translator(nn.Module):
 
         sequence += [nn.Conv2d(ndf * nf_mult, 1, kernel_size=kw, stride=1, padding=padw)]  # output 1 channel prediction map
         self.model = nn.Sequential(*sequence)
-        self.linear = nn.Linear(ndf * nf_mult, 2*5)
+        self.linear = nn.Linear(660, 2*5)
 
         self.tanh = nn.Tanh()
 
