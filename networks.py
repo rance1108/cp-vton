@@ -429,8 +429,8 @@ class GMM(nn.Module):
             return grid, theta
         else:
             print(inputA.shape,inputB.shape)
-            print( torch.cat([inputA,inputB],dim=1).shape )
-            xy = self.translator(torch.cat([inputA,inputB],dim=1))
+            print( torch.cat([inputA,inputB],dim=2).shape)
+            xy = self.translator(torch.cat([inputA,inputB],dim=2))
             for i in range(inputA.shape[1]):
                 inputA[:,i] = torch.roll(inputA[:,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
                 inputB[:,i] = torch.roll(inputB[:,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
@@ -505,7 +505,7 @@ class NLayerDiscriminator(nn.Module):
 class translator(nn.Module):
     """Defines a PatchGAN discriminator"""
 
-    def __init__(self, input_nc=20, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d):
+    def __init__(self, input_nc=4, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d):
         """Construct a PatchGAN discriminator
         Parameters:
             input_nc (int)  -- the number of channels in input images
