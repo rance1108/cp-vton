@@ -430,13 +430,12 @@ class GMM(nn.Module):
         else:
             K = torch.cat([inputA,inputB],dim=2)
             K = K.view(K.size(0), K.size(1)*K.size(2), K.size(3), K.size(4))
-            xy = (256*self.translator(K))
-            print(xy.shape,"xxyy")
+            xy = self.translator(K)
             for j in range(inputA.shape[0]):
                 for i in range(inputA.shape[1]):
-                    inputA[j,i] = torch.roll(inputA[j,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
-                    inputB[j,i] = torch.roll(inputB[j,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
-                    inputC[j,i] = torch.roll(inputC[j,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
+                    inputA[j,i] = torch.roll(inputA[j,i], shifts=(int(256*xy[j,i]),int(192*xy[j,i+1])), dims=(-2,-1))
+                    inputB[j,i] = torch.roll(inputB[j,i], shifts=(int(256*xy[j,i]),int(192*xy[j,i+1])), dims=(-2,-1))
+                    inputC[j,i] = torch.roll(inputC[j,i], shifts=(int(256*xy[j,i]),int(192*xy[j,i+1])), dims=(-2,-1))
             return inputA, inputB, inputC
 
 def save_checkpoint(model, save_path):
