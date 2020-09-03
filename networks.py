@@ -428,9 +428,9 @@ class GMM(nn.Module):
 
             return grid, theta
         else:
-            print(inputA.shape,inputB.shape)
-            print( torch.cat([inputA,inputB],dim=2).shape)
-            xy = self.translator(torch.cat([inputA,inputB],dim=2))
+            K = torch.cat([inputA,inputB],dim=2)
+            K = K.view(K.size(0), K.size(1)*K.size(2), K.size(3), K.size(4))
+            xy = self.translator(K)
             for i in range(inputA.shape[1]):
                 inputA[:,i] = torch.roll(inputA[:,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
                 inputB[:,i] = torch.roll(inputB[:,i], shifts=(xy[i],xy[i+1]), dims=(-2,-1))
