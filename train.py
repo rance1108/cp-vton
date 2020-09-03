@@ -214,6 +214,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
         # loss_mask = torch.max(1-torch.sum(M_unwarp_warp,dim=1),torch.tensor([0.]))
         print(M_unwarp_warp.shape,"OKOKOK")
+        
         loss_mask = nn.ReLU(torch.sum(M_unwarp_warp,dim=1))
 
         # GAN loss D_A(G_A(A))
