@@ -281,7 +281,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
                        [c[:,i], C_unwarp_warp[:,i], im_c[:,i]],
 
-                       [cm[:,i]*2-1, M_unwarp_warp[i]*2-1, pcm[:,i]*2-1],
+                       [cm[:,i]*2-1, M_unwarp_warp[:,i]*2-1, pcm[:,i]*2-1],
 
                        [G_unwarp_warp[:,i], (C_unwarp_warp[:,i]), im],
 
