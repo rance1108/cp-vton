@@ -553,7 +553,9 @@ class translator(nn.Module):
     def forward(self, input):
         """Standard forward."""
         x = self.model(input)
+        print(x.shape)
         x = x.view(x.size(0), -1)
+        print(x.shape)
         x = self.linear(x)
         x = self.tanh(x)
         print(x.shape,'translator')
