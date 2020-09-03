@@ -559,7 +559,7 @@ def main():
 
         # train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board)
 
-        train_gmm(opt, train_loader, G_A, None, None, None, board)
+        train_gmm(opt, train_loader, G_A, None, D_A, None, board)
 
         # save_checkpoint(G_A, os.path.join(opt.checkpoint_dir, opt.name, 'gmmA2B_final.pth'))
         # save_checkpoint(G_B, os.path.join(opt.checkpoint_dir, opt.name, 'gmmB2A_final.pth'))
