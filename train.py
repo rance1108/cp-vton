@@ -104,6 +104,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         # head_mask = inputs['head_mask'].cuda()
         print(c.shape,c[:,3:4].shape)
         print(c[:,4:5].shape)
+        print(c[:,5:6].shape)
         c = torch.cat([c,c[:,3]],dim=1)
         print(c.shape)
 
