@@ -428,6 +428,7 @@ class GMM(nn.Module):
 
             return grid, theta
         else:
+            print(inputA.shape,inputB.shape)
             print( torch.cat([inputA,inputB],dim=1).shape )
             xy = self.translator(torch.cat([inputA,inputB],dim=1))
             for i in range(inputA.shape[1]):
