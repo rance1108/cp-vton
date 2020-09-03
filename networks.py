@@ -505,7 +505,7 @@ class NLayerDiscriminator(nn.Module):
 class translator(nn.Module):
     """Defines a PatchGAN discriminator"""
 
-    def __init__(self, input_nc=4, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d):
+    def __init__(self, input_nc=20, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d):
         """Construct a PatchGAN discriminator
         Parameters:
             input_nc (int)  -- the number of channels in input images
