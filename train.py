@@ -198,8 +198,8 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         M_unwarp_warp = torch.stack(M_unwarp_warp, dim=1)
         G_unwarp_warp = torch.stack(G_unwarp_warp, dim=1)
 
-        C_unwarp_warp_after, M_unwarp_warp_after, G_unwarp_warp_after = G_A(C_unwarp_warp, M_unwarp_warp,
-         G_unwarp_warp, translator=True)
+        # C_unwarp_warp_after, M_unwarp_warp_after, G_unwarp_warp_after = G_A(C_unwarp_warp, M_unwarp_warp,
+        #  G_unwarp_warp, translator=True)
 
 
         for param in D_A.parameters():
@@ -564,7 +564,7 @@ def main():
     if opt.stage == 'GMM':
         G_A = GMM(opt)
         # G_B = GMM(opt)
-        D_A = NLayerDiscriminator(15, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)
+        D_A = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)
         # D_B = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)  
 
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):

@@ -413,7 +413,7 @@ class GMM(nn.Module):
         self.correlation = FeatureCorrelation()
         self.regression = FeatureRegression(input_nc=192, output_dim=2*opt.grid_size**2, use_cuda=True)
         self.gridGen = TpsGridGen(opt.fine_height, opt.fine_width, use_cuda=True, grid_size=opt.grid_size)
-        self.translator = translator()
+        # self.translator = translator()
         
     def forward(self, inputA, inputB, inputC, translator=False):
         if not translator:
