@@ -216,9 +216,11 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
         # loss_mask = torch.sum(F.relu(1-torch.sum(M_unwarp_warp,dim=1)))
 
+        # # GAN loss D_A(G_A(A))
+        # loss_G_A = criterionGAN(D_A(C_unwarp_warp_after.contiguous().view(C_unwarp_warp_after.size(0),
+        #  C_unwarp_warp_after.size(1)*C_unwarp_warp_after.size(2), C_unwarp_warp_after.size(3), C_unwarp_warp_after.size(4))), True)
         # GAN loss D_A(G_A(A))
-        loss_G_A = criterionGAN(D_A(C_unwarp_warp_after.contiguous().view(C_unwarp_warp_after.size(0),
-         C_unwarp_warp_after.size(1)*C_unwarp_warp_after.size(2), C_unwarp_warp_after.size(3), C_unwarp_warp_after.size(4))), True)
+        loss_G_A = criterionGAN(D_A(C_unwarp_warp_after), True)
 
         # # GAN loss D_B(G_B(B))
         # loss_G_B = criterionGAN(D_B(C_warpGT_unwarp[i]), True)
@@ -229,10 +231,12 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         # # Backward cycle loss || G_A(G_B(B)) - B||
         # loss_cycle_B = criterionCycle(C_warpGT_unwarp_warp[i], im_c[:,i]) * lambda_B
 
-        loss_L1 =  criterionL1(C_unwarp_warp_after.contiguous().view(C_unwarp_warp_after.size(0),
-         C_unwarp_warp_after.size(1)*C_unwarp_warp_after.size(2), C_unwarp_warp_after.size(3), C_unwarp_warp_after.size(4)), 
-        im_c[:,0].contiguous().view(im_c.size(0),
-        1, im_c.size(3), im_c.size(4))) * lambda_L1
+        # loss_L1 =  criterionL1(C_unwarp_warp_after.contiguous().view(C_unwarp_warp_after.size(0),
+        #  C_unwarp_warp_after.size(1)*C_unwarp_warp_after.size(2), C_unwarp_warp_after.size(3), C_unwarp_warp_after.size(4)), 
+        # im_c.contiguous().view(im_c.size(0),
+        #  im_c.size(1)*im_c.size(2), im_c.size(3), im_c.size(4))) * lambda_L1
+
+        loss_L1 =  criterionL1(C_unwarp_warp_after, im_c[:,0]) * lambda_L1
         # combined loss and calculate gradients
         loss_G = loss_G_A + loss_L1
         # loss_G = loss_G_A + loss_G_B + loss_cycle_A + loss_cycle_B + loss_idt_A + loss_idt_B + loss_L1
@@ -251,10 +255,13 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
 
 
-        loss_DA = backward_D_basic(D_A, im_c[:,0].contiguous().view(im_c.size(0),
-         1, im_c.size(3), im_c.size(4)), 
-        C_unwarp_warp_after.contiguous().view(C_unwarp_warp_after.size(0),
-         C_unwarp_warp_after.size(1)*C_unwarp_warp_after.size(2), C_unwarp_warp_after.size(3), C_unwarp_warp_after.size(4)))
+        loss_DA = backward_D_basic(D_A, im_c[:,0], 
+        C_unwarp_warp_after)
+
+        # loss_DA = backward_D_basic(D_A, im_c.contiguous().view(im_c.size(0),
+        #  im_c.size(1)*im_c.size(2), im_c.size(3), im_c.size(4)), 
+        # C_unwarp_warp_after.contiguous().view(C_unwarp_warp_after.size(0),
+        #  C_unwarp_warp_after.size(1)*C_unwarp_warp_after.size(2), C_unwarp_warp_after.size(3), C_unwarp_warp_after.size(4)))
             # loss_DB = backward_D_basic(D_B, c[:,i], C_warpGT_unwarp_warp[i])
         optimizerD.step()
 
