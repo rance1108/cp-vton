@@ -137,7 +137,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         loss = 0
         
         # for i in range(c.shape[1]):
-        for i in range(5):
+        for i in range(1):
 
             input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
             # print(type(agnostic),type(pcm[:,i]),type(input_agnostic))
@@ -276,7 +276,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             #            [G_itself_B[i], (C_itself_B[i]), M_itself_B[i]*2-1]])
 
 
-        for i in range(5):
+        for i in range(1):
 
             visuals.append([ [shape, im_h, im_pose], 
 
@@ -304,8 +304,9 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             
         if (step+1) % opt.display_count == 0:
             # for j, k in zip(range(3),['combine_inner', 'combine_outer', 'combine_bottom']):
-            for j, k in zip(range(5),['combine_inner', 'combine_outer', 'combine_bottom',
-                                         'combine_shoe_left', 'combine_shoe_right']):
+            # for j, k in zip(range(5),['combine_inner', 'combine_outer', 'combine_bottom',
+            #                              'combine_shoe_left', 'combine_shoe_right']):
+            for j, k in zip(range(1),['combine_inner']):
 
                 board_add_images(board, k, visuals[j], step+1)
 
