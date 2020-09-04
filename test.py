@@ -119,15 +119,28 @@ def test_gmm(opt, test_loader, model, board):
         for i in range(c.shape[1]):
 
             input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
-            grid, theta = model(input_agnostic, c[:,i])
+            grid, theta = model(input_agnostic, c[:,i],None)
             warped_cloth.append(F.grid_sample(c[:,i], grid, padding_mode='border'))
             warped_mask.append(F.grid_sample(cm[:,i], grid, padding_mode='zeros'))
             warped_grid.append(F.grid_sample(im_g, grid, padding_mode='zeros'))
-            visuals.append([ [shape, im_h, im_pose], 
-                       [c[:,i], warped_cloth[i], im_c[:,i]],
-                       [cm[:,i]*2-1, warped_mask[i]*2-1, pcm[:,i]*2-1],
-                       [warped_grid[i], (warped_cloth[i]+im)*0.5, im]])
 
+
+
+
+        warped_cloth = torch.stack(warped_cloth, dim=1)
+        warped_mask = torch.stack(warped_mask, dim=1)
+        warped_grid = torch.stack(warped_grid, dim=1)
+
+        warped_cloth_after, warped_mask_after, warped_grid_after = G_A(warped_cloth, warped_mask,
+         warped_grid, translator=True)
+
+        visuals.append([ [shape, im_h, im_pose], 
+                   [c[:,i], warped_cloth[:,i], im_c[:,i]],
+                   [cm[:,i]*2-1, warped_mask[:,i]*2-1, pcm[:,i]*2-1],
+                   [warped_grid[:,i], (warped_cloth[:,i]+im)*0.5, im],
+                   [warped_grid_after[:,i], (warped_cloth_after[:,i]+im)*0.5, warped_mask_after[:,i]*2-1]])
+
+        for i in range(c.shape[1]):
             # print(i,len(c.shape[1])-1, len(c.shape[1]),len(c_names))
             if i !=4:
                 cname1 = c_names[i][0][:-4] +'_wc.png'
@@ -141,9 +154,9 @@ def test_gmm(opt, test_loader, model, board):
             # cname5 = c_names[i][0][:-4] +'_1234.png'
             # print("a:",im_c[:,i].max(),"b:",im_c[:,i].min(),"c:",warped_cloth[i].max(),"d:",warped_cloth[i].min(),
             #     "e:",warped_mask[i].max(),"f:",warped_mask[i].min())
-            save_image((warped_cloth[i]+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
+            save_image((warped_cloth[:,i]+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
             save_image((im_c[:,i]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
-            save_image(warped_mask[i]*2-1, os.path.join(warp_cloth_dir, cname2)) 
+            save_image(warped_mask[:,i]*2-1, os.path.join(warp_cloth_dir, cname2)) 
             # save_image(im, os.path.join(warp_cloth_dir, cname4)) 
             # save_image((im+1)*0.5, os.path.join(warp_cloth_dir, cname5)) 
 
@@ -279,7 +292,7 @@ def test_tom(opt, test_loader, model, board):
                [p_rendered, 
 
                p_tryon, 
-               
+
                im]])
 
 

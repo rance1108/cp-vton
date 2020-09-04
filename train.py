@@ -102,7 +102,8 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         im_c =  inputs['parse_cloth'].cuda()
         im_g = inputs['grid_image'].cuda()
         # head_mask = inputs['head_mask'].cuda()
-
+        # print(torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)),torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)).shape)
+        # cm[:,0] = torch.sum([])
 
         C_unwarp_warp = []
         M_unwarp_warp = []
