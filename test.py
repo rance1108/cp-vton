@@ -131,7 +131,7 @@ def test_gmm(opt, test_loader, model, board):
         warped_mask = torch.stack(warped_mask, dim=1)
         warped_grid = torch.stack(warped_grid, dim=1)
 
-        warped_cloth_after, warped_mask_after, warped_grid_after = G_A(warped_cloth, warped_mask,
+        warped_cloth_after, warped_mask_after, warped_grid_after = model(warped_cloth, warped_mask,
          warped_grid, translator=True)
 
         visuals.append([ [shape, im_h, im_pose], 
