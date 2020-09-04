@@ -166,37 +166,37 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
             ##################BACKPROP#########################################################
                         # Identity loss
-            if lambda_idt > 0:
-                # G_A should be identity if real_B is fed: ||G_A(B) - B||
+            # if lambda_idt > 0:
+            #     # G_A should be identity if real_B is fed: ||G_A(B) - B||
 
 
-                input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
-                grid5, theta = G_A(input_agnostic,im_c[:,i], None)                                                  #G_A(A)
-                C_itself_A.append(F.grid_sample(im_c[:,i], grid5, padding_mode='border'))
-                M_itself_A.append(F.grid_sample(pcm[:,i], grid5, padding_mode='zeros'))
-                G_itself_A.append(F.grid_sample(im_g, grid5, padding_mode='zeros'))
+            #     input_agnostic = torch.cat([agnostic,pcm[:,i]],dim=1)
+            #     grid5, theta = G_A(input_agnostic,im_c[:,i], None)                                                  #G_A(A)
+            #     C_itself_A.append(F.grid_sample(im_c[:,i], grid5, padding_mode='border'))
+            #     M_itself_A.append(F.grid_sample(pcm[:,i], grid5, padding_mode='zeros'))
+            #     G_itself_A.append(F.grid_sample(im_g, grid5, padding_mode='zeros'))
 
-                loss_idt_A = criterionIdt(C_itself_A[i], im_c[:,i]) * lambda_B * lambda_idt
-
-
-                # # G_B should be identity if real_A is fed: ||G_B(A) - A||
-
-                # input_agnostic = torch.cat([agnostic,cm[:,i]],dim=1)
-                # grid6, theta = G_B(input_agnostic,c[:,i])                                                  
-                # C_itself_B.append(F.grid_sample(c[:,i], grid6, padding_mode='border'))
-                # M_itself_B.append(F.grid_sample(cm[:,i], grid6, padding_mode='zeros'))
-                # G_itself_B.append(F.grid_sample(im_g, grid6, padding_mode='zeros'))
+            #     loss_idt_A = criterionIdt(C_itself_A[i], im_c[:,i]) * lambda_B * lambda_idt
 
 
-                # loss_idt_B = criterionIdt(C_itself_B[i], c[:,i]) * lambda_A * lambda_idt
-            else:
-                loss_idt_A = 0
-                # loss_idt_B = 0
+            #     # # G_B should be identity if real_A is fed: ||G_B(A) - A||
+
+            #     # input_agnostic = torch.cat([agnostic,cm[:,i]],dim=1)
+            #     # grid6, theta = G_B(input_agnostic,c[:,i])                                                  
+            #     # C_itself_B.append(F.grid_sample(c[:,i], grid6, padding_mode='border'))
+            #     # M_itself_B.append(F.grid_sample(cm[:,i], grid6, padding_mode='zeros'))
+            #     # G_itself_B.append(F.grid_sample(im_g, grid6, padding_mode='zeros'))
 
 
-        C_unwarp_warp = torch.stack(C_unwarp_warp, dim=1)
-        M_unwarp_warp = torch.stack(M_unwarp_warp, dim=1)
-        G_unwarp_warp = torch.stack(G_unwarp_warp, dim=1)
+            #     # loss_idt_B = criterionIdt(C_itself_B[i], c[:,i]) * lambda_A * lambda_idt
+            # else:
+            #     loss_idt_A = 0
+            #     # loss_idt_B = 0
+
+
+        C_unwarp_warp_after = torch.stack(C_unwarp_warp, dim=1)
+        M_unwarp_warp_after = torch.stack(M_unwarp_warp, dim=1)
+        G_unwarp_warp_after = torch.stack(G_unwarp_warp, dim=1)
 
         # C_unwarp_warp_after, M_unwarp_warp_after, G_unwarp_warp_after = G_A(C_unwarp_warp, M_unwarp_warp,
         #  G_unwarp_warp, translator=True)
@@ -214,7 +214,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
         # loss_mask = torch.max(1-torch.sum(M_unwarp_warp,dim=1),torch.tensor([0.]))
 
-        loss_mask = torch.sum(F.relu(1-torch.sum(M_unwarp_warp,dim=1)))
+        # loss_mask = torch.sum(F.relu(1-torch.sum(M_unwarp_warp,dim=1)))
 
         # GAN loss D_A(G_A(A))
         loss_G_A = criterionGAN(D_A(C_unwarp_warp_after.contiguous().view(C_unwarp_warp_after.size(0),
@@ -234,7 +234,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         im_c.contiguous().view(im_c.size(0),
          im_c.size(1)*im_c.size(2), im_c.size(3), im_c.size(4))) * lambda_L1
         # combined loss and calculate gradients
-        loss_G = loss_G_A  + loss_idt_A  + loss_L1
+        loss_G = loss_G_A + loss_L1
         # loss_G = loss_G_A + loss_G_B + loss_cycle_A + loss_cycle_B + loss_idt_A + loss_idt_B + loss_L1
         loss_G.backward()
         optimizerG.step()  
@@ -286,9 +286,10 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
                        [G_unwarp_warp[:,i], (C_unwarp_warp[:,i]), im],
 
-                       [G_unwarp_warp_after[:,i], C_unwarp_warp_after[:,i], M_unwarp_warp_after[:,i]],
+                       # [G_unwarp_warp_after[:,i], C_unwarp_warp_after[:,i], M_unwarp_warp_after[:,i]],
 
-                       [G_itself_A[i], (C_itself_A[i]), M_itself_A[i]*2-1]])
+                       # [G_itself_A[i], (C_itself_A[i]), M_itself_A[i]*2-1]
+                       ])
 
 
 
@@ -320,18 +321,20 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             board.add_scalar('loss_L1', loss_L1.item(), step+1)
             # board.add_scalar('loss_cycle_A', loss_cycle_A.item(), step+1)
             # board.add_scalar('loss_cycle_B', loss_cycle_B.item(), step+1)
-            board.add_scalar('loss_idt_A', loss_idt_A.item(), step+1)
+            # board.add_scalar('loss_idt_A', loss_idt_A.item(), step+1)
             # board.add_scalar('loss_idt_B', loss_idt_B.item(), step+1)
             board.add_scalar('loss_DA', loss_DA.item(), step+1)
             # board.add_scalar('loss_DB', loss_DB.item(), step+1)
 
-            board.add_scalar('loss_mask', loss_mask.item(), step+1)
+            # board.add_scalar('loss_mask', loss_mask.item(), step+1)
 
             t = time.time() - iter_start_time
             # print('step: %8d, time: %.3f, loss: %4f' % (step+1, t, loss.item()), flush=True)
-            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f loss_idt: %4f loss_mask: %4f' \
-                % (step+1, t, loss_G, loss_L1.item(), loss_G_A.item(), loss_DA.item(),
-                    loss_idt_A.item(),loss_mask), flush=True)
+            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f' \
+                % (step+1, t, loss_G, loss_L1.item(), loss_G_A.item(), loss_DA.item()), flush=True)
+            # print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f loss_idt: %4f loss_mask: %4f' \
+            #     % (step+1, t, loss_G, loss_L1.item(), loss_G_A.item(), loss_DA.item(),
+            #         loss_idt_A.item(),loss_mask), flush=True)
             # print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f loss_cyc: %4f loss_idt: %4f' \
             #     % (step+1, t, loss_G, loss_L1.item(), loss_G_A.item()+loss_G_B.item(), loss_DA.item()+loss_DB.item(), \
             #         loss_cycle_A.item()+loss_cycle_B.item(),loss_idt_A.item()+loss_idt_B.item() ), flush=True)
