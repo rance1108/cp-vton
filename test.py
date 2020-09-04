@@ -134,13 +134,15 @@ def test_gmm(opt, test_loader, model, board):
         warped_cloth_after, warped_mask_after, warped_grid_after = model(warped_cloth, warped_mask,
          warped_grid, translator=True)
 
-        visuals.append([ [shape, im_h, im_pose], 
+       
+
+        for i in range(c.shape[1]):
+
+            visuals.append([ [shape, im_h, im_pose], 
                    [c[:,i], warped_cloth[:,i], im_c[:,i]],
                    [cm[:,i]*2-1, warped_mask[:,i]*2-1, pcm[:,i]*2-1],
                    [warped_grid[:,i], (warped_cloth[:,i]+im)*0.5, im],
                    [warped_grid_after[:,i], (warped_cloth_after[:,i]+im)*0.5, warped_mask_after[:,i]*2-1]])
-
-        for i in range(c.shape[1]):
             # print(i,len(c.shape[1])-1, len(c.shape[1]),len(c_names))
             if i !=4:
                 cname1 = c_names[i][0][:-4] +'_wc.png'
