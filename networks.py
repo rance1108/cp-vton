@@ -427,16 +427,16 @@ class GMM(nn.Module):
             grid = self.gridGen(theta)
 
             return grid, theta
-        else:
-            K = torch.cat([inputA,inputB],dim=2)
-            K = K.contiguous().view(K.size(0), K.size(1)*K.size(2), K.size(3), K.size(4))
-            xy = self.translator(K)
-            for j in range(inputA.shape[0]):
-                for i in range(inputA.shape[1]):
-                    inputA[j,i] = torch.roll(inputA[j,i], shifts=(int(256*xy[j,i]),int(192*xy[j,i+1])), dims=(-2,-1))
-                    inputB[j,i] = torch.roll(inputB[j,i], shifts=(int(256*xy[j,i]),int(192*xy[j,i+1])), dims=(-2,-1))
-                    inputC[j,i] = torch.roll(inputC[j,i], shifts=(int(256*xy[j,i]),int(192*xy[j,i+1])), dims=(-2,-1))
-            return inputA, inputB, inputC
+        # else:
+        #     K = torch.cat([inputA,inputB],dim=2)
+        #     K = K.contiguous().view(K.size(0), K.size(1)*K.size(2), K.size(3), K.size(4))
+        #     xy = self.translator(K)
+        #     for j in range(inputA.shape[0]):
+        #         for i in range(inputA.shape[1]):
+        #             inputA[j,i] = torch.roll(inputA[j,i], shifts=(int(256*xy[j,i]),int(192*xy[j,i+1])), dims=(-2,-1))
+        #             inputB[j,i] = torch.roll(inputB[j,i], shifts=(int(256*xy[j,i]),int(192*xy[j,i+1])), dims=(-2,-1))
+        #             inputC[j,i] = torch.roll(inputC[j,i], shifts=(int(256*xy[j,i]),int(192*xy[j,i+1])), dims=(-2,-1))
+        #     return inputA, inputB, inputC
 
 def save_checkpoint(model, save_path):
     if not os.path.exists(os.path.dirname(save_path)):
