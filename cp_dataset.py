@@ -59,8 +59,10 @@ class CPDataset(data.Dataset):
             c = []
             cm = []
             if_c = []
-            clothes = ["0.png", "1.png", "2.png", "4.png"]
-            masks = ["0_mask.png", "1_mask.png", "2_mask.png", "4_mask.png"]
+            # clothes = ["0.png", "1.png", "2.png", "4.png"]
+            # masks = ["0_mask.png", "1_mask.png", "2_mask.png", "4_mask.png"]
+            clothes = ["0.png", "1.png"]
+            masks = ["0_mask.png", "1_mask.png"]
             for f_name, fm_name in zip(clothes, masks):
                 c_path = osp.join(self.data_path, im_name, f_name)
                 cm_path = osp.join(self.data_path, im_name, fm_name)
@@ -70,14 +72,14 @@ class CPDataset(data.Dataset):
                         im = Image.open(c_path)
                         ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
                         im_flip = ImageOps.mirror(im)
-                        c.append(im)
                         c.append(im_flip)
+                        c.append(im)
 
                         im_m = Image.open(cm_path)
                         ori_h, ori_w = np.array(x).shape[0],np.array(x).shape[1]
                         im_m_flip = ImageOps.mirror(im_m)
-                        cm.append(im_m)
                         cm.append(im_m_flip)
+                        cm.append(im_m)
 
                         if_c.append(True)
                         if_c.append(True)
@@ -140,8 +142,10 @@ class CPDataset(data.Dataset):
             c = []
             cm = []
             if_c = []
-            clothes = ["0_wc.png", "1_wc.png", "2_wc.png", "4_wc.png", "5_wc.png"]
-            masks = ["0_wcm.png", "1_wcm.png", "2_wcm.png", "4_wcm.png", "5_wcm.png"]
+            clothes = ["0_wc.png", "1_wc.png"]
+            masks = ["0_wcm.png", "1_wcm.png"]
+            # clothes = ["0_wc.png", "1_wc.png", "2_wc.png", "4_wc.png", "5_wc.png"]
+            # masks = ["0_wcm.png", "1_wcm.png", "2_wcm.png", "4_wcm.png", "5_wcm.png"]
             for f_name, fm_name in zip(clothes, masks):
                 c_path = osp.join(self.tomroot, self.datamode, im_name, f_name)
                 cm_path = osp.join(self.tomroot, self.datamode, im_name, fm_name)
@@ -201,6 +205,15 @@ class CPDataset(data.Dataset):
 
         parse_cloth = []
 
+        parse_inout = (parse_array == 2).astype(np.float32) + (parse_array ==3).astype(np.float32)
+
+        parse_inout = torch.from_numpy(parse_inout)
+
+        parse_inout = transforms.ToPILImage()(parse_inout.unsqueeze_(0))
+        parse_inout = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(parse_inout))
+
+        im_inout = ((im* parse_inout) + 1 - parse_inout)
+
 
         for n,i in enumerate(if_c):
             if i == False:
@@ -222,7 +235,9 @@ class CPDataset(data.Dataset):
         im_h = self.transform(im_h) # [-1,1]
         # im_parse = transforms.Resize((256,192))(im_parse)
 
-        parse_head_bg = (parse_array == 0).astype(np.float32) + (head_mask == 1).astype(np.float32)  
+        parse_head_bg = (parse_array == 0).astype(np.float32) + (head_mask == 1).astype(np.float32) + \
+            (head_mask == 4).astype(np.float32) + (head_mask == 5).astype(np.float32)
+
         parse_head_bg = torch.from_numpy(parse_head_bg)
         parse_head_bg = transforms.ToPILImage()(parse_head_bg.unsqueeze_(0))
         parse_head_bg = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(parse_head_bg))
@@ -354,7 +369,9 @@ class CPDataset(data.Dataset):
             # 'head_mask' : head_mask,
             'bg': bg,
             'pose_map':pose_map,
-            'im_nobg': im_nobg
+            'im_nobg': im_nobg,
+            'parse_inout':parse_inout,
+            'im_inout':im_inout
             # 'if_c': torch.tensor(if_c)
             }
 
