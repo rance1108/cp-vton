@@ -205,15 +205,6 @@ class CPDataset(data.Dataset):
 
         parse_cloth = []
 
-        parse_inout = (parse_array == 2).astype(np.float32) + (parse_array ==3).astype(np.float32)
-
-        parse_inout = torch.from_numpy(parse_inout)
-
-        parse_inout = transforms.ToPILImage()(parse_inout.unsqueeze_(0))
-        parse_inout = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(parse_inout))
-
-        im_inout = ((im* parse_inout) + 1 - parse_inout)
-
 
         for n,i in enumerate(if_c):
             if i == False:
@@ -243,6 +234,16 @@ class CPDataset(data.Dataset):
         parse_head_bg = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(parse_head_bg))
 
         bg = ((im* parse_head_bg) + 1 - parse_head_bg)
+
+
+        parse_inout = (parse_array == 2).astype(np.float32) + (parse_array ==3).astype(np.float32)
+
+        parse_inout = torch.from_numpy(parse_inout)
+
+        parse_inout = transforms.ToPILImage()(parse_inout.unsqueeze_(0))
+        parse_inout = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(parse_inout))
+
+        im_inout = ((im* parse_inout) + 1 - parse_inout)
 
 
         # shape downsample
