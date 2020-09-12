@@ -103,6 +103,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         im_g = inputs['grid_image'].cuda()
         im_inout = inputs['im_inout'].cuda()
         parse_inout = inputs['parse_inout'].cuda()
+        bg = inputs['bg'].cuda()
         # head_mask = inputs['head_mask'].cuda()
         # print(torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)),torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)).shape)
         # cm[:,0] = torch.sum([])
