@@ -243,7 +243,11 @@ class CPDataset(data.Dataset):
         bg = (im* parse_head_bg) 
 
 
-        parse_inout = (parse_array == 2).astype(np.float32) + (parse_array ==3).astype(np.float32)
+        parse_inout = Image.open(osp.join(self.data_path, im_name, "12.png"))
+        
+        parse_inout = np.array(parse_inout)
+
+        parse_inout = (parse_inout == 2).astype(np.float32) + (parse_inout ==3).astype(np.float32)
 
         parse_inout = torch.from_numpy(parse_inout)
 
