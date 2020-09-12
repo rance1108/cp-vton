@@ -140,30 +140,20 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         loss = 0
         
         input_agnostic = torch.cat([agnostic,parse_inout],dim=1)
-        print(input_agnostic.shape,agnostic.shape,parse_inout.shape)
         grid1, theta1 = G_A(input_agnostic, c[:,0], None) 
-        print('111')
         c1 = F.grid_sample(c[:,0], grid1, padding_mode='border')
-        print('1111')
         m1 = F.grid_sample(cm[:,0], grid1, padding_mode='zeros')
-        print('11111')
         g1 = F.grid_sample(im_g, grid1, padding_mode='zeros')
-        print('111111')
 
         grid2, theta2 = G_A(input_agnostic, c[:,1], None) 
-        print('111111111')
 
         c2 = F.grid_sample(c[:,1], grid2, padding_mode='border')
-        print('1111111111111')
         m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
-        print('11111111111111')
         g2 = F.grid_sample(im_g, grid2, padding_mode='zeros')
-        print('1111111111111111')
 
         c_com = c1 * pcm[:,0] + c2 * pcm[:,1]
-        print('111111111111111111111')
 
-
+        print(c_com.shape)
 
         for param in D_A.parameters():
             param.requires_grad = False
@@ -188,6 +178,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
         optimizerD.step()
 
+        print("aaa")
 
         visuals.append([ [shape, im_pose], 
                    [c[:,0], im_c[:,0]],
