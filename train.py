@@ -161,7 +161,8 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
 
         # loss_L1_3 = 0.1* criterionL1(c_com, im_inout)
-        loss_L1_1 = criterionL1(c1 * pcm[:,0], im_c[:,0] * pcm[:,0])
+        # loss_L1_1 = criterionL1(c1 * pcm[:,0], im_c[:,0] * pcm[:,0])
+        loss_L1_1 = criterionL1(c1 , im_c[:,0] )
         # loss_L1_2 = criterionL1(c2 * pcm[:,1], im_c[:,1] * pcm[:,1])
 
         # loss_G_A = criterionGAN(D_A(c_com), True)
