@@ -425,6 +425,7 @@ class GMM(nn.Module):
             correlation = self.correlation(featureA, featureB)
 
             theta = self.regression(correlation)
+            print(theta.shape)
             grid = self.gridGen(theta)
 
             return grid, theta
