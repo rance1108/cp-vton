@@ -139,20 +139,20 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         visuals = []
         loss = 0
         
-        input_agnostic = torch.cat([agnostic,pcm[:,0]],dim=1)
-        grid1, theta1 = G_A(input_agnostic, c[:,0], None) 
+        input_agnostic = torch.cat([agnostic,parse_inout],dim=1)
+        grid1, theta1 = G_A(input_agnostic, torch.cat([c[:,0],pcm[:,0]],dim=1), None) 
         c1 = F.grid_sample(c[:,0], grid1, padding_mode='border')
         m1 = F.grid_sample(cm[:,0], grid1, padding_mode='zeros')
         g1 = F.grid_sample(im_g, grid1, padding_mode='zeros')
 
-        # grid2, theta2 = G_A(input_agnostic, torch.cat([c[:,1],pcm[:,1]],dim=1), None) 
+        grid2, theta2 = G_A(input_agnostic, torch.cat([c[:,1],pcm[:,1]],dim=1), None) 
 
-        # c2 = F.grid_sample(c[:,1], grid2, padding_mode='border')
-        # m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
-        # g2 = F.grid_sample(im_g, grid2, padding_mode='zeros')
+        c2 = F.grid_sample(c[:,1], grid2, padding_mode='border')
+        m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
+        g2 = F.grid_sample(im_g, grid2, padding_mode='zeros')
 
 
-        c_com = c1 * pcm[:,0] 
+        c_com = c1 * pcm[:,0]  + c2 * pcm[:,1]
         # c_com = c1 * pcm[:,0] + c2 * pcm[:,1]
 
 
@@ -160,16 +160,17 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         #     param.requires_grad = False
 
 
-        # loss_L1_3 = 0.1* criterionL1(c_com, im_inout)
-        # loss_L1_1 = criterionL1(c1 * pcm[:,0], im_c[:,0] * pcm[:,0])
+        loss_L1_3 = 0.1* criterionL1(c_com, im_inout)
+        # loss_L1_1 = criterionL1(c1 * pcm[:,0], im_c[:,0] * pcm[:,0])  
         loss_L1_1 = criterionL1(c1 , im_c[:,0] )
+        loss_L1_2 = criterionL1(c2 , im_c[:,1] )
         # loss_L1_2 = criterionL1(c2 * pcm[:,1], im_c[:,1] * pcm[:,1])
 
         # loss_G_A = criterionGAN(D_A(c_com), True)
 
         # loss_G = loss_G_A + loss_L1
-        loss_L1 = loss_L1_1 
-        # loss_L1 = loss_L1_1 + loss_L1_2 + loss_L1_3
+        # loss_L1 = loss_L1_1 
+        loss_L1 = loss_L1_1 + loss_L1_2 + loss_L1_3
         optimizerG.zero_grad()
         loss_L1.backward()
         # loss_G.backward()
@@ -186,14 +187,14 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
         visuals.append([ [shape, im_pose], 
                    [c[:,0], im_c[:,0]],
-                   # [c[:,1], im_c[:,1]],
-                   [c1, m1*2-1],
+                   [c[:,1], im_c[:,1]],
                    [im_c[:,0], pcm[:,0]*2-1],
-                   # [c1, c2],
-                   # [m1*2-1, m2*2-1],
-                   [g1,g1],
+                   [im_c[:,1], pcm[:,1]*2-1],
+                   [c1, c2],
+                   [m1*2-1, m2*2-1],
+                   [g1,g2],
                    [c_com,c_com+bg]
-                   # [im_inout,parse_inout*2-1]
+                   [im_inout,parse_inout*2-1]
                    ])
 
 
@@ -202,12 +203,12 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
                 board_add_images(board, k, visuals[j], step+1)
             board.add_scalar('loss_L1', loss_L1.item(), step+1)
 
-            t = time.time() - iter_start_time
-            print('step: %8d, time: %.3f, loss: %4f ' \
-                % (step+1, t, loss_L1.item() ), flush=True)
             # t = time.time() - iter_start_time
-            # print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_l2: %4f , loss_l3: %4f ' \
-                # % (step+1, t, loss_L1.item(), loss_L1_1.item(), loss_L1_2.item(), loss_L1_3.item()), flush=True)
+            # print('step: %8d, time: %.3f, loss: %4f ' \
+            #     % (step+1, t, loss_L1.item() ), flush=True)
+            t = time.time() - iter_start_time
+            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_l2: %4f , loss_l3: %4f ' \
+                % (step+1, t, loss_L1.item(), loss_L1_1.item(), loss_L1_2.item(), loss_L1_3.item()), flush=True)
 
             # t = time.time() - iter_start_time
             # print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f' \
