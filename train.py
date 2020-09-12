@@ -177,7 +177,6 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         loss_DA = backward_D_basic(D_A, im_inout, c_com)
 
         optimizerD.step()
-        print(m1.shape,g1.shape,c_com.shape,im_inout.shape)
 
         visuals.append([ [shape, im_pose], 
                    [c[:,0], im_c[:,0]],
