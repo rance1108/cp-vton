@@ -411,10 +411,8 @@ class GMM(nn.Module):
         self.extractionB = FeatureExtraction(3+1, ngf=64, n_layers=3, norm_layer=nn.BatchNorm2d)
         self.l2norm = FeatureL2Norm()
         self.correlation = FeatureCorrelation()
-        self.regression = FeatureRegression(input_nc=192, output_dim=6, use_cuda=True)
-        # self.regression = FeatureRegression(input_nc=192, output_dim=2*opt.grid_size**2, use_cuda=True)
-        # self.gridGen = TpsGridGen(opt.fine_height, opt.fine_width, use_cuda=True, grid_size=opt.grid_size)
-        self.gridGen = AffineGridGen()
+        self.regression = FeatureRegression(input_nc=192, output_dim=2*opt.grid_size**2, use_cuda=True)
+        self.gridGen = TpsGridGen(opt.fine_height, opt.fine_width, use_cuda=True, grid_size=opt.grid_size)
         # self.translator = translator()
         
     def forward(self, inputA, inputB, inputC, translator=False):
@@ -426,7 +424,6 @@ class GMM(nn.Module):
             correlation = self.correlation(featureA, featureB)
 
             theta = self.regression(correlation)
-            theta = theta.view(theta.size(0),2,3)
             grid = self.gridGen(theta)
 
             return grid, theta
