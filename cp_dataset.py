@@ -206,18 +206,24 @@ class CPDataset(data.Dataset):
         parse_cloth = []
 
 
+        # for n,i in enumerate(if_c):
+        #     if i == False:
+        #         parse_cloth.append(torch.from_numpy((parse_array > 5).astype(np.float32)))
+        #     else:
+        #         if n < len(if_c)-2:
+        #             parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
+        #         else:
+        #             im_parse_shoe = Image.open(osp.join(self.data_path, im_name, "10.png"))
+        #             parse_array_shoe = np.array(im_parse_shoe)
+        #             parse_cloth.append(torch.from_numpy((parse_array_shoe == 18).astype(np.float32)))
+        #             parse_cloth.append(torch.from_numpy((parse_array_shoe == 19).astype(np.float32)))
+        #             break
         for n,i in enumerate(if_c):
             if i == False:
                 parse_cloth.append(torch.from_numpy((parse_array > 5).astype(np.float32)))
             else:
-                if n < len(if_c)-2:
-                    parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
-                else:
-                    im_parse_shoe = Image.open(osp.join(self.data_path, im_name, "10.png"))
-                    parse_array_shoe = np.array(im_parse_shoe)
-                    parse_cloth.append(torch.from_numpy((parse_array_shoe == 18).astype(np.float32)))
-                    parse_cloth.append(torch.from_numpy((parse_array_shoe == 19).astype(np.float32)))
-                    break
+                parse_cloth.append(torch.from_numpy((parse_array == n+2).astype(np.float32)))
+
 
         im_nobg = Image.open(osp.join(self.data_path, im_name, "9.png"))
         im_nobg = self.transform(im_nobg) # [-1,1]
