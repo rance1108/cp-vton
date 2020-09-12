@@ -151,11 +151,9 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
         g2 = F.grid_sample(im_g, grid2, padding_mode='zeros')
 
-        print(c1.shape,pcm[:,0].shape)
 
         c_com = c1 * pcm[:,0] + c2 * pcm[:,1]
 
-        print(c_com.shape)
 
         for param in D_A.parameters():
             param.requires_grad = False
@@ -179,8 +177,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         loss_DA = backward_D_basic(D_A, im_inout, c_com)
 
         optimizerD.step()
-
-        print("aaa")
+        print(m1.shape,g1.shape,c_com.shape,im_inout.shape)
 
         visuals.append([ [shape, im_pose], 
                    [c[:,0], im_c[:,0]],

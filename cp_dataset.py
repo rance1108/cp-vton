@@ -243,7 +243,8 @@ class CPDataset(data.Dataset):
         parse_inout = transforms.ToPILImage()(parse_inout.unsqueeze_(0))
         parse_inout = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(parse_inout))
 
-        im_inout = ((im* parse_inout) + 1 - parse_inout)
+        im_inout = (im* parse_inout)
+        # im_inout = ((im* parse_inout) + 1 - parse_inout)
 
 
         # shape downsample
