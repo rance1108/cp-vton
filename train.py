@@ -144,7 +144,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         m1 = F.grid_sample(cm[:,0], grid1, padding_mode='zeros')
         g1 = F.grid_sample(im_g, grid1, padding_mode='zeros')
 
-        grid2, theta2 = G_A(input_agnostic, parse_inout, None) 
+        grid2, theta2 = G_A(input_agnostic, c[:,1], None) 
 
         c2 = F.grid_sample(c[:,1], grid2, padding_mode='border')
         m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
