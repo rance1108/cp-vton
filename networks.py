@@ -408,7 +408,7 @@ class GMM(nn.Module):
     def __init__(self, opt):
         super(GMM, self).__init__()
         self.extractionA = FeatureExtraction(22-2+1, ngf=64, n_layers=3, norm_layer=nn.BatchNorm2d) 
-        self.extractionB = FeatureExtraction(3+1, ngf=64, n_layers=3, norm_layer=nn.BatchNorm2d)
+        self.extractionB = FeatureExtraction(3, ngf=64, n_layers=3, norm_layer=nn.BatchNorm2d)
         self.l2norm = FeatureL2Norm()
         self.correlation = FeatureCorrelation()
         self.regression = FeatureRegression(input_nc=192, output_dim=2*opt.grid_size**2, use_cuda=True)
