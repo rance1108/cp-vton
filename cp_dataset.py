@@ -239,8 +239,7 @@ class CPDataset(data.Dataset):
         parse_head_bg = transforms.ToPILImage()(parse_head_bg.unsqueeze_(0))
         parse_head_bg = transforms.ToTensor()(transforms.Resize((256,192),interpolation=Image.NEAREST)(parse_head_bg))
 
-        # bg = ((im* parse_head_bg) + 1 - parse_head_bg)
-        bg = (im* parse_head_bg) 
+        bg = ((im* parse_head_bg) + 1 - parse_head_bg)
 
 
         parse_inout = Image.open(osp.join(self.data_path, im_name, "12.png"))
@@ -256,7 +255,7 @@ class CPDataset(data.Dataset):
 
         im_inout = (im* parse_inout)
         # im_inout = ((im* parse_inout) + 1 - parse_inout)
-
+        bg = im * abs(1-parse_inout)
 
         # shape downsample
         parse_shape = Image.fromarray((parse_shape*255).astype(np.uint8))
