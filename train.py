@@ -160,11 +160,14 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
         optimizerG.zero_grad()
 
-        loss_L1 = criterionL1(c_com, im_inout)
+        loss_L1_3 = 0.1* criterionL1(c_com, im_inout)
+        loss_L1_1 = criterionL1(c1 * pcm[:,0], im_c[:,0] * pcm[:,0])
+        loss_L1_2 = criterionL1(c2 * pcm[:,1], im_c[:,1] * pcm[:,1])
 
         # loss_G_A = criterionGAN(D_A(c_com), True)
 
         # loss_G = loss_G_A + loss_L1
+        loss_L1 = loss_L1_1 + loss_L1_2 + loss_L1_3
 
         loss_L1.backward()
         # loss_G.backward()
@@ -196,8 +199,8 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             board.add_scalar('loss_L1', loss_L1.item(), step+1)
 
             t = time.time() - iter_start_time
-            print('step: %8d, time: %.3f, loss: %4f ' \
-                % (step+1, t, loss_L1.item()), flush=True)
+            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_l2: %4f , loss_l3: %4f ' \
+                % (step+1, t, loss_L1.item(), loss_L1_1.item(), loss_L1_2.item(), loss_L1_3.item(),), flush=True)
 
             # t = time.time() - iter_start_time
             # print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f' \
