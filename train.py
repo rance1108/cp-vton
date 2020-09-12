@@ -203,10 +203,10 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
             t = time.time() - iter_start_time
             print('step: %8d, time: %.3f, loss: %4f ' \
-                % (step+1, t, loss_L1.item(), flush=True)
+                % (step+1, t, loss_L1.item() ), flush=True)
             # t = time.time() - iter_start_time
             # print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_l2: %4f , loss_l3: %4f ' \
-            #     % (step+1, t, loss_L1.item(), loss_L1_1.item(), loss_L1_2.item(), loss_L1_3.item(),), flush=True)
+                # % (step+1, t, loss_L1.item(), loss_L1_1.item(), loss_L1_2.item(), loss_L1_3.item()), flush=True)
 
             # t = time.time() - iter_start_time
             # print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f' \
