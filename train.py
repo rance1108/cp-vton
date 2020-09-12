@@ -193,7 +193,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
                    [c1, c2],
                    [m1*2-1, m2*2-1],
                    [g1,g2],
-                   [c_com,c_com+bg]
+                   [c_com,c_com+bg],
                    [im_inout,parse_inout*2-1]
                    ])
 
