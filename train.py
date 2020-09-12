@@ -202,6 +202,9 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             for j, k in zip(range(1),['combine_inNout']):
                 board_add_images(board, k, visuals[j], step+1)
             board.add_scalar('loss_L1', loss_L1.item(), step+1)
+            board.add_scalar('loss_L1_1', loss_L1_1.item(), step+1)
+            board.add_scalar('loss_L1_2', loss_L1_2.item(), step+1)
+            board.add_scalar('loss_L1_3', loss_L1_3.item(), step+1)
 
             # t = time.time() - iter_start_time
             # print('step: %8d, time: %.3f, loss: %4f ' \
