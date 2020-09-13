@@ -307,7 +307,10 @@ def test_tom(opt, test_loader, model, board):
         c = inputs['cloth'].cuda()
         cm = inputs['cloth_mask'].cuda()
         bg = inputs['bg'].cuda()
-    
+        combined = inputs['combined'].cuda()
+        combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1],dim=1,keepdim=True),0,1)
+        visuals = [] 
+
 
         # outputs = model(torch.cat([agnostic, c],1))
         # p_rendered, m_composite = torch.split(outputs, 3,1)
@@ -320,71 +323,33 @@ def test_tom(opt, test_loader, model, board):
         #            [p_rendered, p_tryon, im]]
             
 
-
-
-####"HI"
-        c[:,0] = (c[:,0] * cm[:,0])
-        c[:,1] = (c[:,1] * cm[:,1])
-        c[:,2] = (c[:,2] * cm[:,2])
-        c[:,3] = (c[:,3] * cm[:,3])
-        c[:,4] = (c[:,4] * cm[:,4])
-
-        # agnostic = torch.cat([shape, bg, pose_map], 1)
-        input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
+        input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4]),
+            combined,combined_mask],dim=1)
         outputs = model(input_agnostic)
 
         p_rendered, m_composite = torch.split(outputs, [3,1],1)
         p_rendered = F.tanh(p_rendered)
         m_composite = F.sigmoid(m_composite)
 
-        p_tryon = m_composite * (((c[:,0] )+ \
-                    (c[:,1] )+ \
-                    (c[:,2] )+ \
-                    (c[:,3] )+ \
-                    (c[:,4] ))+(1-torch.sum(cm,1)))+ \
+
+        p_tryon = (m_composite * combined)+ \
         p_rendered * (1 - m_composite)
 
 
 
-        visuals = ([ [im_h, shape, im_pose], 
-               [c[:,0], cm[:,0]*2-1, cm[:,0]*2-1],
-
-               [c[:,1], cm[:,1]*2-1, cm[:,1]*2-1],
-
-               [c[:,2], cm[:,2]*2-1, cm[:,2]*2-1],
-
-               [c[:,3], cm[:,3]*2-1, cm[:,3]*2-1], 
-
-               [c[:,4], cm[:,4]*2-1, cm[:,4]*2-1], 
-
-               [(((c[:,0] )+ \
-                    (c[:,1] )+ \
-                    (c[:,2] )+ \
-                    (c[:,3] )+ \
-                    (c[:,4] ))+(1-torch.sum(cm,1))),
-
-               bg, 
-
-               m_composite*2-1], 
-
-               [p_rendered, 
-
-               p_tryon, 
-
-               im]])
+        visuals.append([ [shape, im_pose], 
+               [c[:,0], cm[:,0]*2-1],
+               [c[:,1], cm[:,1]*2-1],
+               [bg, bg],
+               [combined,combined_mask*2-1],
+               [p_rendered, m_composite*2-1], 
+               [p_tryon, im]])
 
 
         cname = '999.png'
 
-        save_image(p_tryon, os.path.join(warp_cloth_dir, cname)) 
+        save_image((p_tryon+1)*0.5, os.path.join(warp_cloth_dir, cname)) 
 
-        cname1 = 'all.png'
-
-        save_image((((c[:,0] )+ \
-                    (c[:,1] )+ \
-                    (c[:,2] )+ \
-                    (c[:,3] )+ \
-                    (c[:,4] ))+(1-torch.sum(cm,1))), os.path.join(warp_cloth_dir, cname1)) 
 
 
         # save_images(p_tryon, im_names, try_on_dir) 
@@ -393,6 +358,79 @@ def test_tom(opt, test_loader, model, board):
             board_add_images(board, 'combine', visuals, step+1)
             t = time.time() - iter_start_time
             print('step: %8d, time: %.3f' % (step+1, t), flush=True)
+
+
+# ####"HI"
+#         c[:,0] = (c[:,0] * cm[:,0])
+#         c[:,1] = (c[:,1] * cm[:,1])
+#         c[:,2] = (c[:,2] * cm[:,2])
+#         c[:,3] = (c[:,3] * cm[:,3])
+#         c[:,4] = (c[:,4] * cm[:,4])
+
+#         # agnostic = torch.cat([shape, bg, pose_map], 1)
+#         input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
+#         outputs = model(input_agnostic)
+
+#         p_rendered, m_composite = torch.split(outputs, [3,1],1)
+#         p_rendered = F.tanh(p_rendered)
+#         m_composite = F.sigmoid(m_composite)
+
+#         p_tryon = m_composite * (((c[:,0] )+ \
+#                     (c[:,1] )+ \
+#                     (c[:,2] )+ \
+#                     (c[:,3] )+ \
+#                     (c[:,4] ))+(1-torch.sum(cm,1)))+ \
+#         p_rendered * (1 - m_composite)
+
+
+
+#         visuals = ([ [im_h, shape, im_pose], 
+#                [c[:,0], cm[:,0]*2-1, cm[:,0]*2-1],
+
+#                [c[:,1], cm[:,1]*2-1, cm[:,1]*2-1],
+
+#                [c[:,2], cm[:,2]*2-1, cm[:,2]*2-1],
+
+#                [c[:,3], cm[:,3]*2-1, cm[:,3]*2-1], 
+
+#                [c[:,4], cm[:,4]*2-1, cm[:,4]*2-1], 
+
+#                [(((c[:,0] )+ \
+#                     (c[:,1] )+ \
+#                     (c[:,2] )+ \
+#                     (c[:,3] )+ \
+#                     (c[:,4] ))+(1-torch.sum(cm,1))),
+
+#                bg, 
+
+#                m_composite*2-1], 
+
+#                [p_rendered, 
+
+#                p_tryon, 
+
+#                im]])
+
+
+#         cname = '999.png'
+
+#         save_image(p_tryon, os.path.join(warp_cloth_dir, cname)) 
+
+#         cname1 = 'all.png'
+
+#         save_image((((c[:,0] )+ \
+#                     (c[:,1] )+ \
+#                     (c[:,2] )+ \
+#                     (c[:,3] )+ \
+#                     (c[:,4] ))+(1-torch.sum(cm,1))), os.path.join(warp_cloth_dir, cname1)) 
+
+
+#         # save_images(p_tryon, im_names, try_on_dir) 
+
+#         if (step+1) % opt.display_count == 0:
+#             board_add_images(board, 'combine', visuals, step+1)
+#             t = time.time() - iter_start_time
+#             print('step: %8d, time: %.3f' % (step+1, t), flush=True)
 
 
 def main():
