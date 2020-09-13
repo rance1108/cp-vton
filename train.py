@@ -472,11 +472,11 @@ def train_tom(opt, train_loader, model, board):
         # agnostic = inputs['agnostic'].cuda()
         c = inputs['cloth'].cuda()
         cm = inputs['cloth_mask'].cuda()
-
         bg = inputs['bg'].cuda()
+        combined = inputs['combined'].cuda()
         # padding = torch.zeros((im.shape[0],2,im.shape[2],im.shape[3])).cuda()
 
-
+        combined_mask = torch.min(1,(cm[:,0]+cm[:,1]))
         # for i in range(c.shape[1]):
 
         #     if i < 1 :
@@ -517,15 +517,16 @@ def train_tom(opt, train_loader, model, board):
         loss = 0
 
 
-        c[:,0] = (c[:,0] * cm[:,0])
-        c[:,1] = (c[:,1] * cm[:,1])
-        c[:,2] = (c[:,2] * cm[:,2])
-        c[:,3] = (c[:,3] * cm[:,3])
-        c[:,4] = (c[:,4] * cm[:,4])
+        # c[:,0] = (c[:,0] * cm[:,0])
+        # c[:,1] = (c[:,1] * cm[:,1])
+        # c[:,2] = (c[:,2] * cm[:,2])
+        # c[:,3] = (c[:,3] * cm[:,3])
+        # c[:,4] = (c[:,4] * cm[:,4])
 
         # agnostic = torch.cat([shape, bg, pose_map], 1)
 
-        input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
+        input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4]),
+            combined,combined_mask],dim=1)
         # input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
         outputs = model(input_agnostic)
 
@@ -540,33 +541,45 @@ def train_tom(opt, train_loader, model, board):
         #             0.2*(c[:,4] * m_composite[:,4:5])+ \
         # p_rendered * (1 - torch.mean(m_composite,1,keepdim=True))
 
-        p_tryon = m_composite * (((c[:,0] )+ \
-                    (c[:,1] )+ \
-                    (c[:,2] )+ \
-                    (c[:,3] )+ \
-                    (c[:,4] ))+(1-torch.sum(cm,1)))+ \
+        # p_tryon = m_composite * (((c[:,0] )+ \
+        #             (c[:,1] )+ \
+        #             (c[:,2] )+ \
+        #             (c[:,3] )+ \
+        #             (c[:,4] ))+(1-torch.sum(cm,1)))+ \
+        # p_rendered * (1 - m_composite)
+
+        p_tryon = (m_composite * combined)+ \
         p_rendered * (1 - m_composite)
 
 
 
-        visuals.append([ [im_h, shape, im_pose], 
-               [c[:,0], cm[:,0]*2-1, cm[:,0]*2-1],
-               [c[:,1], cm[:,1]*2-1, cm[:,1]*2-1],
-               [c[:,2], cm[:,2]*2-1, cm[:,2]*2-1],
-               [c[:,3], cm[:,3]*2-1, cm[:,3]*2-1], 
-               [c[:,4], cm[:,4]*2-1, cm[:,4]*2-1], 
-               [(((c[:,0] )+ \
-                    (c[:,1] )+ \
-                    (c[:,2] )+ \
-                    (c[:,3] )+ \
-                    (c[:,4] ))+(1-torch.sum(cm,1))),
-               bg, m_composite*2-1], 
-               [p_rendered, p_tryon, im]])
+        visuals.append([ [shape, im_pose], 
+               [c[:,0], cm[:,0]*2-1],
+               [c[:,1], cm[:,1]*2-1],
+               [bg, bg],
+               [combined,combined_mask]
+               [p_rendered, m_composite*2-1], 
+               [p_tryon, im]])
+
+
+        # visuals.append([ [im_h, shape, im_pose], 
+        #        [c[:,0], cm[:,0]*2-1, cm[:,0]*2-1],
+        #        [c[:,1], cm[:,1]*2-1, cm[:,1]*2-1],
+        #        [c[:,2], cm[:,2]*2-1, cm[:,2]*2-1],
+        #        [c[:,3], cm[:,3]*2-1, cm[:,3]*2-1], 
+        #        [c[:,4], cm[:,4]*2-1, cm[:,4]*2-1], 
+        #        [(((c[:,0] )+ \
+        #             (c[:,1] )+ \
+        #             (c[:,2] )+ \
+        #             (c[:,3] )+ \
+        #             (c[:,4] ))+(1-torch.sum(cm,1))),
+        #        bg, m_composite*2-1], 
+        #        [p_rendered, p_tryon, im]])
         # for i in range(5):
         #     loss_mask += criterionMask(m_composite[:,i:i+1], cm[:,i])
 
 
-        loss_mask += criterionMask(m_composite, torch.sum(cm,1))
+        loss_mask = criterionMask(m_composite, combined_mask)
 
         loss_l1 = criterionL1(p_tryon, im)
         loss_vgg = criterionVGG(p_tryon, im)
@@ -682,7 +695,7 @@ def main():
 
 
     elif opt.stage == 'TOM':
-        model = UnetGenerator(25+10, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        model = UnetGenerator(21+6+3+1, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):
             load_checkpoint(model, opt.checkpoint)
         train_tom(opt, train_loader, model, board)

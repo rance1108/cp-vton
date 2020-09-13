@@ -181,6 +181,12 @@ class CPDataset(data.Dataset):
                 cm[i].unsqueeze_(0)
             cm = torch.stack(cm,dim=0)
 
+
+        if self.stage != 'GMM':
+            combined = Image.open(osp.join(self.tomroot, self.datamode, im_name, "combined.png"))
+            combined = self.transform(combined)
+        else:
+            combined =''
         # person image 
         im = Image.open(osp.join(self.data_path, im_name, "99.png"))
         im_h = Image.open(osp.join(self.data_path, im_name, "8.png"))
@@ -383,7 +389,8 @@ class CPDataset(data.Dataset):
             'pose_map':pose_map,
             'im_nobg': im_nobg,
             'parse_inout':parse_inout,
-            'im_inout':im_inout
+            'im_inout':im_inout,
+            'combined':combined
             # 'if_c': torch.tensor(if_c)
             }
 
