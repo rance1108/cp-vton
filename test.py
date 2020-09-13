@@ -119,12 +119,12 @@ def test_gmm(opt, test_loader, model, board):
         #     # save_image(im, os.path.join(warp_cloth_dir, cname4)) 
         #     # save_image((im+1)*0.5, os.path.join(warp_cloth_dir, cname5)) 
         input_agnostic = torch.cat([agnostic,parse_inout],dim=1)
-        grid1, theta1 = G_A(input_agnostic, torch.cat([c[:,0],pcm[:,0]],dim=1), None) 
+        grid1, theta1 = model(input_agnostic, torch.cat([c[:,0],pcm[:,0]],dim=1), None) 
         c1 = F.grid_sample(c[:,0], grid1, padding_mode='border')
         m1 = F.grid_sample(cm[:,0], grid1, padding_mode='zeros')
         g1 = F.grid_sample(im_g, grid1, padding_mode='zeros')
 
-        grid2, theta2 = G_A(input_agnostic, torch.cat([c[:,1],pcm[:,1]],dim=1), None) 
+        grid2, theta2 = model(input_agnostic, torch.cat([c[:,1],pcm[:,1]],dim=1), None) 
 
         c2 = F.grid_sample(c[:,1], grid2, padding_mode='border')
         m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
