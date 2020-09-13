@@ -476,7 +476,7 @@ def train_tom(opt, train_loader, model, board):
         combined = inputs['combined'].cuda()
         # padding = torch.zeros((im.shape[0],2,im.shape[2],im.shape[3])).cuda()
 
-        combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1]),max=1)
+        combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1],dim=1,keepdim=True),0,1)
         # for i in range(c.shape[1]):
 
         #     if i < 1 :
@@ -524,8 +524,6 @@ def train_tom(opt, train_loader, model, board):
         # c[:,4] = (c[:,4] * cm[:,4])
 
         # agnostic = torch.cat([shape, bg, pose_map], 1)
-        print(agnostic.shape,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4]).shape,combined.shape,combined_mask.shape,
-            torch.sum(cm[:,0]+cm[:,1],dim=1,keepdim=True).shape, cm[:,0].shape)
         input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4]),
             combined,combined_mask],dim=1)
         # input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
