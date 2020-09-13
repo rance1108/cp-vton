@@ -309,7 +309,6 @@ def test_tom(opt, test_loader, model, board):
         bg = inputs['bg'].cuda()
         combined = inputs['combined'].cuda()
         combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1],dim=1,keepdim=True),0,1)
-        visuals = [] 
 
 
         # outputs = model(torch.cat([agnostic, c],1))
@@ -337,7 +336,7 @@ def test_tom(opt, test_loader, model, board):
 
 
 
-        visuals.append([ [shape, im_pose], 
+        visuals = ([ [shape, im_pose], 
                [c[:,0], cm[:,0]*2-1],
                [c[:,1], cm[:,1]*2-1],
                [bg, bg],
@@ -349,10 +348,6 @@ def test_tom(opt, test_loader, model, board):
         cname = '999.png'
 
         save_image((p_tryon+1)*0.5, os.path.join(warp_cloth_dir, cname)) 
-
-
-
-        # save_images(p_tryon, im_names, try_on_dir) 
 
         if (step+1) % opt.display_count == 0:
             board_add_images(board, 'combine', visuals, step+1)
