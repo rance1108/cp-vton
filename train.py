@@ -476,7 +476,7 @@ def train_tom(opt, train_loader, model, board):
         combined = inputs['combined'].cuda()
         # padding = torch.zeros((im.shape[0],2,im.shape[2],im.shape[3])).cuda()
 
-        combined_mask = torch.min(1,torch.sum(cm[:,0]+cm[:,1]))
+        combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1]),0,1)
         # for i in range(c.shape[1]):
 
         #     if i < 1 :
