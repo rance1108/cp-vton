@@ -694,7 +694,7 @@ def main():
 
 
     elif opt.stage == 'TOM':
-        model = UnetGenerator(21+6+3+1, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        model = UnetGenerator(20+6+3+1, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):
             load_checkpoint(model, opt.checkpoint)
         train_tom(opt, train_loader, model, board)
