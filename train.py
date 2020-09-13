@@ -556,7 +556,7 @@ def train_tom(opt, train_loader, model, board):
                [c[:,0], cm[:,0]*2-1],
                [c[:,1], cm[:,1]*2-1],
                [bg, bg],
-               [combined,combined_mask*2-1]
+               [combined,combined_mask*2-1],
                [p_rendered, m_composite*2-1], 
                [p_tryon, im]])
 
