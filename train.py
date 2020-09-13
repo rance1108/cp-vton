@@ -524,7 +524,7 @@ def train_tom(opt, train_loader, model, board):
         # c[:,4] = (c[:,4] * cm[:,4])
 
         # agnostic = torch.cat([shape, bg, pose_map], 1)
-
+        print(agnostic.shape,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4]).shape,combined.shape,combined_mask.shape)
         input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4]),
             combined,combined_mask],dim=1)
         # input_agnostic = torch.cat([agnostic,c.view(c.shape[0],c.shape[1]*c.shape[2],c.shape[3],c.shape[4])],dim=1)
