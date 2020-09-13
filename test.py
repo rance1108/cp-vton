@@ -154,7 +154,7 @@ def test_gmm(opt, test_loader, model, board):
         cname3 = c_names[0][0][:-4] +'_orgwc.png'
 
 
-        save_image((g1+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
+        save_image((c1+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
         save_image((im_c[:,0]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
         save_image(m1*2-1, os.path.join(warp_cloth_dir, cname2)) 
 
@@ -163,17 +163,19 @@ def test_gmm(opt, test_loader, model, board):
         cname3 = c_names[1][0][:-4] +'_orgwc.png'
 
 
-        save_image((g2+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
+        save_image((c2+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
         save_image((im_c[:,1]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
         save_image(m2*2-1, os.path.join(warp_cloth_dir, cname2)) 
 
         cname_com = 'combined.png' 
         cname_comgt = 'combined_gt.png' 
         cname_result = 'stage1_result.png' 
+        cname_bg = 'bg.png' 
 
         save_image(c_com, os.path.join(warp_cloth_dir, cname_com)) 
         save_image(im_inout, os.path.join(warp_cloth_dir, cname_comgt)) 
-        save_image(c_com+bg, os.path.join(warp_cloth_dir, cname_result)) 
+        save_image(c_com+bg, os.path.join(warp_cloth_dir, cname_result))
+        save_image(bg, os.path.join(warp_cloth_dir, cname_bg)) 
 
             
 
