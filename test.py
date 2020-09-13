@@ -172,10 +172,10 @@ def test_gmm(opt, test_loader, model, board):
         cname_result = 'stage1_result.png' 
         cname_bg = 'bg.png' 
 
-        save_image(c_com, os.path.join(warp_cloth_dir, cname_com)) 
-        save_image(im_inout, os.path.join(warp_cloth_dir, cname_comgt)) 
-        save_image(c_com+bg, os.path.join(warp_cloth_dir, cname_result))
-        save_image(bg, os.path.join(warp_cloth_dir, cname_bg)) 
+        save_image((c_com+1)*0.5, os.path.join(warp_cloth_dir, cname_com)) 
+        save_image((im_inout+1)*0.5, os.path.join(warp_cloth_dir, cname_comgt)) 
+        save_image((c_com+bg+1)*0.5, os.path.join(warp_cloth_dir, cname_result))
+        save_image((bg+1)*0.5, os.path.join(warp_cloth_dir, cname_bg)) 
 
             
 
