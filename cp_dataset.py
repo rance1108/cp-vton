@@ -59,10 +59,10 @@ class CPDataset(data.Dataset):
             c = []
             cm = []
             if_c = []
-            # clothes = ["0.png", "1.png", "2.png", "4.png"]
-            # masks = ["0_mask.png", "1_mask.png", "2_mask.png", "4_mask.png"]
-            clothes = ["0.png", "1.png"]
-            masks = ["0_mask.png", "1_mask.png"]
+            clothes = ["0.png", "1.png", "2.png", "4.png"]
+            masks = ["0_mask.png", "1_mask.png", "2_mask.png", "4_mask.png"]
+            # clothes = ["0.png", "1.png"]
+            # masks = ["0_mask.png", "1_mask.png"]
             for f_name, fm_name in zip(clothes, masks):
                 c_path = osp.join(self.data_path, im_name, f_name)
                 cm_path = osp.join(self.data_path, im_name, fm_name)
@@ -142,10 +142,10 @@ class CPDataset(data.Dataset):
             c = []
             cm = []
             if_c = []
-            clothes = ["0_wc.png", "1_wc.png"]
-            masks = ["0_wcm.png", "1_wcm.png"]
-            # clothes = ["0_wc.png", "1_wc.png", "2_wc.png", "4_wc.png", "5_wc.png"]
-            # masks = ["0_wcm.png", "1_wcm.png", "2_wcm.png", "4_wcm.png", "5_wcm.png"]
+            # clothes = ["0_wc.png", "1_wc.png"]
+            # masks = ["0_wcm.png", "1_wcm.png"]
+            clothes = ["0_wc.png", "1_wc.png", "2_wc.png", "4_wc.png", "5_wc.png"]
+            masks = ["0_wcm.png", "1_wcm.png", "2_wcm.png", "4_wcm.png", "5_wcm.png"]
             for f_name, fm_name in zip(clothes, masks):
                 c_path = osp.join(self.tomroot, self.datamode, im_name, f_name)
                 cm_path = osp.join(self.tomroot, self.datamode, im_name, fm_name)
@@ -252,7 +252,8 @@ class CPDataset(data.Dataset):
         
         parse_inout = np.array(parse_inout)
 
-        parse_inout = (parse_inout == 2).astype(np.float32) + (parse_inout ==3).astype(np.float32)
+        # parse_inout = (parse_inout == 2).astype(np.float32) + (parse_inout ==3).astype(np.float32) #this is only inner and outer
+        parse_inout = (parse_inout == 2).astype(np.float32) + (parse_inout ==3).astype(np.float32)  + (parse_inout ==4).astype(np.float32) + (parse_inout ==5).astype(np.float32)  #all
 
         parse_inout = torch.from_numpy(parse_inout)
 

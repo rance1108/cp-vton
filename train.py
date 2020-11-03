@@ -151,26 +151,49 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
         g2 = F.grid_sample(im_g, grid2, padding_mode='zeros')
 
+        grid3, theta3 = G_A(input_agnostic, torch.cat([c[:,2],pcm[:,2]],dim=1), None) 
 
-        c_com = c1 * pcm[:,0]  + c2 * pcm[:,1]
+        c3 = F.grid_sample(c[:,2], grid3, padding_mode='border')
+        m3 = F.grid_sample(cm[:,2], grid3, padding_mode='zeros')
+        g3 = F.grid_sample(im_g, grid3, padding_mode='zeros')
+
+        grid4, theta4 = G_A(input_agnostic, torch.cat([c[:,3],pcm[:,3]],dim=1), None) 
+
+        c4 = F.grid_sample(c[:,3], grid4, padding_mode='border')
+        m4 = F.grid_sample(cm[:,3], grid4, padding_mode='zeros')
+        g4 = F.grid_sample(im_g, grid4, padding_mode='zeros')
+
+
+        grid5, theta5 = G_A(input_agnostic, torch.cat([c[:,4],pcm[:,4]],dim=1), None) 
+
+        c5 = F.grid_sample(c[:,4], grid5, padding_mode='border')
+        m5 = F.grid_sample(cm[:,4], grid5, padding_mode='zeros')
+        g5 = F.grid_sample(im_g, grid5, padding_mode='zeros')
+
+
+        # c_com = c1 * pcm[:,0]  + c2 * pcm[:,1]
         # c_com = c1 * pcm[:,0] + c2 * pcm[:,1]
 
+        c_com = c1 * pcm[:,0]  + c2 * pcm[:,1] + c3 * pcm[:,2] + c4 * pcm[:,3] + c5 * pcm[:,4]
 
         # for param in D_A.parameters():
         #     param.requires_grad = False
 
 
-        loss_L1_3 = 0.1* criterionL1(c_com, im_inout)
+        loss_L1_all = 0.1* criterionL1(c_com, im_inout)
         # loss_L1_1 = criterionL1(c1 * pcm[:,0], im_c[:,0] * pcm[:,0])  
         loss_L1_1 = criterionL1(c1 , im_c[:,0] )
         loss_L1_2 = criterionL1(c2 , im_c[:,1] )
+        loss_L1_3 = criterionL1(c3 , im_c[:,2] )
+        loss_L1_4 = criterionL1(c4 , im_c[:,3] )
+        loss_L1_5 = criterionL1(c5 , im_c[:,4] )
         # loss_L1_2 = criterionL1(c2 * pcm[:,1], im_c[:,1] * pcm[:,1])
 
         # loss_G_A = criterionGAN(D_A(c_com), True)
 
         # loss_G = loss_G_A + loss_L1
         # loss_L1 = loss_L1_1 
-        loss_L1 = loss_L1_1 + loss_L1_2 + loss_L1_3
+        loss_L1 = loss_L1_1 + loss_L1_2 + loss_L1_3 + loss_L1_4 + loss_L1_5 + loss_L1_all
         optimizerG.zero_grad()
         loss_L1.backward()
         # loss_G.backward()
@@ -188,11 +211,23 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         visuals.append([ [shape, im_pose], 
                    [c[:,0], im_c[:,0]],
                    [c[:,1], im_c[:,1]],
+                   [c[:,2], im_c[:,2]],
+                   [c[:,3], im_c[:,3]],
+                   [c[:,4], im_c[:,4]],
                    [im_c[:,0], pcm[:,0]*2-1],
                    [im_c[:,1], pcm[:,1]*2-1],
+                   [im_c[:,2], pcm[:,2]*2-1],
+                   [im_c[:,3], pcm[:,3]*2-1],
+                   [im_c[:,4], pcm[:,4]*2-1],
                    [c1, c2],
+                   [c3, c4],
+                   [c5, c5],
                    [m1*2-1, m2*2-1],
+                   [m3*2-1, m4*2-1],
+                   [m5*2-1, m5*2-1],
                    [g1,g2],
+                   [g3,g4],
+                   [g5,g5],
                    [c_com,c_com+bg],
                    [im_inout,parse_inout*2-1]
                    ])
@@ -205,13 +240,16 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             board.add_scalar('loss_L1_1', loss_L1_1.item(), step+1)
             board.add_scalar('loss_L1_2', loss_L1_2.item(), step+1)
             board.add_scalar('loss_L1_3', loss_L1_3.item(), step+1)
+            board.add_scalar('loss_L1_4', loss_L1_4.item(), step+1)
+            board.add_scalar('loss_L1_5', loss_L1_5.item(), step+1)
+            board.add_scalar('loss_L1_all', loss_L1_all.item(), step+1)
 
             # t = time.time() - iter_start_time
             # print('step: %8d, time: %.3f, loss: %4f ' \
             #     % (step+1, t, loss_L1.item() ), flush=True)
             t = time.time() - iter_start_time
-            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_l2: %4f , loss_l3: %4f ' \
-                % (step+1, t, loss_L1.item(), loss_L1_1.item(), loss_L1_2.item(), loss_L1_3.item()), flush=True)
+            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_l2: %4f , loss_l3: %4f , loss_l4: %4f , loss_l5: %4f , loss_lall: %4f ' \
+                % (step+1, t, loss_L1.item(), loss_L1_1.item(), loss_L1_2.item(), loss_L1_3.item(), loss_L1_4.item(), loss_L1_5.item(), loss_L1_all.item()), flush=True)
 
             # t = time.time() - iter_start_time
             # print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f' \
