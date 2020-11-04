@@ -234,7 +234,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
 
         if (step+1) % opt.display_count == 0:
-            for j, k in zip(range(1),['combine_inNout']):
+            for j, k in zip(range(1),['combined']):
                 board_add_images(board, k, visuals[j], step+1)
             board.add_scalar('loss_L1', loss_L1.item(), step+1)
             board.add_scalar('loss_L1_1', loss_L1_1.item(), step+1)

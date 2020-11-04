@@ -130,24 +130,55 @@ def test_gmm(opt, test_loader, model, board):
         m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
         g2 = F.grid_sample(im_g, grid2, padding_mode='zeros')
 
+        grid3, theta3 = G_A(input_agnostic, torch.cat([c[:,2],pcm[:,2]],dim=1), None) 
 
-        c_com = c1 * pcm[:,0]  + c2 * pcm[:,1]
+        c3 = F.grid_sample(c[:,2], grid3, padding_mode='border')
+        m3 = F.grid_sample(cm[:,2], grid3, padding_mode='zeros')
+        g3 = F.grid_sample(im_g, grid3, padding_mode='zeros')
 
+        grid4, theta4 = G_A(input_agnostic, torch.cat([c[:,3],pcm[:,3]],dim=1), None) 
+
+        c4 = F.grid_sample(c[:,3], grid4, padding_mode='border')
+        m4 = F.grid_sample(cm[:,3], grid4, padding_mode='zeros')
+        g4 = F.grid_sample(im_g, grid4, padding_mode='zeros')
+
+
+        grid5, theta5 = G_A(input_agnostic, torch.cat([c[:,4],pcm[:,4]],dim=1), None) 
+
+        c5 = F.grid_sample(c[:,4], grid5, padding_mode='border')
+        m5 = F.grid_sample(cm[:,4], grid5, padding_mode='zeros')
+        g5 = F.grid_sample(im_g, grid5, padding_mode='zeros')
+
+        # c_com = c1 * pcm[:,0]  + c2 * pcm[:,1]
+
+        c_com = c1 * pcm[:,0]  + c2 * pcm[:,1] + c3 * pcm[:,2] + c4 * pcm[:,3] + c5 * pcm[:,4]
 
 
        
-
         visuals.append([ [shape, im_pose], 
                    [c[:,0], im_c[:,0]],
                    [c[:,1], im_c[:,1]],
+                   [c[:,2], im_c[:,2]],
+                   [c[:,3], im_c[:,3]],
+                   [c[:,4], im_c[:,4]],
                    [im_c[:,0], pcm[:,0]*2-1],
                    [im_c[:,1], pcm[:,1]*2-1],
+                   [im_c[:,2], pcm[:,2]*2-1],
+                   [im_c[:,3], pcm[:,3]*2-1],
+                   [im_c[:,4], pcm[:,4]*2-1],
                    [c1, c2],
+                   [c3, c4],
+                   [c5, c5],
                    [m1*2-1, m2*2-1],
+                   [m3*2-1, m4*2-1],
+                   [m5*2-1, m5*2-1],
                    [g1,g2],
+                   [g3,g4],
+                   [g5,g5],
                    [c_com,c_com+bg],
                    [im_inout,parse_inout*2-1]
                    ])
+
 
         cname1 = c_names[0][0][:-4] +'_wc.png'
         cname2 = c_names[0][0][:-4] +'_wcm.png'
@@ -166,6 +197,33 @@ def test_gmm(opt, test_loader, model, board):
         save_image((c2+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
         save_image((im_c[:,1]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
         save_image(m2*2-1, os.path.join(warp_cloth_dir, cname2)) 
+
+        cname1 = c_names[2][0][:-4] +'_wc.png'
+        cname2 = c_names[2][0][:-4] +'_wcm.png'
+        cname3 = c_names[2][0][:-4] +'_orgwc.png'
+
+
+        save_image((c3+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
+        save_image((im_c[:,2]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
+        save_image(m3*2-1, os.path.join(warp_cloth_dir, cname2)) 
+
+        cname1 = c_names[3][0][:-4] +'_wc.png'
+        cname2 = c_names[3][0][:-4] +'_wcm.png'
+        cname3 = c_names[3][0][:-4] +'_orgwc.png'
+
+
+        save_image((c4+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
+        save_image((im_c[:,3]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
+        save_image(m4*2-1, os.path.join(warp_cloth_dir, cname2)) 
+
+        cname1 = c_names[4][0][:-4] +'_wc.png'
+        cname2 = c_names[4][0][:-4] +'_wcm.png'
+        cname3 = c_names[4][0][:-4] +'_orgwc.png'
+
+
+        save_image((c5+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
+        save_image((im_c[:,4]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
+        save_image(m5*2-1, os.path.join(warp_cloth_dir, cname2)) 
 
         cname_com = 'combined.png' 
         cname_comgt = 'combined_gt.png' 
