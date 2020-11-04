@@ -216,9 +216,9 @@ def test_gmm(opt, test_loader, model, board):
         save_image((im_c[:,3]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
         save_image(m4*2-1, os.path.join(warp_cloth_dir, cname2)) 
 
-        cname1 = c_names[4][0][:-4] +'_wc.png'
-        cname2 = c_names[4][0][:-4] +'_wcm.png'
-        cname3 = c_names[4][0][:-4] +'_orgwc.png'
+        cname1 = c_names[3][0][:-4] +'_r_wc.png'
+        cname2 = c_names[3][0][:-4] +'_r_wcm.png'
+        cname3 = c_names[3][0][:-4] +'_r_orgwc.png'
 
 
         save_image((c5+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
