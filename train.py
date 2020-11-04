@@ -514,7 +514,7 @@ def train_tom(opt, train_loader, model, board):
         combined = inputs['combined'].cuda()
         # padding = torch.zeros((im.shape[0],2,im.shape[2],im.shape[3])).cuda()
 
-        combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1],dim=1,keepdim=True),0,1)
+        combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1]+cm[:,2]+cm[:,3]+cm[:,4],dim=1,keepdim=True),0,1)
         # for i in range(c.shape[1]):
 
         #     if i < 1 :
@@ -593,6 +593,9 @@ def train_tom(opt, train_loader, model, board):
         visuals.append([ [shape, im_pose], 
                [c[:,0], cm[:,0]*2-1],
                [c[:,1], cm[:,1]*2-1],
+               [c[:,2], cm[:,2]*2-1],
+               [c[:,3], cm[:,3]*2-1],
+               [c[:,4], cm[:,4]*2-1],
                [bg, bg],
                [combined,combined_mask*2-1],
                [p_rendered, m_composite*2-1], 
@@ -732,7 +735,7 @@ def main():
 
 
     elif opt.stage == 'TOM':
-        model = UnetGenerator(20+6+3+1, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        model = UnetGenerator(20+15+3+1, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):
             load_checkpoint(model, opt.checkpoint)
         train_tom(opt, train_loader, model, board)
