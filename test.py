@@ -130,20 +130,20 @@ def test_gmm(opt, test_loader, model, board):
         m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
         g2 = F.grid_sample(im_g, grid2, padding_mode='zeros')
 
-        grid3, theta3 = G_A(input_agnostic, torch.cat([c[:,2],pcm[:,2]],dim=1), None) 
+        grid3, theta3 = model(input_agnostic, torch.cat([c[:,2],pcm[:,2]],dim=1), None) 
 
         c3 = F.grid_sample(c[:,2], grid3, padding_mode='border')
         m3 = F.grid_sample(cm[:,2], grid3, padding_mode='zeros')
         g3 = F.grid_sample(im_g, grid3, padding_mode='zeros')
 
-        grid4, theta4 = G_A(input_agnostic, torch.cat([c[:,3],pcm[:,3]],dim=1), None) 
+        grid4, theta4 = model(input_agnostic, torch.cat([c[:,3],pcm[:,3]],dim=1), None) 
 
         c4 = F.grid_sample(c[:,3], grid4, padding_mode='border')
         m4 = F.grid_sample(cm[:,3], grid4, padding_mode='zeros')
         g4 = F.grid_sample(im_g, grid4, padding_mode='zeros')
 
 
-        grid5, theta5 = G_A(input_agnostic, torch.cat([c[:,4],pcm[:,4]],dim=1), None) 
+        grid5, theta5 = model(input_agnostic, torch.cat([c[:,4],pcm[:,4]],dim=1), None) 
 
         c5 = F.grid_sample(c[:,4], grid5, padding_mode='border')
         m5 = F.grid_sample(cm[:,4], grid5, padding_mode='zeros')
