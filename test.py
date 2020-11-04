@@ -366,7 +366,9 @@ def test_tom(opt, test_loader, model, board):
         cm = inputs['cloth_mask'].cuda()
         bg = inputs['bg'].cuda()
         combined = inputs['combined'].cuda()
-        combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1],dim=1,keepdim=True),0,1)
+
+        
+        combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1]+cm[:,2]+cm[:,3]+cm[:,4],dim=1,keepdim=True),0,1)
 
 
         # outputs = model(torch.cat([agnostic, c],1))
@@ -397,11 +399,13 @@ def test_tom(opt, test_loader, model, board):
         visuals = ([ [shape, im_pose], 
                [c[:,0], cm[:,0]*2-1],
                [c[:,1], cm[:,1]*2-1],
+               [c[:,2], cm[:,2]*2-1],
+               [c[:,3], cm[:,3]*2-1],
+               [c[:,4], cm[:,4]*2-1],
                [bg, bg],
                [combined,combined_mask*2-1],
                [p_rendered, m_composite*2-1], 
                [p_tryon, im]])
-
 
         cname = '999.png'
 
@@ -509,7 +513,7 @@ def main():
         with torch.no_grad():
             test_gmm(opt, train_loader, model, board)
     elif opt.stage == 'TOM':
-        model = UnetGenerator(20+6+3+1, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        model = UnetGenerator(20+15+3+1, 1+3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         load_checkpoint(model, opt.checkpoint)
         with torch.no_grad():
             test_tom(opt, train_loader, model, board)
