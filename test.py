@@ -367,7 +367,7 @@ def test_tom(opt, test_loader, model, board):
         bg = inputs['bg'].cuda()
         combined = inputs['combined'].cuda()
 
-        
+
         combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1]+cm[:,2]+cm[:,3]+cm[:,4],dim=1,keepdim=True),0,1)
 
 
@@ -408,8 +408,27 @@ def test_tom(opt, test_loader, model, board):
                [p_tryon, im]])
 
         cname = '999.png'
+        cname1 = 'gt.png'
+
+
+        cname2 = '1.png'
+        cname3 = '2.png'
+        cname4 = '3.png'
+        cname5 = '4.png'
+        cname5_r = '4_r.png'
+
+        cname6 = 'input.png'
 
         save_image((p_tryon+1)*0.5, os.path.join(warp_cloth_dir, cname)) 
+        save_image((im+1)*0.5, os.path.join(warp_cloth_dir, cname1)) 
+
+        save_image((c[:,0]+1)*0.5, os.path.join(warp_cloth_dir, cname2)) 
+        save_image((c[:,1]+1)*0.5, os.path.join(warp_cloth_dir, cname3)) 
+        save_image((c[:,2]+1)*0.5, os.path.join(warp_cloth_dir, cname4)) 
+        save_image((c[:,3]+1)*0.5, os.path.join(warp_cloth_dir, cname5)) 
+        save_image((c[:,4]+1)*0.5, os.path.join(warp_cloth_dir, cname5_r)) 
+
+        save_image((bg+1)*0.5, os.path.join(warp_cloth_dir, cname6)) 
 
         if (step+1) % opt.display_count == 0:
             board_add_images(board, 'combine', visuals, step+1)
