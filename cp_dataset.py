@@ -396,17 +396,19 @@ class CPDataset(data.Dataset):
         shading = shading.permute(2,0,1).contiguous()
         transport = transport.permute(2,0,1).contiguous()
 
-        model_path = "/media/rance/hdd/relighting_humans_pytorch/models/shared_model_059.pth"
         print("TRANSPORT", transport.shape,transport.max(),transport.min())
         print("light", light.shape,light.max(),light.min())
         print("mask_1024", mask_1024.shape,mask_1024.max(),mask_1024.min())
         print("albedo", albedo.shape,albedo.max(),albedo.min())
         print("shading", shading.shape,shading.max(),shading.min())
-        m_shared = CNNAE2ResNet()
-        m_shared.load_state_dict(torch.load(shared_model_file))
 
-        m_shared.train_dropout = False  
-        m_shared.to("cuda")  
+        # model_path = "/media/rance/hdd/relighting_humans_pytorch/models/shared_model_059.pth"
+        
+        # m_shared = CNNAE2ResNet()
+        # m_shared.load_state_dict(torch.load(shared_model_file))
+
+        # m_shared.train_dropout = False  
+        # m_shared.to("cuda")  
         
 
         result = {
