@@ -389,6 +389,9 @@ class CPDataset(data.Dataset):
         shading = cv2.imread(osp.join(self.data_path, im_name, "shading.jpg"), cv2.IMREAD_COLOR).astype(np.float32) / 255.
 
 
+        albedo = torch.from_numpy(albedo.astype(np.float32)).clone()
+        shading = torch.from_numpy(shading.astype(np.float32)).clone()
+
         albedo = albedo.permute(2,0,1).contiguous()
         shading = shading.permute(2,0,1).contiguous()
         transport = transport.permute(2,0,1).contiguous()
