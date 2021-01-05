@@ -9,7 +9,6 @@ from PIL import Image
 from PIL import ImageDraw, ImageOps
 
 
-from networks import CNNAE2ResNet
 
 import os.path as osp
 import numpy as np

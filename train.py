@@ -89,6 +89,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
 
 
+    from networks import CNNAE2ResNet
     model_path = "/media/rance/hdd/relighting_humans_pytorch/models/shared_model_059.pth"
     
     m_shared = CNNAE2ResNet()
