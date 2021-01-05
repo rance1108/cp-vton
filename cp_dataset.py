@@ -15,6 +15,8 @@ import os.path as osp
 import numpy as np
 import json
 
+import cv2
+
 class CPDataset(data.Dataset):
     """Dataset for CP-VTON.
     """
@@ -397,7 +399,7 @@ class CPDataset(data.Dataset):
         print("mask_1024", mask_1024.shape,mask_1024.max(),mask_1024.min())
         print("albedo", albedo.shape,albedo.max(),albedo.min())
         print("shading", shading.shape,shading.max(),shading.min())
-        
+
         return 0 
         m_shared = CNNAE2ResNet()
         m_shared.load_state_dict(torch.load(shared_model_file))
