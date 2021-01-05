@@ -96,7 +96,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
     m_shared.load_state_dict(torch.load(model_path))
 
     m_shared.train_dropout = False  
-    m_shared.to("cuda")  
+    m_shared.cuda()
     
     for step in range(opt.keep_step + opt.decay_step):
         iter_start_time = time.time()
@@ -128,7 +128,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         print("albedo22222", albedo.shape,albedo.max(),albedo.min())
         print("shading2222222", shading.shape,shading.max(),shading.min())
 
-        aa, vv, cc = m_shared(im)
+        aa, vv, cc = m_shared(mask_1024)
         print("aa",aa.shape,aa.max(),aa.min())
         print("vv",vv.shape,vv.max(),vv.min())
         print("cc",cc.shape,cc.max(),cc.min())
