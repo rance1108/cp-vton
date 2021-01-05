@@ -8,6 +8,9 @@ import torch.nn.functional as F
 from PIL import Image
 from PIL import ImageDraw, ImageOps
 
+
+from networks import CNNAE2ResNet
+
 import os.path as osp
 import numpy as np
 import json
@@ -370,6 +373,38 @@ class CPDataset(data.Dataset):
         # print(pose_map.shape,'pose_map')
         # print(im_nobg.shape,'im_nobg')
 
+        transport = np.load(osp.join(self.data_path, im_name, "transport.npz"))['T']
+        transport = torch.from_numpy(transport.astype(np.float32)).clone()
+
+        light = np.load(osp.join(self.data_path, im_name, "light.npy"))
+        light = torch.from_numpy(light.astype(np.float32)).clone()
+
+        mask_1024 = np.array(Image.open(osp.join(self.data_path, im_name, "mask_1024.png")))
+        mask_1024 = mask_1024[None,:,:].repeat(3,axis=0).astype(np.float32)
+        mask_1024 = torch.from_numpy(mask_1024.astype(np.float32)).clone()
+
+        albedo = cv2.imread(osp.join(self.data_path, im_name, "albedo.jpg"), cv2.IMREAD_COLOR).astype(np.float32) / 255.
+        shading = cv2.imread(osp.join(self.data_path, im_name, "shading.jpg"), cv2.IMREAD_COLOR).astype(np.float32) / 255.
+
+
+        albedo = albedo.permute(2,0,1).contiguous()
+        shading = shading.permute(2,0,1).contiguous()
+        transport = transport.permute(2,0,1).contiguous()
+
+        model_path = "/media/rance/hdd/relighting_humans_pytorch/models/shared_model_059.pth"
+        print("TRANSPORT", transport.shape,transport.max(),transport.min())
+        print("light", light.shape,light.max(),light.min())
+        print("mask_1024", mask_1024.shape,mask_1024.max(),mask_1024.min())
+        print("albedo", albedo.shape,albedo.max(),albedo.min())
+        print("shading", shading.shape,shading.max(),shading.min())
+        
+        return 0 
+        m_shared = CNNAE2ResNet()
+        m_shared.load_state_dict(torch.load(shared_model_file))
+
+        m_shared.train_dropout = False  
+        m_shared.to("cuda")  
+        
 
         result = {
             'c_name':   clothes,     # for visualization
