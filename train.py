@@ -90,8 +90,9 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
     for step in range(opt.keep_step + opt.decay_step):
         iter_start_time = time.time()
         inputs = train_loader.next_batch()
-            
+        
         im = inputs['image'].cuda()
+        print(im.shape,"IMMMMMM")
         im_pose = inputs['pose_image'].cuda()
         im_h = inputs['head'].cuda()
         shape = inputs['shape'].cuda()
