@@ -92,7 +92,6 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         inputs = train_loader.next_batch()
         
         im = inputs['image'].cuda()
-        print(im.shape,"IMMMMMM")
         im_pose = inputs['pose_image'].cuda()
         im_h = inputs['head'].cuda()
         shape = inputs['shape'].cuda()
@@ -105,6 +104,19 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         im_inout = inputs['im_inout'].cuda()
         parse_inout = inputs['parse_inout'].cuda()
         bg = inputs['bg'].cuda()
+
+        transport = inputs['transport'].cuda()
+        mask_1024 = inputs['mask_1024'].cuda()
+        albedo = inputs['albedo'].cuda()
+        shading = inputs['shading'].cuda()
+        light = inputs['light'].cuda()
+
+        print("TRANSPORT22222", transport.shape,transport.max(),transport.min())
+        print("light222222222", light.shape,light.max(),light.min())
+        print("mask_1024222222222", mask_1024.shape,mask_1024.max(),mask_1024.min())
+        print("albedo22222", albedo.shape,albedo.max(),albedo.min())
+        print("shading2222222", shading.shape,shading.max(),shading.min())
+        return 0
         # head_mask = inputs['head_mask'].cuda()
         # print(torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)),torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)).shape)
         # cm[:,0] = torch.sum([])

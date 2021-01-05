@@ -402,8 +402,6 @@ class CPDataset(data.Dataset):
         print("mask_1024", mask_1024.shape,mask_1024.max(),mask_1024.min())
         print("albedo", albedo.shape,albedo.max(),albedo.min())
         print("shading", shading.shape,shading.max(),shading.min())
-        print(im.shape,"IM")
-        return 0 
         m_shared = CNNAE2ResNet()
         m_shared.load_state_dict(torch.load(shared_model_file))
 
@@ -431,7 +429,12 @@ class CPDataset(data.Dataset):
             'im_nobg': im_nobg,
             'parse_inout':parse_inout,
             'im_inout':im_inout,
-            'combined':combined
+            'combined':combined,
+            'transport':transport,
+            'mask_1024':mask_1024,
+            'albedo':albedo,
+            'shading':shading,
+            'light':light
             # 'if_c': torch.tensor(if_c)
             }
 
