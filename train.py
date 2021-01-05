@@ -93,7 +93,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
     model_path = "/media/rance/hdd/relighting_humans_pytorch/models/shared_model_059.pth"
     
     m_shared = CNNAE2ResNet()
-    m_shared.load_state_dict(torch.load(shared_model_file))
+    m_shared.load_state_dict(torch.load(model_path))
 
     m_shared.train_dropout = False  
     m_shared.to("cuda")  
