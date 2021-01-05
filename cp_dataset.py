@@ -402,13 +402,6 @@ class CPDataset(data.Dataset):
         print("albedo", albedo.shape,albedo.max(),albedo.min())
         print("shading", shading.shape,shading.max(),shading.min())
 
-        # model_path = "/media/rance/hdd/relighting_humans_pytorch/models/shared_model_059.pth"
-        
-        # m_shared = CNNAE2ResNet()
-        # m_shared.load_state_dict(torch.load(shared_model_file))
-
-        # m_shared.train_dropout = False  
-        # m_shared.to("cuda")  
         
 
         result = {

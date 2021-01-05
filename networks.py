@@ -9,6 +9,8 @@ import torch.nn.functional as F
 import numpy as np
 import functools
 
+import math
+
 def weights_init_normal(m):
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:

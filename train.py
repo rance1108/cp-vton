@@ -86,6 +86,16 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
     # schedulerD = torch.optim.lr_scheduler.LambdaLR(optimizerD, lr_lambda = lambda step: 1.0 -
     #         max(0, step - opt.keep_step) / float(opt.decay_step + 1))
+
+
+
+    model_path = "/media/rance/hdd/relighting_humans_pytorch/models/shared_model_059.pth"
+    
+    m_shared = CNNAE2ResNet()
+    m_shared.load_state_dict(torch.load(shared_model_file))
+
+    m_shared.train_dropout = False  
+    m_shared.to("cuda")  
     
     for step in range(opt.keep_step + opt.decay_step):
         iter_start_time = time.time()
@@ -116,6 +126,12 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         print("mask_1024222222222", mask_1024.shape,mask_1024.max(),mask_1024.min())
         print("albedo22222", albedo.shape,albedo.max(),albedo.min())
         print("shading2222222", shading.shape,shading.max(),shading.min())
+
+        aa, vv, cc = m_shared(im)
+        print("aa",aa.shape,aa.max(),aa.min())
+        print("vv",vv.shape,vv.max(),vv.min())
+        print("cc",cc.shape,cc.max(),cc.min())
+
         return 0
         # head_mask = inputs['head_mask'].cuda()
         # print(torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)),torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)).shape)
