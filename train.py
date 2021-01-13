@@ -675,7 +675,7 @@ def train_tom(opt, train_loader, model, board):
         # loss_shading = criterionL1(shade, shading)
 
         loss_transport = criterionL1(transport, res_transport)
-        loss_light = criterionL1(light, res_light)
+        loss_light = criterionL1(light[0], res_light)
         print(loss_transport.shape,loss_light.shape)
         loss = 0.1*loss_l1 + 0.5* loss_vgg + 0.1*loss_mask + loss_transport, loss_light #loss_shading
         optimizer.zero_grad()
