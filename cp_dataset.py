@@ -395,11 +395,11 @@ class CPDataset(data.Dataset):
         shading = shading.permute(2,0,1).contiguous()
         transport = transport.permute(2,0,1).contiguous()
 
-        print("TRANSPORT", transport.shape,transport.max(),transport.min())
-        print("light", light.shape,light.max(),light.min())
-        print("mask_1024", mask_1024.shape,mask_1024.max(),mask_1024.min())
-        print("albedo", albedo.shape,albedo.max(),albedo.min())
-        print("shading", shading.shape,shading.max(),shading.min())
+        # print("TRANSPORT", transport.shape,transport.max(),transport.min())
+        # print("light", light.shape,light.max(),light.min())
+        # print("mask_1024", mask_1024.shape,mask_1024.max(),mask_1024.min())
+        # print("albedo", albedo.shape,albedo.max(),albedo.min())
+        # print("shading", shading.shape,shading.max(),shading.min())
 
         
 
