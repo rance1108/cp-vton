@@ -668,17 +668,17 @@ def train_tom(opt, train_loader, model, board):
         p_tryon = torch.nn.functional.interpolate(p_tryon, size=(1024,1024), scale_factor=None, mode='nearest', align_corners=None)
         p_tryon = p_tryon * mask_1024
         res_transport, res_albedo, res_light = criterionRelight(p_tryon)
-        print(transport.shape,res_transport.shape)
-        print(res_albedo.shape,albedo.shape)
-        print(res_light.shape,light.shape)
+        # print(transport.shape,res_transport.shape)
+        # print(res_albedo.shape,albedo.shape)
+        # print(res_light.shape,light.shape)
         # shade = torch.matmul(res_transport,res_light)
         # loss_shading = criterionL1(shade, shading)
 
         loss_transport = criterionL1(transport, res_transport)
-        loss_light = criterionL1(light[0], res_light)
-        print(loss_transport.shape,loss_light.shape)
-        print(loss_transport,loss_light)
-        loss = 0.1*loss_l1 + 0.5* loss_vgg + 0.1*loss_mask + loss_transport, loss_light #loss_shading
+        loss_light = criterionL1(light, res_light)
+        # print(loss_transport.shape,loss_light.shape)
+        # print(loss_transport,loss_light)
+        loss = 0.1*loss_l1 + 0.5* loss_vgg + 0.1*loss_mask + loss_transport + loss_light #loss_shading
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
