@@ -669,10 +669,13 @@ def train_tom(opt, train_loader, model, board):
         p_tryon = p_tryon * mask_1024
         res_transport, res_albedo, res_light = criterionRelight(p_tryon)
 
-        shade = torch.matmul(res_transport,res_light)
-        loss_shading = criterionL1(shade, shading)
+        # shade = torch.matmul(res_transport,res_light)
+        # loss_shading = criterionL1(shade, shading)
 
-        loss = 0.1*loss_l1 + 0.5* loss_vgg + 0.1*loss_mask + loss_shading
+        loss_transport = criterionL1(transport, res_transport)
+        loss_light = criterionL1(light, res_light)
+
+        loss = 0.1*loss_l1 + 0.5* loss_vgg + 0.1*loss_mask + loss_transport, loss_light #loss_shading
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -707,11 +710,13 @@ def train_tom(opt, train_loader, model, board):
             board.add_scalar('L1', loss_l1.item(), step+1)
             board.add_scalar('VGG', loss_vgg.item(), step+1)
             board.add_scalar('MaskL1', loss_mask.item(), step+1)
-            board.add_scalar('Mask_shade', loss_shading.item(), step+1)
+            # board.add_scalar('Mask_shade', loss_shading.item(), step+1)
+            board.add_scalar('Mask_transport', loss_transport.item(), step+1)
+            board.add_scalar('Mask_light', loss_light.item(), step+1)
             t = time.time() - iter_start_time
-            print('step: %8d, time: %.3f, loss: %.4f, l1: %.4f, vgg: %.4f, mask: %.4f, shade: %.4f' 
+            print('step: %8d, time: %.3f, loss: %.4f, l1: %.4f, vgg: %.4f, mask: %.4f, transport: %.4f, light: %.4f' 
                     % (step+1, t, loss.item(), loss_l1.item(), 
-                    loss_vgg.item(), loss_mask.item(),loss_shading.item()), flush=True)
+                    loss_vgg.item(), loss_mask.item(),loss_transport.item(),loss_light.item()), flush=True)
 
         if (step+1) % opt.save_count == 0:
             save_checkpoint(model, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d.pth' % (step+1)))
