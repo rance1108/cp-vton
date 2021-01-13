@@ -7,7 +7,7 @@ import argparse
 import os
 import time
 from cp_dataset import CPDataset, CPDataLoader
-from networks import GMM, UnetGenerator, VGGLoss, load_checkpoint, save_checkpoint, NLayerDiscriminator, GANLoss
+from networks import GMM, UnetGenerator, VGGLoss, load_checkpoint, save_checkpoint, NLayerDiscriminator, GANLoss, CNNAE2ResNet
 
 from tensorboardX import SummaryWriter
 from visualization import board_add_image, board_add_images
@@ -122,18 +122,17 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         shading = inputs['shading'].cuda()
         light = inputs['light'].cuda()
 
-        print("TRANSPORT22222", transport.shape,transport.max(),transport.min())
-        print("light222222222", light.shape,light.max(),light.min())
-        print("mask_1024222222222", mask_1024.shape,mask_1024.max(),mask_1024.min())
-        print("albedo22222", albedo.shape,albedo.max(),albedo.min())
-        print("shading2222222", shading.shape,shading.max(),shading.min())
+        # print("TRANSPORT22222", transport.shape,transport.max(),transport.min())
+        # print("light222222222", light.shape,light.max(),light.min())
+        # print("mask_1024222222222", mask_1024.shape,mask_1024.max(),mask_1024.min())
+        # print("albedo22222", albedo.shape,albedo.max(),albedo.min())
+        # print("shading2222222", shading.shape,shading.max(),shading.min())
 
-        aa, vv, cc = m_shared(mask_1024)
-        print("aa",aa.shape,aa.max(),aa.min())
-        print("vv",vv.shape,vv.max(),vv.min())
-        print("cc",cc.shape,cc.max(),cc.min())
+        # aa, vv, cc = m_shared(mask_1024)
+        # print("aa",aa.shape,aa.max(),aa.min())
+        # print("vv",vv.shape,vv.max(),vv.min())
+        # print("cc",cc.shape,cc.max(),cc.min())
 
-        return 0
         # head_mask = inputs['head_mask'].cuda()
         # print(torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)),torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)).shape)
         # cm[:,0] = torch.sum([])
@@ -520,6 +519,8 @@ def train_tom(opt, train_loader, model, board):
     criterionL1 = nn.L1Loss()
     criterionVGG = VGGLoss()
     criterionMask = nn.L1Loss()
+
+    criterionRelight = CNNAE2ResNet()
     
     # optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.5, 0.999))
@@ -543,6 +544,13 @@ def train_tom(opt, train_loader, model, board):
         bg = inputs['bg'].cuda()
         combined = inputs['combined'].cuda()
         # padding = torch.zeros((im.shape[0],2,im.shape[2],im.shape[3])).cuda()
+
+        transport = inputs['transport'].cuda()
+        mask_1024 = inputs['mask_1024'].cuda()
+        albedo = inputs['albedo'].cuda()
+        shading = inputs['shading'].cuda()
+        light = inputs['light'].cuda()
+
 
         combined_mask = torch.clamp(torch.sum(cm[:,0]+cm[:,1]+cm[:,2]+cm[:,3]+cm[:,4],dim=1,keepdim=True),0,1)
         # for i in range(c.shape[1]):
@@ -653,8 +661,19 @@ def train_tom(opt, train_loader, model, board):
 
         loss_l1 = criterionL1(p_tryon, im)
         loss_vgg = criterionVGG(p_tryon, im)
+        x = im[:,0]
+        im = im[:,[2,1,0]]
+        y = im[:,2]
+        print(x == y)
+        # p_tryon = p_tryon[:,[2,1,0]]
 
-        loss = loss_l1 + loss_vgg + loss_mask
+        p_tryon = torch.nn.functional.interpolate(p_tryon, size=(1024,1024), scale_factor=None, mode='nearest', align_corners=None)
+        p_tryon = p_tryon * mask_1024
+        res_transport, res_albedo, res_light = criterionRelight(p_tryon)
+        shade = torch.matmul(res_albedo,res_light)
+        loss_shading = criterionL1(shade, shading)
+
+        loss = 0.1*loss_l1 + 0.5* loss_vgg + 0.1*loss_mask + loss_shading
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()

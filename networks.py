@@ -770,6 +770,9 @@ class CNNAE2ResNet(nn.Module):
         
         self.train_dropout = train
 
+        for param in self.parameters():
+            param.requires_grad = False
+
 
     def forward(self, xi):
         hc0 = F.leaky_relu(self.c0(xi))
