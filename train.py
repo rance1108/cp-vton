@@ -664,7 +664,7 @@ def train_tom(opt, train_loader, model, board):
         x = im[:,0]
         im = im[:,[2,1,0]]
         y = im[:,2]
-        print(torch.eq(x, y))
+        print(torch.eq(x, y),torch.min(torch.eq(x, y)))
         p_tryon = p_tryon[:,[2,1,0]]
 
         p_tryon = torch.nn.functional.interpolate(p_tryon, size=(1024,1024), scale_factor=None, mode='nearest', align_corners=None)
