@@ -96,7 +96,9 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
     m_shared.load_state_dict(torch.load(model_path))
 
     m_shared.train_dropout = False  
-    m_shared.cuda()
+
+    criterionRelight = m_shared.cuda()
+    
     
     for step in range(opt.keep_step + opt.decay_step):
         iter_start_time = time.time()
@@ -122,48 +124,10 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         shading = inputs['shading'].cuda()
         light = inputs['light'].cuda()
 
-        # print("TRANSPORT22222", transport.shape,transport.max(),transport.min())
-        # print("light222222222", light.shape,light.max(),light.min())
-        # print("mask_1024222222222", mask_1024.shape,mask_1024.max(),mask_1024.min())
-        # print("albedo22222", albedo.shape,albedo.max(),albedo.min())
-        # print("shading2222222", shading.shape,shading.max(),shading.min())
-
-        # aa, vv, cc = m_shared(mask_1024)
-        # print("aa",aa.shape,aa.max(),aa.min())
-        # print("vv",vv.shape,vv.max(),vv.min())
-        # print("cc",cc.shape,cc.max(),cc.min())
-
-        # head_mask = inputs['head_mask'].cuda()
-        # print(torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)),torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)).shape)
-        # cm[:,0] = torch.sum([])
-
         C_unwarp_warp = []
         M_unwarp_warp = []
         G_unwarp_warp = []
 
-        # C_unwarp_warp_unwarp = []
-        # M_unwarp_warp_unwarp = []
-        # G_unwarp_warp_unwarp = []
-
-        # C_warpGT_unwarp = []
-        # M_warpGT_unwarp = []
-        # G_warpGT_unwarp = []
-
-
-
-        # C_warpGT_unwarp_warp = []
-        # M_warpGT_unwarp_warp = []
-        # G_warpGT_unwarp_warp = []
-
-
-        # C_itself_A = []
-        # M_itself_A = []
-        # G_itself_A = []
-
-
-        # C_itself_B = []
-        # M_itself_B = []
-        # G_itself_B = []
 
         visuals = []
         loss = 0
@@ -174,91 +138,33 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         m1 = F.grid_sample(cm[:,0], grid1, padding_mode='zeros')
         g1 = F.grid_sample(im_g, grid1, padding_mode='zeros')
 
-        grid2, theta2 = G_A(input_agnostic, torch.cat([c[:,1],pcm[:,1]],dim=1), None) 
-
-        c2 = F.grid_sample(c[:,1], grid2, padding_mode='border')
-        m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
-        g2 = F.grid_sample(im_g, grid2, padding_mode='zeros')
-
-        grid3, theta3 = G_A(input_agnostic, torch.cat([c[:,2],pcm[:,2]],dim=1), None) 
-
-        c3 = F.grid_sample(c[:,2], grid3, padding_mode='border')
-        m3 = F.grid_sample(cm[:,2], grid3, padding_mode='zeros')
-        g3 = F.grid_sample(im_g, grid3, padding_mode='zeros')
-
-        grid4, theta4 = G_A(input_agnostic, torch.cat([c[:,3],pcm[:,3]],dim=1), None) 
-
-        c4 = F.grid_sample(c[:,3], grid4, padding_mode='border')
-        m4 = F.grid_sample(cm[:,3], grid4, padding_mode='zeros')
-        g4 = F.grid_sample(im_g, grid4, padding_mode='zeros')
 
 
-        grid5, theta5 = G_A(input_agnostic, torch.cat([c[:,4],pcm[:,4]],dim=1), None) 
 
-        c5 = F.grid_sample(c[:,4], grid5, padding_mode='border')
-        m5 = F.grid_sample(cm[:,4], grid5, padding_mode='zeros')
-        g5 = F.grid_sample(im_g, grid5, padding_mode='zeros')
+        for param in D_A.parameters():
+            param.requires_grad = False
 
 
-        # c_com = c1 * pcm[:,0]  + c2 * pcm[:,1]
-        # c_com = c1 * pcm[:,0] + c2 * pcm[:,1]
+        loss_G_A = criterionGAN(D_A(c1), True)
 
-        c_com = c1 * pcm[:,0]  + c2 * pcm[:,1] + c3 * pcm[:,2] + c4 * pcm[:,3] + c5 * pcm[:,4]
-
-        # for param in D_A.parameters():
-        #     param.requires_grad = False
-
-
-        loss_L1_all = 0.1* criterionL1(c_com, im_inout)
-        # loss_L1_1 = criterionL1(c1 * pcm[:,0], im_c[:,0] * pcm[:,0])  
-        loss_L1_1 = criterionL1(c1 , im_c[:,0] )
-        loss_L1_2 = criterionL1(c2 , im_c[:,1] )
-        loss_L1_3 = criterionL1(c3 , im_c[:,2] )
-        loss_L1_4 = criterionL1(c4 , im_c[:,3] )
-        loss_L1_5 = criterionL1(c5 , im_c[:,4] )
-        # loss_L1_2 = criterionL1(c2 * pcm[:,1], im_c[:,1] * pcm[:,1])
-
-        # loss_G_A = criterionGAN(D_A(c_com), True)
-
-        # loss_G = loss_G_A + loss_L1
-        # loss_L1 = loss_L1_1 
-        loss_L1 = loss_L1_1 + loss_L1_2 + loss_L1_3 + loss_L1_4 + loss_L1_5 + loss_L1_all
+        loss_G = 0.5* loss_G_A + loss_L1
         optimizerG.zero_grad()
-        loss_L1.backward()
-        # loss_G.backward()
+        loss_G.backward()
         optimizerG.step() 
 
-        # for param in D_A.parameters():
-        #     param.requires_grad = True
+        for param in D_A.parameters():
+            param.requires_grad = True
             
-        # optimizerD.zero_grad() 
+        optimizerD.zero_grad() 
 
-        # loss_DA = backward_D_basic(D_A, im_inout, c_com)
+        loss_DA = backward_D_basic(D_A, im_c[:,0], c1)
 
-        # optimizerD.step()
+        optimizerD.step()
 
         visuals.append([ [shape, im_pose], 
                    [c[:,0], im_c[:,0]],
-                   [c[:,1], im_c[:,1]],
-                   [c[:,2], im_c[:,2]],
-                   [c[:,3], im_c[:,3]],
-                   [c[:,4], im_c[:,4]],
-                   [im_c[:,0], pcm[:,0]*2-1],
-                   [im_c[:,1], pcm[:,1]*2-1],
-                   [im_c[:,2], pcm[:,2]*2-1],
-                   [im_c[:,3], pcm[:,3]*2-1],
-                   [im_c[:,4], pcm[:,4]*2-1],
-                   [c1, c2],
-                   [c3, c4],
-                   [c5, c5],
-                   [m1*2-1, m2*2-1],
-                   [m3*2-1, m4*2-1],
-                   [m5*2-1, m5*2-1],
-                   [g1,g2],
-                   [g3,g4],
-                   [g5,g5],
-                   [c_com,c_com+bg],
-                   [im_inout,parse_inout*2-1]
+                   [pcm[:,0]*2-1,c1],
+                   [m1*2-1,g1]
                    ])
 
 
@@ -266,27 +172,208 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             for j, k in zip(range(1),['combined']):
                 board_add_images(board, k, visuals[j], step+1)
             board.add_scalar('loss_L1', loss_L1.item(), step+1)
-            board.add_scalar('loss_L1_1', loss_L1_1.item(), step+1)
-            board.add_scalar('loss_L1_2', loss_L1_2.item(), step+1)
-            board.add_scalar('loss_L1_3', loss_L1_3.item(), step+1)
-            board.add_scalar('loss_L1_4', loss_L1_4.item(), step+1)
-            board.add_scalar('loss_L1_5', loss_L1_5.item(), step+1)
-            board.add_scalar('loss_L1_all', loss_L1_all.item(), step+1)
+            board.add_scalar('loss_G', loss_G.item(), step+1)
+            board.add_scalar('loss_DA', loss_DA.item(), step+1)
 
-            # t = time.time() - iter_start_time
-            # print('step: %8d, time: %.3f, loss: %4f ' \
-            #     % (step+1, t, loss_L1.item() ), flush=True)
             t = time.time() - iter_start_time
-            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_l2: %4f , loss_l3: %4f , loss_l4: %4f , loss_l5: %4f , loss_lall: %4f ' \
-                % (step+1, t, loss_L1.item(), loss_L1_1.item(), loss_L1_2.item(), loss_L1_3.item(), loss_L1_4.item(), loss_L1_5.item(), loss_L1_all.item()), flush=True)
-
-            # t = time.time() - iter_start_time
-            # print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f' \
-            #     % (step+1, t, loss_G, loss_L1.item(), loss_G_A.item(), loss_DA.item()), flush=True)
+            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_G: %4f , loss_DA: %4f ' \
+                % (step+1, t, loss_L1.item(), loss_G.item(), loss_DA.item()), flush=True)
 
         if (step+1) % opt.save_count == 0:
             save_checkpoint(G_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_G_A.pth' % (step+1)))
-            # save_checkpoint(D_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_D_A.pth' % (step+1)))
+            save_checkpoint(D_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_D_A.pth' % (step+1)))
+
+    
+    
+    # for step in range(opt.keep_step + opt.decay_step):
+    #     iter_start_time = time.time()
+    #     inputs = train_loader.next_batch()
+        
+    #     im = inputs['image'].cuda()
+    #     im_pose = inputs['pose_image'].cuda()
+    #     im_h = inputs['head'].cuda()
+    #     shape = inputs['shape'].cuda()
+    #     agnostic = inputs['agnostic'].cuda()
+    #     c = inputs['cloth'].cuda()
+    #     cm = inputs['cloth_mask'].cuda()
+    #     pcm = inputs['parse_cloth_mask'].cuda()
+    #     im_c =  inputs['parse_cloth'].cuda()
+    #     im_g = inputs['grid_image'].cuda()
+    #     im_inout = inputs['im_inout'].cuda()
+    #     parse_inout = inputs['parse_inout'].cuda()
+    #     bg = inputs['bg'].cuda()
+
+    #     transport = inputs['transport'].cuda()
+    #     mask_1024 = inputs['mask_1024'].cuda()
+    #     albedo = inputs['albedo'].cuda()
+    #     shading = inputs['shading'].cuda()
+    #     light = inputs['light'].cuda()
+
+    #     # print("TRANSPORT22222", transport.shape,transport.max(),transport.min())
+    #     # print("light222222222", light.shape,light.max(),light.min())
+    #     # print("mask_1024222222222", mask_1024.shape,mask_1024.max(),mask_1024.min())
+    #     # print("albedo22222", albedo.shape,albedo.max(),albedo.min())
+    #     # print("shading2222222", shading.shape,shading.max(),shading.min())
+
+    #     # aa, vv, cc = m_shared(mask_1024)
+    #     # print("aa",aa.shape,aa.max(),aa.min())
+    #     # print("vv",vv.shape,vv.max(),vv.min())
+    #     # print("cc",cc.shape,cc.max(),cc.min())
+
+    #     # head_mask = inputs['head_mask'].cuda()
+    #     # print(torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)),torch.min(torch.sum([cm[:,0],cm[:,1]],dim=1)).shape)
+    #     # cm[:,0] = torch.sum([])
+
+    #     C_unwarp_warp = []
+    #     M_unwarp_warp = []
+    #     G_unwarp_warp = []
+
+    #     # C_unwarp_warp_unwarp = []
+    #     # M_unwarp_warp_unwarp = []
+    #     # G_unwarp_warp_unwarp = []
+
+    #     # C_warpGT_unwarp = []
+    #     # M_warpGT_unwarp = []
+    #     # G_warpGT_unwarp = []
+
+
+
+    #     # C_warpGT_unwarp_warp = []
+    #     # M_warpGT_unwarp_warp = []
+    #     # G_warpGT_unwarp_warp = []
+
+
+    #     # C_itself_A = []
+    #     # M_itself_A = []
+    #     # G_itself_A = []
+
+
+    #     # C_itself_B = []
+    #     # M_itself_B = []
+    #     # G_itself_B = []
+
+    #     visuals = []
+    #     loss = 0
+        
+    #     input_agnostic = torch.cat([agnostic,parse_inout],dim=1)
+    #     grid1, theta1 = G_A(input_agnostic, torch.cat([c[:,0],pcm[:,0]],dim=1), None) 
+    #     c1 = F.grid_sample(c[:,0], grid1, padding_mode='border')
+    #     m1 = F.grid_sample(cm[:,0], grid1, padding_mode='zeros')
+    #     g1 = F.grid_sample(im_g, grid1, padding_mode='zeros')
+
+    #     grid2, theta2 = G_A(input_agnostic, torch.cat([c[:,1],pcm[:,1]],dim=1), None) 
+
+    #     c2 = F.grid_sample(c[:,1], grid2, padding_mode='border')
+    #     m2 = F.grid_sample(cm[:,1], grid2, padding_mode='zeros')
+    #     g2 = F.grid_sample(im_g, grid2, padding_mode='zeros')
+
+    #     grid3, theta3 = G_A(input_agnostic, torch.cat([c[:,2],pcm[:,2]],dim=1), None) 
+
+    #     c3 = F.grid_sample(c[:,2], grid3, padding_mode='border')
+    #     m3 = F.grid_sample(cm[:,2], grid3, padding_mode='zeros')
+    #     g3 = F.grid_sample(im_g, grid3, padding_mode='zeros')
+
+    #     grid4, theta4 = G_A(input_agnostic, torch.cat([c[:,3],pcm[:,3]],dim=1), None) 
+
+    #     c4 = F.grid_sample(c[:,3], grid4, padding_mode='border')
+    #     m4 = F.grid_sample(cm[:,3], grid4, padding_mode='zeros')
+    #     g4 = F.grid_sample(im_g, grid4, padding_mode='zeros')
+
+
+    #     grid5, theta5 = G_A(input_agnostic, torch.cat([c[:,4],pcm[:,4]],dim=1), None) 
+
+    #     c5 = F.grid_sample(c[:,4], grid5, padding_mode='border')
+    #     m5 = F.grid_sample(cm[:,4], grid5, padding_mode='zeros')
+    #     g5 = F.grid_sample(im_g, grid5, padding_mode='zeros')
+
+
+    #     # c_com = c1 * pcm[:,0]  + c2 * pcm[:,1]
+    #     # c_com = c1 * pcm[:,0] + c2 * pcm[:,1]
+
+    #     c_com = c1 * pcm[:,0]  + c2 * pcm[:,1] + c3 * pcm[:,2] + c4 * pcm[:,3] + c5 * pcm[:,4]
+
+    #     # for param in D_A.parameters():
+    #     #     param.requires_grad = False
+
+
+    #     loss_L1_all = 0.1* criterionL1(c_com, im_inout)
+    #     # loss_L1_1 = criterionL1(c1 * pcm[:,0], im_c[:,0] * pcm[:,0])  
+    #     loss_L1_1 = criterionL1(c1 , im_c[:,0] )
+    #     loss_L1_2 = criterionL1(c2 , im_c[:,1] )
+    #     loss_L1_3 = criterionL1(c3 , im_c[:,2] )
+    #     loss_L1_4 = criterionL1(c4 , im_c[:,3] )
+    #     loss_L1_5 = criterionL1(c5 , im_c[:,4] )
+    #     # loss_L1_2 = criterionL1(c2 * pcm[:,1], im_c[:,1] * pcm[:,1])
+
+    #     # loss_G_A = criterionGAN(D_A(c_com), True)
+
+    #     # loss_G = loss_G_A + loss_L1
+    #     # loss_L1 = loss_L1_1 
+    #     loss_L1 = loss_L1_1 + loss_L1_2 + loss_L1_3 + loss_L1_4 + loss_L1_5 + loss_L1_all
+    #     optimizerG.zero_grad()
+    #     loss_L1.backward()
+    #     # loss_G.backward()
+    #     optimizerG.step() 
+
+    #     # for param in D_A.parameters():
+    #     #     param.requires_grad = True
+            
+    #     # optimizerD.zero_grad() 
+
+    #     # loss_DA = backward_D_basic(D_A, im_inout, c_com)
+
+    #     # optimizerD.step()
+
+    #     visuals.append([ [shape, im_pose], 
+    #                [c[:,0], im_c[:,0]],
+    #                [c[:,1], im_c[:,1]],
+    #                [c[:,2], im_c[:,2]],
+    #                [c[:,3], im_c[:,3]],
+    #                [c[:,4], im_c[:,4]],
+    #                [im_c[:,0], pcm[:,0]*2-1],
+    #                [im_c[:,1], pcm[:,1]*2-1],
+    #                [im_c[:,2], pcm[:,2]*2-1],
+    #                [im_c[:,3], pcm[:,3]*2-1],
+    #                [im_c[:,4], pcm[:,4]*2-1],
+    #                [c1, c2],
+    #                [c3, c4],
+    #                [c5, c5],
+    #                [m1*2-1, m2*2-1],
+    #                [m3*2-1, m4*2-1],
+    #                [m5*2-1, m5*2-1],
+    #                [g1,g2],
+    #                [g3,g4],
+    #                [g5,g5],
+    #                [c_com,c_com+bg],
+    #                [im_inout,parse_inout*2-1]
+    #                ])
+
+
+    #     if (step+1) % opt.display_count == 0:
+    #         for j, k in zip(range(1),['combined']):
+    #             board_add_images(board, k, visuals[j], step+1)
+    #         board.add_scalar('loss_L1', loss_L1.item(), step+1)
+    #         board.add_scalar('loss_L1_1', loss_L1_1.item(), step+1)
+    #         board.add_scalar('loss_L1_2', loss_L1_2.item(), step+1)
+    #         board.add_scalar('loss_L1_3', loss_L1_3.item(), step+1)
+    #         board.add_scalar('loss_L1_4', loss_L1_4.item(), step+1)
+    #         board.add_scalar('loss_L1_5', loss_L1_5.item(), step+1)
+    #         board.add_scalar('loss_L1_all', loss_L1_all.item(), step+1)
+
+    #         # t = time.time() - iter_start_time
+    #         # print('step: %8d, time: %.3f, loss: %4f ' \
+    #         #     % (step+1, t, loss_L1.item() ), flush=True)
+    #         t = time.time() - iter_start_time
+    #         print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_l2: %4f , loss_l3: %4f , loss_l4: %4f , loss_l5: %4f , loss_lall: %4f ' \
+    #             % (step+1, t, loss_L1.item(), loss_L1_1.item(), loss_L1_2.item(), loss_L1_3.item(), loss_L1_4.item(), loss_L1_5.item(), loss_L1_all.item()), flush=True)
+
+    #         # t = time.time() - iter_start_time
+    #         # print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f loss_G: %4f loss_D: %4f' \
+    #         #     % (step+1, t, loss_G, loss_L1.item(), loss_G_A.item(), loss_DA.item()), flush=True)
+
+    #     if (step+1) % opt.save_count == 0:
+    #         save_checkpoint(G_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_G_A.pth' % (step+1)))
+    #         # save_checkpoint(D_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_D_A.pth' % (step+1)))
 
 
 
@@ -520,7 +607,15 @@ def train_tom(opt, train_loader, model, board):
     criterionVGG = VGGLoss()
     criterionMask = nn.L1Loss()
 
-    criterionRelight = CNNAE2ResNet().cuda()
+    from networks import CNNAE2ResNet
+    model_path = "/media/rance/hdd/relighting_humans_pytorch/models/shared_model_059.pth"
+    
+    m_shared = CNNAE2ResNet()
+    m_shared.load_state_dict(torch.load(model_path))
+
+    m_shared.train_dropout = False  
+
+    criterionRelight = m_shared.cuda()
     
     # optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.5, 0.999))
