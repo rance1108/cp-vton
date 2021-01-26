@@ -147,7 +147,8 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         # loss_G_B_GAN = criterionGAN(D_A(c11), True)
         loss_L1_B = criterionL1(c11,im_c[:,0])
 
-        loss_G_B = 0*loss_G_B_GAN + loss_L1_B + loss_vgg_B
+        # loss_G_B = loss_G_B_GAN + loss_L1_B + loss_vgg_B
+        loss_G_B =  + loss_L1_B + loss_vgg_B
 
 
 
@@ -177,13 +178,15 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             for j, k in zip(range(1),['combined']):
                 board_add_images(board, k, visuals[j], step+1)
             board.add_scalar('loss_L1', loss_L1.item(), step+1)
-            board.add_scalar('loss_G', loss_G.item(), step+1)
-            board.add_scalar('loss_DA', loss_DA.item(), step+1)
+            # board.add_scalar('loss_G', loss_G.item(), step+1)
+            # board.add_scalar('loss_DA', loss_DA.item(), step+1)
             board.add_scalar('loss_G_B', loss_G_B.item(), step+1)
 
             t = time.time() - iter_start_time
-            print('step: %8d, time: %.3f, loss_G_A: %4f, loss_DA: %4f , loss_G_B_GAN: %4f , loss_L1_B: %4f , loss_vgg_B: %4f ' \
-                % (step+1, t, loss_L1.item(), loss_DA.item(),loss_G_B_GAN.item(),loss_L1_B.item(),loss_vgg_B.item()), flush=True)
+            print('step: %8d, time: %.3f, loss_G_A: %4f, loss_G_B_GAN: %4f , loss_L1_B: %4f , loss_vgg_B: %4f ' \
+                % (step+1, t, loss_L1.item(), ,loss_G_B_GAN.item(),loss_L1_B.item(),loss_vgg_B.item()), flush=True)
+            # print('step: %8d, time: %.3f, loss_G_A: %4f, loss_DA: %4f , loss_G_B_GAN: %4f , loss_L1_B: %4f , loss_vgg_B: %4f ' \
+            #     % (step+1, t, loss_L1.item(), loss_DA.item(),loss_G_B_GAN.item(),loss_L1_B.item(),loss_vgg_B.item()), flush=True)
 
         if (step+1) % opt.save_count == 0:
             save_checkpoint(G_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_G_A.pth' % (step+1)))
