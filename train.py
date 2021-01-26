@@ -132,7 +132,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
         loss_L1 = criterionL1(c1,im_c[:,0])
 
-        loss_G = 0.5* loss_G_A + loss_L1
+        loss_G =  loss_L1
         optimizerG.zero_grad()
         loss_G.backward()
         optimizerG.step() 
