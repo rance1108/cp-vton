@@ -138,7 +138,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         optimizerG.step() 
 
 
-        input_G_B = torch.cat([agnostic,c1,c[:,0],pcm[:,0]],dim=1)
+        input_G_B = torch.cat([agnostic,c1.detach(),c[:,0],pcm[:,0]],dim=1)
         c11 = G_B(input_G_B)
 
 
