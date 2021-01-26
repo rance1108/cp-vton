@@ -148,7 +148,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         loss_L1_B = criterionL1(c11,im_c[:,0])
 
         # loss_G_B = loss_G_B_GAN + loss_L1_B + loss_vgg_B
-        loss_G_B =  + loss_L1_B + loss_vgg_B
+        loss_G_B = loss_L1_B + loss_vgg_B
 
 
 
