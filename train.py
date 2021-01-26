@@ -138,7 +138,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         optimizerG.step() 
 
 
-        input_G_B = torch.cat([agnostic,c1.detach(),c[:,0],pcm[:,0]],dim=1)
+        input_G_B = torch.cat([c1.detach(),c[:,0],pcm[:,0]],dim=1)
         c11 = G_B(input_G_B)
 
 
@@ -147,7 +147,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         loss_G_B_GAN = criterionGAN(D_A(c11), True)
         loss_L1_B = criterionL1(c11,im_c[:,0])
 
-        loss_G_B = loss_G_B_GAN + loss_L1_B + loss_vgg_B
+        loss_G_B = 0.5*loss_G_B_GAN + loss_L1_B + loss_vgg_B
 
 
 
@@ -876,7 +876,7 @@ def main():
     # create model & train & save the final checkpoint
     if opt.stage == 'GMM':
         G_A = GMM(opt)
-        G_B = UnetGenerator(20+3+3+1, 3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        G_B = UnetGenerator(3+3+1, 3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         D_A = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)
         # D_B = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)  
 
