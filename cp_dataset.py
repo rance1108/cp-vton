@@ -63,10 +63,10 @@ class CPDataset(data.Dataset):
             c = []
             cm = []
             if_c = []
-            clothes = ["0.png", "1.png", "2.png", "4.png"]
-            masks = ["0_mask.png", "1_mask.png", "2_mask.png", "4_mask.png"]
-            # clothes = ["0.png", "1.png"]
-            # masks = ["0_mask.png", "1_mask.png"]
+            # clothes = ["0.png", "1.png", "2.png", "4.png"]
+            # masks = ["0_mask.png", "1_mask.png", "2_mask.png", "4_mask.png"]
+            clothes = ["0.png"]
+            masks = ["0_mask.png"]
             for f_name, fm_name in zip(clothes, masks):
                 c_path = osp.join(self.data_path, im_name, f_name)
                 cm_path = osp.join(self.data_path, im_name, fm_name)

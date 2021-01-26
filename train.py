@@ -49,43 +49,30 @@ def get_opt():
 def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
     G_A.cuda()
     G_A.train()
+
+    G_B.cuda()
+    G_B.train()
     
-    # G_B.cuda()
-    # G_B.train()
-
-    # D_A.cuda()
-    # D_A.train()
-
-    # D_B.cuda()
-    # D_B.train()
-
+    D_A.cuda()
+    D_A.train()
 
     # criterion
     criterionL1 = nn.L1Loss()
-    # criterionGAN = GANLoss('lsgan').cuda()
-    # criterionCycle = torch.nn.L1Loss()
-    # criterionIdt = torch.nn.L1Loss()
-    """Calculate the loss for generators G_A and G_B"""
-    # lambda_idt = 0.5    
-    # lambda_A = 10.0
-    # lambda_B = 10.0
-    # lambda_L1 = 10.0
+    criterionGAN = GANLoss('lsgan').cuda()
+    criterionVGG = VGGLoss()
 
-    # optimizer
+
     optimizerG = torch.optim.Adam(itertools.chain(G_A.parameters()), lr=opt.lr, betas=(0.5, 0.999))
-    # optimizerD = torch.optim.Adam(itertools.chain(D_A.parameters()), lr=opt.lr, betas=(0.5, 0.999))
-
-    # optimizerG = torch.optim.Adam(itertools.chain(G_A.parameters(), G_B.parameters()), lr=opt.lr, betas=(0.5, 0.999))
-    # optimizerD = torch.optim.Adam(itertools.chain(D_A.parameters(), D_B.parameters()), lr=opt.lr, betas=(0.5, 0.999))
-
-    # optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.5, 0.999))
-
+    optimizerG_B = torch.optim.Adam(itertools.chain(G_B.parameters()), lr=opt.lr, betas=(0.5, 0.999))
+    optimizerD = torch.optim.Adam(itertools.chain(D_A.parameters()), lr=opt.lr, betas=(0.5, 0.999))
 
     schedulerG = torch.optim.lr_scheduler.LambdaLR(optimizerG, lr_lambda = lambda step: 1.0 -
             max(0, step - opt.keep_step) / float(opt.decay_step + 1))
+    schedulerG_B = torch.optim.lr_scheduler.LambdaLR(optimizerG_B, lr_lambda = lambda step: 1.0 -
+            max(0, step - opt.keep_step) / float(opt.decay_step + 1))
 
-    # schedulerD = torch.optim.lr_scheduler.LambdaLR(optimizerD, lr_lambda = lambda step: 1.0 -
-    #         max(0, step - opt.keep_step) / float(opt.decay_step + 1))
+    schedulerD = torch.optim.lr_scheduler.LambdaLR(optimizerD, lr_lambda = lambda step: 1.0 -
+            max(0, step - opt.keep_step) / float(opt.decay_step + 1))
 
 
 
@@ -132,8 +119,7 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         visuals = []
         loss = 0
         
-        input_agnostic = torch.cat([agnostic,parse_inout],dim=1)
-        grid1, theta1 = G_A(input_agnostic, torch.cat([c[:,0],pcm[:,0]],dim=1), None) 
+        grid1, theta1 = G_A(agnostic, torch.cat([c[:,0],pcm[:,0]],dim=1), None) 
         c1 = F.grid_sample(c[:,0], grid1, padding_mode='border')
         m1 = F.grid_sample(cm[:,0], grid1, padding_mode='zeros')
         g1 = F.grid_sample(im_g, grid1, padding_mode='zeros')
@@ -144,27 +130,46 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         for param in D_A.parameters():
             param.requires_grad = False
 
-
-        loss_G_A = criterionGAN(D_A(c1), True)
+        loss_L1 = criterionL1(c1,im_c[:,0])
 
         loss_G = 0.5* loss_G_A + loss_L1
         optimizerG.zero_grad()
         loss_G.backward()
         optimizerG.step() 
 
+
+        input_G_B = torch.cat([agnostic,c1,c[:,0],pcm[:,0]],dim=1)
+        c11 = G_B(input_G_B)
+
+
+        loss_vgg_B = criterionVGG(c11, im_c[:,0])
+
+        loss_G_B_GAN = criterionGAN(D_A(c11), True)
+        loss_L1_B = criterionL1(c11,im_c[:,0])
+
+        loss_G_B = loss_G_B_GAN + loss_L1_B + loss_vgg_B
+
+
+
+        optimizerG_B.zero_grad()
+        loss_G_B.backward()
+        optimizerG_B.step() 
+
+
         for param in D_A.parameters():
             param.requires_grad = True
             
         optimizerD.zero_grad() 
 
-        loss_DA = backward_D_basic(D_A, im_c[:,0], c1)
+        loss_DA = backward_D_basic(D_A, im_c[:,0], c11)
 
         optimizerD.step()
 
         visuals.append([ [shape, im_pose], 
                    [c[:,0], im_c[:,0]],
                    [pcm[:,0]*2-1,c1],
-                   [m1*2-1,g1]
+                   [m1*2-1,g1],
+                   [c1,c11]
                    ])
 
 
@@ -174,13 +179,15 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             board.add_scalar('loss_L1', loss_L1.item(), step+1)
             board.add_scalar('loss_G', loss_G.item(), step+1)
             board.add_scalar('loss_DA', loss_DA.item(), step+1)
+            board.add_scalar('loss_G_B', loss_G_B.item(), step+1)
 
             t = time.time() - iter_start_time
-            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_G: %4f , loss_DA: %4f ' \
-                % (step+1, t, loss_L1.item(), loss_G.item(), loss_DA.item()), flush=True)
+            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_G: %4f , loss_DA: %4f , loss_G_B_GAN: %4f , loss_L1_B: %4f , loss_vgg_B: %4f ' \
+                % (step+1, t, loss_L1.item(), loss_G.item(), loss_DA.item(),loss_G_B_GAN.item(),loss_L1_B.item(),loss_vgg_B.item()), flush=True)
 
         if (step+1) % opt.save_count == 0:
             save_checkpoint(G_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_G_A.pth' % (step+1)))
+            save_checkpoint(G_B, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_G_A.pth' % (step+1)))
             save_checkpoint(D_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_D_A.pth' % (step+1)))
 
     
@@ -869,8 +876,8 @@ def main():
     # create model & train & save the final checkpoint
     if opt.stage == 'GMM':
         G_A = GMM(opt)
-        # G_B = GMM(opt)
-        # D_A = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)
+        G_B = UnetGenerator(20+3+3+1, 3, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        D_A = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)
         # D_B = NLayerDiscriminator(3, 64, n_layers=3, norm_layer=nn.InstanceNorm2d)  
 
         if not opt.checkpoint =='' and os.path.exists(opt.checkpoint):
@@ -878,7 +885,7 @@ def main():
 
         # train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board)
 
-        train_gmm(opt, train_loader, G_A, None, None, None, board)
+        train_gmm(opt, train_loader, G_A, G_B, D_A, None, board)
 
         # save_checkpoint(G_A, os.path.join(opt.checkpoint_dir, opt.name, 'gmmA2B_final.pth'))
         # save_checkpoint(G_B, os.path.join(opt.checkpoint_dir, opt.name, 'gmmB2A_final.pth'))
