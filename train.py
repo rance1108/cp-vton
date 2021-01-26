@@ -182,8 +182,8 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
             board.add_scalar('loss_G_B', loss_G_B.item(), step+1)
 
             t = time.time() - iter_start_time
-            print('step: %8d, time: %.3f, loss: %4f , loss_l1: %4f , loss_G: %4f , loss_DA: %4f , loss_G_B_GAN: %4f , loss_L1_B: %4f , loss_vgg_B: %4f ' \
-                % (step+1, t, loss_L1.item(), loss_G.item(), loss_DA.item(),loss_G_B_GAN.item(),loss_L1_B.item(),loss_vgg_B.item()), flush=True)
+            print('step: %8d, time: %.3f, loss: %4f, loss_G_A: %4f, loss_DA: %4f , loss_G_B_GAN: %4f , loss_L1_B: %4f , loss_vgg_B: %4f ' \
+                % (step+1, t, loss_L1.item(), loss_DA.item(),loss_G_B_GAN.item(),loss_L1_B.item(),loss_vgg_B.item()), flush=True)
 
         if (step+1) % opt.save_count == 0:
             save_checkpoint(G_A, os.path.join(opt.checkpoint_dir, opt.name, 'step_%06d_G_A.pth' % (step+1)))
