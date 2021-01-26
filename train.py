@@ -139,7 +139,8 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
 
         input_G_B = torch.cat([c1.detach(),c[:,0],pcm[:,0]],dim=1)
-        c11 = G_B(input_G_B)
+        im_c[:,0] = pcm[:,0]* im_c[:,0] 
+        c11 = pcm[:,0]*G_B(input_G_B)
 
 
         loss_vgg_B = criterionVGG(c11, im_c[:,0])
