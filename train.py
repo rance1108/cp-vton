@@ -127,8 +127,8 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
 
 
-        for param in D_A.parameters():
-            param.requires_grad = False
+        # for param in D_A.parameters():
+        #     param.requires_grad = False
 
         loss_L1 = criterionL1(c1,im_c[:,0])
 
@@ -144,10 +144,10 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
 
         loss_vgg_B = criterionVGG(c11, im_c[:,0])
 
-        loss_G_B_GAN = criterionGAN(D_A(c11), True)
+        # loss_G_B_GAN = criterionGAN(D_A(c11), True)
         loss_L1_B = criterionL1(c11,im_c[:,0])
 
-        loss_G_B = 0.5*loss_G_B_GAN + loss_L1_B + loss_vgg_B
+        loss_G_B = 0*loss_G_B_GAN + loss_L1_B + loss_vgg_B
 
 
 
@@ -156,14 +156,14 @@ def train_gmm(opt, train_loader, G_A, G_B, D_A, D_B, board):
         optimizerG_B.step() 
 
 
-        for param in D_A.parameters():
-            param.requires_grad = True
+        # for param in D_A.parameters():
+        #     param.requires_grad = True
             
-        optimizerD.zero_grad() 
+        # optimizerD.zero_grad() 
 
-        loss_DA = backward_D_basic(D_A, im_c[:,0], c11)
+        # loss_DA = backward_D_basic(D_A, im_c[:,0], c11)
 
-        optimizerD.step()
+        # optimizerD.step()
 
         visuals.append([ [shape, im_pose], 
                    [c[:,0], im_c[:,0]],
